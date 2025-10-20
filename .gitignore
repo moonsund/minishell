@@ -1,0 +1,13 @@
+# Ignore the progect executable
+minishell
+
+# Ignore testing files
+/testing/
+
+# Ignore object files
+/object/
+*.o
+
+# Ignore IDE configuration folders
+.vscode/
+.idea
