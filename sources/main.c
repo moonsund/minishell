@@ -4,7 +4,7 @@ int main(void)
 {
     /*
     init();
-    while()
+    while(exit_status)
     {
         readline();
         parser();
