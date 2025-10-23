@@ -28,6 +28,7 @@ TASK LIST :
 	- Pipes (output from left = input for right - first command writes in pipe / second command reads from pipe)
 		- To create a pipe : pipe(fd)
 	- Env variables
+
 */
 
 #include "minishell.h"
