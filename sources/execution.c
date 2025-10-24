@@ -31,9 +31,34 @@ TASK LIST :
 
 */
 
-#include "minishell.h"
+// #include "minishell.h"
 
-void	execute_command(t_shell commands/*, TBD */)
+// For Quick Debug
+#include "../includes/minishell.h"
+#include "libft.h"
+
+void	execute_command(t_shell command/*, TBD */)
 {
+	if(ft_memcmp(command.command_array[0], "pwd", 3) == 0)
+	{
+		char	*getcwd_return;
+		char	*buf;
+		buf = malloc(sizeof(char) * 50);
+		size_t	z = 50;
 
+		getcwd_return = getcwd(buf, z);
+		printf("%s\n", getcwd_return);
+		free(buf);
+	}
+}
+// Only for testing this file (use current file config in debugger)
+int		main(void)
+{
+	t_shell	command;
+	command.command_array = malloc(sizeof(char*) * 4);		// Faire de la place pour 4 potentielles commandes
+	command.command_array[0] = ft_strdup("pwd");			// Malloc done in strdup
+
+	execute_command(command);
+
+	return(0);
 }
