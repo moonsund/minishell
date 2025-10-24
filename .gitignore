@@ -4,6 +4,12 @@ minishell
 # Ignore testing files
 /testing/
 
+# Ignore libft library
+/libft/
+
+# Ignore text files
+*.txt
+
 # Ignore object files
 /object/
 *.o
@@ -11,3 +17,10 @@ minishell
 # Ignore IDE configuration folders
 .vscode/
 .idea
+
+# Ignore temporary files and cache
+*.swp
+*.swo
+*.tmp
+*.log
+.DS_Store

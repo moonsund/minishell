@@ -9,7 +9,9 @@
 # include <errno.h>		// errno
 # include <sys/wait.h>	// waitpid
 # include <stdbool.h>
-
+#include <signal.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 
 
 
@@ -18,5 +20,13 @@ typedef struct t_shell
 	int		exit_status;
 	char	**command_array;
 }	t_shell;
+
+
+
+// signals
+void setup_signals(void);
+
+
+
 
 #endif
