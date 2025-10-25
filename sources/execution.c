@@ -43,13 +43,15 @@ void	execute_cd(char *requested_path);
 
 void	execute_commands(t_shell command/*, TBD */)
 {
+	// get current working directory here because needed for cd (pass as char*)
 	if(ft_memcmp(command.command_array[0], "pwd", 3) == 0)
 	{
 		execute_pwd();
 	}
 	if(ft_memcmp(command.command_array[0], "cd", 2) == 0)
 	{
-		execute_pwd(command.command_array[1]);
+
+		execute_cd(/* current path, */command.command_array[1]);
 	}
 }
 
@@ -66,25 +68,31 @@ void	execute_pwd()
 }
 
 // cd with only a relative or absolute path
-void	execute_cd(char *requested_path)
+void	execute_cd(/* char *current_path,  */char *requested_path)
 {
 	// Code the following options ? . (deal with ..) ~ cd (no args) -
+	char	*up_one_folder;
+	char	*crop_from;
+	crop_from = ft_strrchr(requested_path, '/');
+	size_t	size_cropped = strlen(crop_from);
+	// TO DO
 
-	if(ft_memcmp(requested_path, ".", 1) == 0)
-	{
-		// Get current directory and remove everything after the last /
-		if(chdir(/* Go up one dir */) == -1)
-		{
-			perror("Error");			// Errno prints the rest of the message
-		}
-	}
-	else								// Path provided
-	{
-		if(chdir(requested_path) == -1)
-		{
-			perror("Error");			// Errno prints the rest of the message
-		}
-	}
+	// up_one_folder = requested path until the last / (remove the last /)
+	// if(ft_memcmp(requested_path, "..", 2) == 0)
+	// {
+	// 	// Get current directory and remove everything after the last /
+	// 	if(chdir(/* Go up one dir */) == -1)
+	// 	{
+	// 		perror("Error");			// Errno prints the rest of the message
+	// 	}
+	// }
+	// else								// Path provided
+	// {
+	// 	if(chdir(requested_path) == -1)
+	// 	{
+	// 		perror("Error");			// Errno prints the rest of the message
+	// 	}
+	// }
 }
 
 // Only for testing this file (use current file config in debugger)
@@ -93,7 +101,7 @@ int		main(void)
 	t_shell	command;
 	command.command_array = malloc(sizeof(char*) * 4);				// Faire de la place pour 4 potentielles commandes
 	command.command_array[0] = ft_strdup("cd");						// Malloc done in strdup
-	command.command_array[1] = ft_strdup("./8_Minishell/");			// Malloc done in strdup
+	command.command_array[1] = ft_strdup("./8_Minishell");			// Malloc done in strdup
 
 	execute_commands(command);
 
