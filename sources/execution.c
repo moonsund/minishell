@@ -37,28 +37,80 @@ TASK LIST :
 #include "../includes/minishell.h"
 #include "libft.h"
 
-void	execute_command(t_shell command/*, TBD */)
+void	execute_commands(t_shell command/*, TBD */);
+void	execute_pwd();
+void	execute_cd(char *requested_path);
+
+void	execute_commands(t_shell command/*, TBD */)
 {
 	if(ft_memcmp(command.command_array[0], "pwd", 3) == 0)
 	{
-		char	*getcwd_return;
-		char	*buf;
-		buf = malloc(sizeof(char) * 50);
-		size_t	z = 50;
-
-		getcwd_return = getcwd(buf, z);
-		printf("%s\n", getcwd_return);
-		free(buf);
+		execute_pwd();
+	}
+	if(ft_memcmp(command.command_array[0], "cd", 2) == 0)
+	{
+		execute_pwd(command.command_array[1]);
 	}
 }
+
+void	execute_pwd()
+{
+	char	*getcwd_return;
+	char	*buf;
+	buf = malloc(sizeof(char) * 50);
+	size_t	z = 50;
+
+	getcwd_return = getcwd(buf, z);
+	printf("%s\n", getcwd_return);
+	free(buf);
+}
+
+// cd with only a relative or absolute path
+void	execute_cd(char *requested_path)
+{
+	// Code the following options ? . (deal with ..) ~ cd (no args) -
+
+	if(ft_memcmp(requested_path, ".", 1) == 0)
+	{
+		// Get current directory and remove everything after the last /
+		if(chdir(/* Go up one dir */) == -1)
+		{
+			perror("Error");			// Errno prints the rest of the message
+		}
+	}
+	else								// Path provided
+	{
+		if(chdir(requested_path) == -1)
+		{
+			perror("Error");			// Errno prints the rest of the message
+		}
+	}
+}
+
 // Only for testing this file (use current file config in debugger)
 int		main(void)
 {
 	t_shell	command;
-	command.command_array = malloc(sizeof(char*) * 4);		// Faire de la place pour 4 potentielles commandes
-	command.command_array[0] = ft_strdup("pwd");			// Malloc done in strdup
+	command.command_array = malloc(sizeof(char*) * 4);				// Faire de la place pour 4 potentielles commandes
+	command.command_array[0] = ft_strdup("cd");						// Malloc done in strdup
+	command.command_array[1] = ft_strdup("./8_Minishell/");			// Malloc done in strdup
 
-	execute_command(command);
+	execute_commands(command);
 
 	return(0);
 }
+
+/*
+// Learn & Fix
+int main() {
+	char	*ppath = "ls";
+	char	*argv;
+	char	*envp;
+
+	printf("Finished reading\n");
+	execve("ls", NULL, NULL);
+	printf("OK\n");					// Ne sera pas affiché car ls a remplacé le binaire précédent
+    return 0;
+}
+
+*/
