@@ -1,4 +1,4 @@
-# Ignore the progect executable
+# Ignore the project executable
 minishell
 
 # Ignore testing files
@@ -24,3 +24,6 @@ minishell
 *.tmp
 *.log
 .DS_Store
+
+# Sophie's test files
+execution
