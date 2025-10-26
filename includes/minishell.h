@@ -13,15 +13,34 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
+typedef enum e_token_type
+{
+    WORD,
+
+} t_token_type;
 
 
-typedef struct t_shell
+
+typedef struct s_token
+{
+    char *tokeh;
+} t_token;
+
+
+typedef struct s_shell
 {
 	int		exit_status;
+    char *normalized_cmd_str;
 	char	**command_array;
 }	t_shell;
 
 
+// normalize
+char *normalize_str(const char *str);
+
+// utils
+bool is_empty(const char *str);
+bool is_space(unsigned char c);
 
 // signals
 void setup_signals(void);

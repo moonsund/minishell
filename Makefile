@@ -24,7 +24,7 @@ endif
 SRC_PATH = sources/
 OBJ_PATH = objects/
 
-SRC_FILES = main.c signals.c
+SRC_FILES = main.c signals.c lexer.c normalize.c utils.c
 
 SRCS = $(addprefix $(SRC_PATH),$(SRC_FILES))
 OBJS = $(addprefix $(OBJ_PATH),$(SRC_FILES:.c=.o))

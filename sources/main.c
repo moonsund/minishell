@@ -1,7 +1,5 @@
 #include "minishell.h"
 
-static bool is_empty(const char *str);
-
 int main(int argc, char **argv, char **envp)
 {
     char *line;
@@ -27,22 +25,17 @@ int main(int argc, char **argv, char **envp)
         if (!is_empty(line))
             add_history(line);
 
-        printf("[debug] typed: \"%s\"\n", line);
+        shell.normalized_cmd_str = normalize_str(line);
+        if (!shell.normalized_cmd_str)
+            perror("normalize_str");
+        printf("[normalize_debug]: \"%s\"\n", shell.normalized_cmd_str);
+
+        // tokenize(line);
         free(line);
+        
         // parser();
         // execute();
     }
 
     return (EXIT_SUCCESS);
-}
-
-// will be moved away later
-static bool is_empty(const char *str)
-{
-    if (!str || !*str) return true;
-    while (*str) {
-        if (!isspace((unsigned char)*str)) return false;
-        str++;
-    }
-    return true;
 }
