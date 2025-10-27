@@ -48,7 +48,7 @@ void setup_signals(void);
 
 // exec functions
 void	execute_commands(t_shell command/*, TBD */);
-void	execute_pwd();
-void	execute_cd(char *requested_path);
+void	execute_pwd(char *current_working_directory);
+void	execute_cd(char *current_working_directory, char **command_array);
 
 #endif
