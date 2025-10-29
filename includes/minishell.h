@@ -1,6 +1,7 @@
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
+#include "../libft/libft.h"
 #include <stdlib.h>		// EXIT_FAILURE, EXIT_SUCCESS
 #include <limits.h>		// INT_MAX
 #include <sys/time.h>	// time
@@ -16,27 +17,45 @@
 typedef enum e_token_type
 {
     WORD,
+    PIPE,
+    REDIR_IN,
+    HEREDOC,
+    REDIR_OUT,
+    APPEND,
+
+
+
 
 } t_token_type;
 
-
-
 typedef struct s_token
 {
-    char *tokeh;
+    char *text;
+    t_token_type type;
+    struct s_token  *next;
 } t_token;
 
+typedef struct s_token_list
+{
+    t_token *head;
+    unsigned int count;
+} t_token_list;
 
 typedef struct s_shell
 {
 	int		exit_status;
     char *normalized_cmd_str;
 	char	**command_array;
+    t_token_list list;
 }	t_shell;
 
 
 // normalize
 char *normalize_str(const char *str);
+
+// lexer
+bool tokenize(const char *str, t_token_list *list);
+void clean(t_token_list *list);
 
 // utils
 bool is_empty(const char *str);
