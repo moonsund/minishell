@@ -38,61 +38,95 @@ TASK LIST :
 #include "libft.h"
 
 void	execute_commands(t_shell command/*, TBD */);
-void	execute_pwd();
-void	execute_cd(char *requested_path);
+void	execute_pwd(char *current_working_directory);
+void	execute_cd(char *current_working_directory, char **command_array);
 
 void	execute_commands(t_shell command/*, TBD */)
 {
-	// get current working directory here because needed for cd (pass as char*)
+	char	*current_working_directory;
+	current_working_directory = ft_calloc(sizeof(char), PATH_MAX);
+	getcwd(current_working_directory, PATH_MAX);
+
 	if(ft_memcmp(command.command_array[0], "pwd", 3) == 0)
 	{
-		execute_pwd();
+		execute_pwd(current_working_directory);									// Verif ✅
 	}
 	if(ft_memcmp(command.command_array[0], "cd", 2) == 0)
 	{
-
-		execute_cd(/* current path, */command.command_array[1]);
+		execute_cd(current_working_directory, command.command_array);
+		current_working_directory = ft_calloc(sizeof(char), PATH_MAX);			// Verif ✅
+		getcwd(current_working_directory, PATH_MAX);							// Verif ✅
 	}
 }
 
-void	execute_pwd()
+void	execute_pwd(char *current_working_directory)
 {
-	char	*getcwd_return;
-	char	*buf;
-	buf = malloc(sizeof(char) * 50);
-	size_t	z = 50;
-
-	getcwd_return = getcwd(buf, z);
-	printf("%s\n", getcwd_return);
-	free(buf);
+	printf("%s\n", current_working_directory);
 }
 
-// cd with only a relative or absolute path
-void	execute_cd(/* char *current_path,  */char *requested_path)
+// Subject : "cd with only a relative or absolute path"
+void	execute_cd(char *current_working_directory, char **command_array)
 {
-	// Code the following options ? . (deal with ..) ~ cd (no args) -
-	char	*up_one_folder;
-	char	*crop_from;
-	crop_from = ft_strrchr(requested_path, '/');
-	size_t	size_cropped = strlen(crop_from);
-	// TO DO
+	char	*updated_path;
+	char	*path_section;
+	size_t	size_to_crop;
+	size_t	size_new_path;
 
-	// up_one_folder = requested path until the last / (remove the last /)
-	// if(ft_memcmp(requested_path, "..", 2) == 0)
-	// {
-	// 	// Get current directory and remove everything after the last /
-	// 	if(chdir(/* Go up one dir */) == -1)
-	// 	{
-	// 		perror("Error");			// Errno prints the rest of the message
-	// 	}
-	// }
-	// else								// Path provided
-	// {
-	// 	if(chdir(requested_path) == -1)
-	// 	{
-	// 		perror("Error");			// Errno prints the rest of the message
-	// 	}
-	// }
+	if(ft_memcmp(command_array[1], ".", 2) == 0)						// Check in 2 bytes to make sure there's a \0 after the .
+	{
+		// Only one . = Do nothing = Display the command invite
+		// ou chdir current_working_directory ? Comme ca on le met juste une fois a la fin
+		// updated_path = current_working_directory
+		// remove return line in that case
+		return;
+	}
+	else if(ft_memcmp(command_array[1], "..", 3) == 0)					// Check in 3 bytes to make sure there's a \0 after the ..
+	{
+		path_section = ft_strrchr(current_working_directory, '/');		// Searches the last occurence of '/'
+		size_to_crop = strlen(path_section);
+		size_new_path = strlen(current_working_directory) - size_to_crop;
+		updated_path = ft_calloc(sizeof(char), size_new_path + 1);
+		updated_path = ft_memmove(updated_path, current_working_directory, size_new_path);
+		if(chdir(updated_path) == -1)
+		{
+			perror("Error");											// Errno prints the rest of the message
+		}
+	}
+	else if(ft_memcmp(command_array[1], "./", 2) == 0)					// Relative path (same folder)
+	{
+		path_section = ft_strtrim(command_array[1], ".");								// Ⓜ️
+		updated_path = ft_strjoin(current_working_directory, path_section);				// Ⓜ️
+		if(chdir(updated_path) == -1)
+		{
+			perror("Error");
+		}
+	}
+	else if(ft_memcmp(command_array[1], "../", 2) == 0)					// Relative path (parent folder)
+	{
+		// Crop the last directory
+		// cat paths
+		path_section = ft_strrchr(current_working_directory, '/');		// Ptr to the last occurence of '/'
+		size_to_crop = strlen(path_section);
+		ft_memset(path_section, 0, size_to_crop);						// Do same for .. ?
+		updated_path = ft_calloc(sizeof(char), PATH_MAX);
+		// DO DO, check from here - WIP
+		updated_path = ft_memmove(updated_path, current_working_directory, size_new_path);
+		// same till here
+		// remove .. from command_array[1]
+		// join + chdir
+	}
+	else if(ft_memcmp(command_array[1], "/", 1) == 0)					// Absolute path
+	{
+		if(chdir(command_array[1]) == -1)
+		{
+			perror("Error");
+		}
+	}
+	else
+	{
+		// ?? Error message : Command not recognized / Out of Minishell requirements
+		// return;
+	}
 }
 
 // Only for testing this file (use current file config in debugger)
@@ -100,8 +134,12 @@ int		main(void)
 {
 	t_shell	command;
 	command.command_array = malloc(sizeof(char*) * 4);				// Faire de la place pour 4 potentielles commandes
-	command.command_array[0] = ft_strdup("cd");						// Malloc done in strdup
-	command.command_array[1] = ft_strdup("./8_Minishell");			// Malloc done in strdup
+	// command.command_array[0] = ft_strdup("pwd");						// 🟡 Test pwd
+	command.command_array[0] = ft_strdup("cd");						// 🟡 Test cd
+	// command.command_array[1] = ft_strdup(".");						// 🟡 Test cd .
+	// command.command_array[1] = ft_strdup("..");						// 🟡 Test cd ..
+	// command.command_array[1] = ft_strdup("./test_folder");			// 🟡 Test cd + relative path
+	command.command_array[1] = ft_strdup("/home/schappuy/00_Root");			// 🟡 Test cd + absolute path
 
 	execute_commands(command);
 
