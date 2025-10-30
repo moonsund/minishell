@@ -38,8 +38,9 @@ TASK LIST :
 #include "libft.h"
 
 void	execute_commands(t_shell command/*, TBD */);
-void	execute_pwd(char *current_working_directory);
+void	execute_echo(char **command_array);
 void	execute_cd(char *current_working_directory, char **command_array);
+void	execute_pwd(char *current_working_directory);
 
 void	execute_commands(t_shell command/*, TBD */)
 {
@@ -47,21 +48,32 @@ void	execute_commands(t_shell command/*, TBD */)
 	current_working_directory = ft_calloc(sizeof(char), PATH_MAX);
 	getcwd(current_working_directory, PATH_MAX);
 
-	if(ft_memcmp(command.command_array[0], "pwd", 3) == 0)
+	if(ft_memcmp(command.command_array[0], "echo", 5) == 0)
 	{
-		execute_pwd(current_working_directory);									// Verif ✅
+		execute_echo(command.command_array);
 	}
-	if(ft_memcmp(command.command_array[0], "cd", 2) == 0)
+	else if(ft_memcmp(command.command_array[0], "cd", 3) == 0)
 	{
 		execute_cd(current_working_directory, command.command_array);
 		current_working_directory = ft_calloc(sizeof(char), PATH_MAX);			// Verif ✅
 		getcwd(current_working_directory, PATH_MAX);							// Verif ✅
 	}
+	else if(ft_memcmp(command.command_array[0], "pwd", 4) == 0)
+	{
+		execute_pwd(current_working_directory);									// Verif ✅
+	}
 }
-
-void	execute_pwd(char *current_working_directory)
+// Subject : "echo with option -n"
+void	execute_echo(char **command_array)
 {
-	printf("%s\n", current_working_directory);
+	if(ft_memcmp(command_array[1], "-n", 3) == 0)
+	{
+		printf("%s", command_array[2]);
+	}
+	else
+	{
+		printf("%s\n", command_array[1]);
+	}
 }
 
 // Subject : "cd with only a relative or absolute path"
@@ -72,74 +84,77 @@ void	execute_cd(char *current_working_directory, char **command_array)
 	size_t	size_to_crop;
 	size_t	size_new_path;
 
-	if(ft_memcmp(command_array[1], ".", 2) == 0)						// Check in 2 bytes to make sure there's a \0 after the .
+	if(ft_memcmp(command_array[1], "/", 1) == 0)						// Absolute path
 	{
-		// Only one . = Do nothing = Display the command invite
-		// ou chdir current_working_directory ? Comme ca on le met juste une fois a la fin
-		// updated_path = current_working_directory
-		// remove return line in that case
-		return;
+		updated_path = command_array[1];
+	}
+	else if(ft_memcmp(command_array[1], ".", 2) == 0)					// Check 2 bytes to make sure there's a \0 after the .
+	{
+		updated_path = current_working_directory;
 	}
 	else if(ft_memcmp(command_array[1], "..", 3) == 0)					// Check in 3 bytes to make sure there's a \0 after the ..
 	{
 		path_section = ft_strrchr(current_working_directory, '/');		// Searches the last occurence of '/'
 		size_to_crop = strlen(path_section);
-		size_new_path = strlen(current_working_directory) - size_to_crop;
-		updated_path = ft_calloc(sizeof(char), size_new_path + 1);
-		updated_path = ft_memmove(updated_path, current_working_directory, size_new_path);
-		if(chdir(updated_path) == -1)
-		{
-			perror("Error");											// Errno prints the rest of the message
-		}
+		ft_memset(path_section, 0, size_to_crop);
+		updated_path = current_working_directory;
 	}
 	else if(ft_memcmp(command_array[1], "./", 2) == 0)					// Relative path (same folder)
 	{
-		path_section = ft_strtrim(command_array[1], ".");								// Ⓜ️
-		updated_path = ft_strjoin(current_working_directory, path_section);				// Ⓜ️
-		if(chdir(updated_path) == -1)
-		{
-			perror("Error");
-		}
+		path_section = ft_strchr(command_array[1], '/');						// Ptr to the first occurence of '/'
+		updated_path = ft_strjoin(current_working_directory, path_section);		// Ⓜ️
 	}
-	else if(ft_memcmp(command_array[1], "../", 2) == 0)					// Relative path (parent folder)
+	else if(ft_memcmp(command_array[1], "../", 2) == 0)						// Relative path (parent folder)
 	{
-		// Crop the last directory
-		// cat paths
-		path_section = ft_strrchr(current_working_directory, '/');		// Ptr to the last occurence of '/'
+		path_section = ft_strrchr(current_working_directory, '/');			// Ptr to the last occurence of '/'
 		size_to_crop = strlen(path_section);
-		ft_memset(path_section, 0, size_to_crop);						// Do same for .. ?
-		updated_path = ft_calloc(sizeof(char), PATH_MAX);
-		// DO DO, check from here - WIP
-		updated_path = ft_memmove(updated_path, current_working_directory, size_new_path);
-		// same till here
-		// remove .. from command_array[1]
-		// join + chdir
-	}
-	else if(ft_memcmp(command_array[1], "/", 1) == 0)					// Absolute path
-	{
-		if(chdir(command_array[1]) == -1)
-		{
-			perror("Error");
-		}
+		ft_memset(path_section, 0, size_to_crop);
+		path_section = ft_strchr(command_array[1], '/');					// Ptr to the first occurence of '/'
+		updated_path = ft_strjoin(current_working_directory, path_section);	// Ⓜ️
 	}
 	else
 	{
-		// ?? Error message : Command not recognized / Out of Minishell requirements
-		// return;
+		printf("Whoops - Command not recognized / Out of Minishell requirements\n");
+		return;
 	}
+	if(chdir(updated_path) == -1)
+	{
+		perror("Error");											// Errno prints the rest of the message
+	}
+	free(updated_path);
 }
+
+// Subject : "pwd with no options"
+void	execute_pwd(char *current_working_directory)
+{
+	printf("%s\n", current_working_directory);
+}
+
+// Subject : "export with no options"
+void	execute_export()
+{
+	// export ENV_VAR_NAME="Data in variable to add or edit"
+}
+
+// NEXT
+// Subject : "unset with no options"
+// Subject : "env with no options or arguments"
+// Subject : "exit with no options"
 
 // Only for testing this file (use current file config in debugger)
 int		main(void)
 {
 	t_shell	command;
-	command.command_array = malloc(sizeof(char*) * 4);				// Faire de la place pour 4 potentielles commandes
-	// command.command_array[0] = ft_strdup("pwd");						// 🟡 Test pwd
-	command.command_array[0] = ft_strdup("cd");						// 🟡 Test cd
-	// command.command_array[1] = ft_strdup(".");						// 🟡 Test cd .
-	// command.command_array[1] = ft_strdup("..");						// 🟡 Test cd ..
-	// command.command_array[1] = ft_strdup("./test_folder");			// 🟡 Test cd + relative path
-	command.command_array[1] = ft_strdup("/home/schappuy/00_Root");			// 🟡 Test cd + absolute path
+	command.command_array = malloc(sizeof(char*) * 4);						// Faire de la place pour 4 potentielles commandes
+	// command.command_array[0] = ft_strdup("pwd");							// 🟡 Test pwd
+	// command.command_array[0] = ft_strdup("cd");							// 🟡 Test cd
+	// command.command_array[1] = ft_strdup(".");							// 🟡 Test cd .
+	// command.command_array[1] = ft_strdup("..");							// 🟡 Test cd ..
+	// command.command_array[1] = ft_strdup("../objects");					// 🟡 Test cd + relative path
+	// command.command_array[1] = ft_strdup("/home/schappuy/00_Root");		// 🟡 Test cd + absolute path
+	command.command_array[0] = ft_strdup("echo");							// 🟡 Test echo
+	command.command_array[1] = ft_strdup("-n");								// 🟡 Test echo
+	command.command_array[2] = ft_strdup("OMG");							// 🟡 Test echo
 
 	execute_commands(command);
 
