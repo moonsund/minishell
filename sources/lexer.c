@@ -2,102 +2,80 @@
 
 static t_token *create_token(char *str, t_token_type type);
 static void add_token(t_token_list *list, t_token *new_token);
-void clean(t_token_list *list);
+static bool read_word_until_break(const char *s, size_t *i);
+
 
 bool tokenize(const char *str, t_token_list *list)
 {
+    size_t start;
     size_t i;
-    unsigned int start;
+    t_token_type type;
     size_t len;
     char *chunk;
     t_token *new_token;
-    t_token_type type;
 
     i = 0;
-    while (str[i] != '\0')
+    while (str[i] != '\0') 
     {
-        start = i;
-        while (str[i] && !is_space(str[i]))
+        if (is_space(str[i])) 
+        {
             i++;
-        len = i - start;
-        if (str[start] == '|' && (len == 1))
+            continue;
+        }
+
+        start = i;
+        if (str[i] == '|') 
         {
-            chunk = ft_substr(str, start, len);
-            if (!chunk)
-                return (clean(list), false);
             type = PIPE;
+            i++;
         }
-        else if ((str[start] == '<') && (len == 1))
+        
+        else if (str[i] == '<')
         {
-            chunk = ft_substr(str, start, len);
-            if (!chunk)
-                return (clean(list), false);
-            type = REDIR_IN;
+            if (str[i+1] == '<')
+            {
+                type = HEREDOC;
+                i += 2;
+            }
+            else
+            {
+                type = REDIR_IN;
+                i++;
+            }
         }
-        else if ((str[start] == '<') && (len == 2)&& (str[start + 1] == '<'))
+        else if (str[i] == '>')
         {
-            chunk = ft_substr(str, start, len);
-            if (!chunk)
-                return (clean(list), false);
-            type = HEREDOC;
-        }
-        else if ((str[start] == '>') && (len == 1))
-        {
-            chunk = ft_substr(str, start, len);
-            if (!chunk)
-                return (clean(list), false);
-            type = REDIR_OUT;
-        }
-        else if ((str[start] == '>') && (len == 2) && (str[start + 1] == '>'))
-        {
-            chunk = ft_substr(str, start, len);
-            if (!chunk)
-                return (clean(list), false);
-            type = APPEND;
+            if (str[i+1] == '>')
+            {
+                type = APPEND;
+                i += 2;
+            }
+            else
+            {
+                type = REDIR_OUT;
+                i++;
+            }
         }
         else
         {
-            chunk = ft_substr(str, start, len);
-            if (!chunk)
-                return (clean(list), false);
+            if (!read_word_until_break(str, &i))
+                return (false); 
             type = WORD;
         }
+
+        len = i - start;
+        chunk = ft_substr(str, start, len);
+        if (!chunk)
+            return (clean(list), false);
+
         new_token = create_token(chunk, type);
         if (!new_token)
             return (free(chunk), clean(list), false);
+
         add_token(list, new_token);
-        i++;
     }
-    return (true);
+    return true;
 }
-
-// find_chunk(size_t *i, const char *str)
-// {
-//     unsigned int start;
-//     size_t len;
-//     char *chunk;
-
-//     start = i;
-//     while(str[*i] && !is_space(str[*i]))
-//     {
-        
-
-        
-
-//     }
-
-// }
-
-
-// detect_token_type()
-// {
-    
-
-
-// }
-
-
-
 
 static t_token *create_token(char *str, t_token_type type)
 {
@@ -131,7 +109,31 @@ static void add_token(t_token_list *list, t_token *new_token)
     list->count++;
 }
 
-void clean(t_token_list *list)
+
+static bool read_word_until_break(const char *s, size_t *i)
 {
-    (void)list;
+    while (s[*i] && !is_space(s[*i]) && !is_operator(s[*i])) 
+    {
+        if (s[*i] == '\'') 
+        {
+            (*i)++;
+            while (s[*i] && s[*i] != '\'')
+                (*i)++;
+            if (s[*i] != '\'') 
+                return (false);
+            (*i)++;
+        } 
+        else if (s[*i] == '"') 
+        {
+            (*i)++;
+            while (s[*i] && s[*i] != '"')
+                (*i)++;
+            if (s[*i] != '"')
+                return (false);
+            (*i)++;
+        }
+        else
+            (*i)++;
+    }
+    return (true);
 }

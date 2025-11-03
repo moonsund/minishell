@@ -20,3 +20,29 @@ bool is_space(unsigned char c)
 {
     return (c == ' ' || c == '\t' || c == '\n' || c == '\r');
 }
+
+bool is_operator(unsigned char c)
+{
+    return (c == '<' || c == '>' || c == '|');
+}
+
+
+void clean(t_token_list *list)
+{
+    t_token *cur;
+    t_token *next;
+
+    if (!list || list->head == NULL)
+        return ;
+
+    cur = list->head;
+    while (cur != NULL)
+    {
+        next = cur->next;
+        free(cur->text);
+        free(cur);
+        cur = next;
+    }
+    list->head = NULL;
+    list->count = 0;
+}

@@ -30,18 +30,19 @@ int main(int argc, char **argv, char **envp)
             add_history(line);
         printf("[readline_debug]: \"%s\"\n", line);
 
-        shell.normalized_cmd_str = normalize_str(line);
-        if (!shell.normalized_cmd_str)
-            perror("normalize_str");
-        free(line);
-        printf("[normalize_debug]: \"%s\"\n", shell.normalized_cmd_str);
+        // shell.normalized_cmd_str = normalize_str(line);
+        // if (!shell.normalized_cmd_str)
+        //     perror("normalize_str");
+        // free(line);
+        // printf("[normalize_debug]: \"%s\"\n", shell.normalized_cmd_str);
 
-        tokenize(shell.normalized_cmd_str, &shell.list);
+        tokenize(line, &shell.list);
         print_token_list(&shell.list);
 
         
         // parser();
         // execute();
+        clean(&shell.list);
     }
 
     return (EXIT_SUCCESS);

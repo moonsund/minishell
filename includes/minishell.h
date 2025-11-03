@@ -60,6 +60,8 @@ void clean(t_token_list *list);
 // utils
 bool is_empty(const char *str);
 bool is_space(unsigned char c);
+bool is_operator(unsigned char c);
+void clean(t_token_list *list);
 
 // signals
 void setup_signals(void);
