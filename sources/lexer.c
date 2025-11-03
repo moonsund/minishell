@@ -1,11 +1,11 @@
 #include "minishell.h"
 
 static t_token *create_token(char *str, t_token_type type);
-static void add_token(t_token_list *list, t_token *new_token);
-static bool read_word_until_break(const char *s, size_t *i);
+static void add_token(t_token_list *tokens, t_token *new_token);
+static bool read_word_until_break(const char *str, size_t *i);
 
 
-bool tokenize(const char *str, t_token_list *list)
+bool tokenize(const char *str, t_token_list *tokens)
 {
     size_t start;
     size_t i;
@@ -66,13 +66,13 @@ bool tokenize(const char *str, t_token_list *list)
         len = i - start;
         chunk = ft_substr(str, start, len);
         if (!chunk)
-            return (clean(list), false);
+            return (clean(tokens), false);
 
         new_token = create_token(chunk, type);
         if (!new_token)
-            return (free(chunk), clean(list), false);
+            return (free(chunk), clean(tokens), false);
 
-        add_token(list, new_token);
+        add_token(tokens, new_token);
     }
     return true;
 }
@@ -109,26 +109,25 @@ static void add_token(t_token_list *list, t_token *new_token)
     list->count++;
 }
 
-
-static bool read_word_until_break(const char *s, size_t *i)
+static bool read_word_until_break(const char *str, size_t *i)
 {
-    while (s[*i] && !is_space(s[*i]) && !is_operator(s[*i])) 
+    while (str[*i] && !is_space(str[*i]) && !is_operator(str[*i])) 
     {
-        if (s[*i] == '\'') 
+        if (str[*i] == '\'') 
         {
             (*i)++;
-            while (s[*i] && s[*i] != '\'')
+            while (str[*i] && str[*i] != '\'')
                 (*i)++;
-            if (s[*i] != '\'') 
+            if (str[*i] != '\'') 
                 return (false);
             (*i)++;
         } 
-        else if (s[*i] == '"') 
+        else if (str[*i] == '"') 
         {
             (*i)++;
-            while (s[*i] && s[*i] != '"')
+            while (str[*i] && str[*i] != '"')
                 (*i)++;
-            if (s[*i] != '"')
+            if (str[*i] != '"')
                 return (false);
             (*i)++;
         }

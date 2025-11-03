@@ -23,9 +23,6 @@ typedef enum e_token_type
     REDIR_OUT,
     APPEND,
 
-
-
-
 } t_token_type;
 
 typedef struct s_token
@@ -46,12 +43,9 @@ typedef struct s_shell
 	int		exit_status;
     char *normalized_cmd_str;
 	char	**command_array;
-    t_token_list list;
+    t_token_list tokens;
 }	t_shell;
 
-
-// normalize
-char *normalize_str(const char *str);
 
 // lexer
 bool tokenize(const char *str, t_token_list *list);

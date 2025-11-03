@@ -15,8 +15,8 @@ int main(int argc, char **argv, char **envp)
 
     setup_signals();
     // init();
-    shell.list.head = NULL;
-    shell.list.count = 0;
+    shell.tokens.head = NULL;
+    shell.tokens.count = 0;
     while(true) // or exit_status
     {
         line = readline("minishell> ");
@@ -30,33 +30,46 @@ int main(int argc, char **argv, char **envp)
             add_history(line);
         printf("[readline_debug]: \"%s\"\n", line);
 
-        // shell.normalized_cmd_str = normalize_str(line);
-        // if (!shell.normalized_cmd_str)
-        //     perror("normalize_str");
-        // free(line);
-        // printf("[normalize_debug]: \"%s\"\n", shell.normalized_cmd_str);
-
-        tokenize(line, &shell.list);
-        print_token_list(&shell.list);
-
+        if (!tokenize(line, &shell.tokens))
+        {
+            printf("minishell: syntax error: unexpected end of file\n");
+            shell.exit_status = 2;
+            free(line);
+            continue;
+        }
+        print_token_list(&shell.tokens); // for debugging, to be deleted
         
         // parser();
         // execute();
-        clean(&shell.list);
+        clean(&shell.tokens);
     }
 
     return (EXIT_SUCCESS);
 }
 
 
-static void print_token_list(t_token_list *list)
+static void print_token_list(t_token_list *tokens) // for debugging, to be deleted
 {
-    t_token *cur;
+    static const char *g_token_type_str[] = {
+        [WORD]      = "WORD",
+        [PIPE]      = "PIPE",
+        [REDIR_IN]  = "REDIR_IN",
+        [REDIR_OUT] = "REDIR_OUT",
+        [APPEND]    = "APPEND",
+        [HEREDOC]   = "HEREDOC"
+    };
 
-    cur = list->head;
-    while (cur != NULL)
+    t_token *cur = tokens->head;
+    while (cur)
     {
-        printf("[debug list token] text: %s, type: %u\n", cur->text, cur->type);
+        const char *type_str = "UNKNOWN";
+        if (cur->type >= 0 && cur->type <= HEREDOC)
+            type_str = g_token_type_str[cur->type];
+
+        printf("[debug list token] text: %s, type: %s\n",
+               cur->text ? cur->text : "(null)",
+               type_str);
+
         cur = cur->next;
     }
 }
