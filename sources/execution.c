@@ -62,10 +62,16 @@ void	execute_commands(t_shell command/*, TBD */)
 	{
 		execute_pwd(current_working_directory);									// Verif ✅
 	}
+	else if(ft_memcmp(command.command_array[0], "export", 4) == 0)
+	{
+		execute_export(command.command_array);
+	}
 }
 // Subject : "echo with option -n"
+// Check if string has been placed in a char* , or if each word is a char* -> VERY PROBABLY - Check w/ Leonid
 void	execute_echo(char **command_array)
 {
+	// the string to print is very probably made of many strings. Loop through command_array and print till the last element
 	if(ft_memcmp(command_array[1], "-n", 3) == 0)
 	{
 		printf("%s", command_array[2]);
@@ -104,6 +110,7 @@ void	execute_cd(char *current_working_directory, char **command_array)
 		path_section = ft_strchr(command_array[1], '/');						// Ptr to the first occurence of '/'
 		updated_path = ft_strjoin(current_working_directory, path_section);		// Ⓜ️
 	}
+	// MISSING !! -- TO DO --- Relative path but without ./ = The classic cd
 	else if(ft_memcmp(command_array[1], "../", 2) == 0)						// Relative path (parent folder)
 	{
 		path_section = ft_strrchr(current_working_directory, '/');			// Ptr to the last occurence of '/'
@@ -131,9 +138,12 @@ void	execute_pwd(char *current_working_directory)
 }
 
 // Subject : "export with no options"
-void	execute_export()
+// no options = no flags (TBC) - So I have to code export ENV_VAR_NAME="Data in variable to add or edit"
+void	execute_export(char **command_array)
 {
 	// export ENV_VAR_NAME="Data in variable to add or edit"
+	// export with no options : print all env var that have been exported
+
 }
 
 // NEXT
