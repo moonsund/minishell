@@ -13,6 +13,9 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
+#include <sys/types.h>	// opendir
+#include <dirent.h>		// opendir
+
 typedef enum e_token_type
 {
     WORD,
@@ -23,23 +26,29 @@ typedef enum e_token_type
 
 typedef struct s_token
 {
-    char *tokeh;
-} t_token;
+	char *tokeh;
+}	t_token;
 
 typedef struct s_env
 {
-	char	*variable_name;
-	char	equal_sign;
-	char	*variable_data;
-	t_env	*next;
+	char			*variable_name;
+	char			*variable_data;
+	struct s_env	*next;
 }	t_env;
+
+typedef struct s_command
+{
+	char				**full_command;	// Exec requirement
+	struct s_command	*next;
+	// demander a Leo pour infiles/outfiles - Qu'est ce qu'il va me donner du parsing pour que je bosse avec une redirection par exemple
+}	t_command;
 
 typedef struct s_shell
 {
-	int		exit_status;
-	char	 *normalized_cmd_str;
-	char	**command_array;		// Added by So
-	t_env	*env_variables;			// Added by So
+	int				exit_status;
+	char			 *normalized_cmd_str;
+	t_command		all_commands;		// Exec requirement
+	t_env			*env_variables;		// Exec requirement
 }	t_shell;
 
 
@@ -53,15 +62,21 @@ bool is_space(unsigned char c);
 // signals
 void setup_signals(void);
 
+// pre exec functions
+void	check_command_type_and_execute(t_shell minishell/*, TBD */);
+void	execute_built_in_commands(t_shell minishell/*, TBD */);
+void	execute_external_commands(t_shell minishell/*, TBD */);
 
 // exec built in functions
-void	execute_commands(t_shell command/*, TBD */);
 void	execute_echo(char **command_array);
 void	execute_cd(char *current_working_directory, char **command_array);
 void	execute_pwd(char *current_working_directory);
-void	execute_export(void/* TBD */);
-void	execute_unset(void/* TBD */);
-void	execute_env(void/* TBD */);
-void	execute_exit(void/* TBD */);
+void	execute_export(t_shell minishell);
+void	execute_unset(t_shell minishell);
+void	execute_env(t_shell minishell);
+void	execute_exit(t_shell minishell);
+
+// exec external functions
+char	**execute_ls(t_shell minishell, char *path);
 
 #endif
