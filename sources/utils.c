@@ -39,7 +39,7 @@ void clean(t_token_list *list)
     while (cur != NULL)
     {
         next = cur->next;
-        free(cur->text);
+        free(cur->raw_str);
         free(cur);
         cur = next;
     }

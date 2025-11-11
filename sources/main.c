@@ -17,6 +17,7 @@ int main(int argc, char **argv, char **envp)
     // init();
     shell.tokens.head = NULL;
     shell.tokens.count = 0;
+    shell.pipeline = NULL;
     while(true) // or exit_status
     {
         line = readline("minishell> ");
@@ -30,7 +31,7 @@ int main(int argc, char **argv, char **envp)
             add_history(line);
         printf("[readline_debug]: \"%s\"\n", line);
 
-        if (!tokenize(line, &shell.tokens))
+        if (!tokenize_with_qmap(line, &shell.tokens))
         {
             printf("minishell: syntax error: unexpected end of file\n");
             shell.exit_status = 2;
@@ -39,7 +40,7 @@ int main(int argc, char **argv, char **envp)
         }
         print_token_list(&shell.tokens); // for debugging, to be deleted
         
-        // parser();
+        // shell.pipeline = parse_command(shell.tokens);
         // execute();
         clean(&shell.tokens);
     }
@@ -50,26 +51,36 @@ int main(int argc, char **argv, char **envp)
 
 static void print_token_list(t_token_list *tokens) // for debugging, to be deleted
 {
-    static const char *g_token_type_str[] = {
-        [WORD]      = "WORD",
-        [PIPE]      = "PIPE",
-        [REDIR_IN]  = "REDIR_IN",
-        [REDIR_OUT] = "REDIR_OUT",
-        [APPEND]    = "APPEND",
-        [HEREDOC]   = "HEREDOC"
+    static const char *g_token_type_str[] = 
+    {
+        [TOK_WORD] = "WORD",
+        [TOK_PIPE] = "PIPE",
+        [TOK_REDIR_IN] = "REDIR_IN",
+        [TOK_HEREDOC] = "HEREDOC",
+        [TOK_REDIR_OUT] = "REDIR_OUT",
+        [TOK_APPEND] = "APPEND",
     };
 
-    t_token *cur = tokens->head;
-    while (cur)
+    static const char qmark_char[] =  
     {
-        const char *type_str = "UNKNOWN";
-        if (cur->type >= 0 && cur->type <= HEREDOC)
-            type_str = g_token_type_str[cur->type];
+        [Q_NONE] = 'N',
+        [Q_SQ] = 'S',
+        [Q_DQ] = 'D',
+    };
 
-        printf("[debug list token] text: %s, type: %s\n",
-               cur->text ? cur->text : "(null)",
-               type_str);
-
-        cur = cur->next;
+    const t_token *token = tokens->head;
+    size_t idx = 0;
+    while (token) 
+    {
+        const char *type_str = g_token_type_str[token->type];
+        printf("[%zu] %-4s : \"%s\"", idx, type_str, token->raw_str ? token->raw_str : "");
+        if (token->type == TOK_WORD) {
+            printf("  qmap: ");
+            for (size_t i = 0; i < token->length; ++i) 
+                putchar(qmark_char[token->quotes_map[i]]);
+        }
+        putchar('\n');
+        token = token->next;
+        idx++;
     }
 }

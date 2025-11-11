@@ -15,6 +15,7 @@ bool tokenize(const char *str, t_token_list *tokens)
     t_token *new_token;
 
     i = 0;
+
     while (str[i] != '\0') 
     {
         if (is_space(str[i])) 

@@ -16,27 +16,58 @@
 
 typedef enum e_token_type
 {
-    WORD,
-    PIPE,
-    REDIR_IN,
-    HEREDOC,
-    REDIR_OUT,
-    APPEND,
-
+    TOK_WORD,
+    TOK_PIPE,           // |
+    TOK_REDIR_IN,       // <
+    TOK_HEREDOC,        // >
+    TOK_REDIR_OUT,      // <<
+    TOK_APPEND,         // >>
 } t_token_type;
+
+typedef enum e_qmark
+{
+    Q_NONE, // outside quotes
+    Q_SQ,   // inside single quotes '...'
+    Q_DQ,   // inside double quotes "..."
+}   t_qmark;
+
+typedef struct s_buf
+{
+    char *characters; // array of accumulated characters
+    t_qmark *quotes_map; // array of qmarks for everysingle character in the characters array 
+    size_t capacity; // actual array length
+    size_t used_length; // array length in use
+} t_buf;
 
 typedef struct s_token
 {
-    char *text;
-    t_token_type type;
+    char *raw_str;  // '0\'-terminated string
+    t_token_type type; // WORD, PIPE, REDIR_IN, etc.
+    t_qmark *quotes_map; // array of qmarks for everysingle character in the raw_str
+    size_t length; // *raw_str length
     struct s_token  *next;
 } t_token;
 
 typedef struct s_token_list
 {
     t_token *head;
-    unsigned int count;
+    t_token *tail;
+    size_t count;
 } t_token_list;
+
+typedef struct s_command
+{
+    char *command_name;
+    char **argv;
+    size_t argc;
+    struct s_command *next;
+} t_command;
+
+typedef struct s_pipeline
+{
+    t_command *head;
+    size_t count;
+} t_pipeline;
 
 typedef struct s_shell
 {
@@ -44,12 +75,19 @@ typedef struct s_shell
     char *normalized_cmd_str;
 	char	**command_array;
     t_token_list tokens;
+    t_pipeline *pipeline; // Abstract Syntax Tree
 }	t_shell;
 
+// normalize
+char *normalize_str(const char *str);
 
 // lexer
-bool tokenize(const char *str, t_token_list *list);
-void clean(t_token_list *list);
+bool tokenize_with_qmap(const char *str, t_token_list *tokens);
+
+
+// parser
+
+
 
 // utils
 bool is_empty(const char *str);
