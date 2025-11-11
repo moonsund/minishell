@@ -10,8 +10,8 @@
 #include <sys/wait.h>	// waitpid
 #include <stdbool.h>
 #include <signal.h>
-#include <readline/readline.h>
-#include <readline/history.h>
+// #include <readline/readline.h>
+// #include <readline/history.h>
 
 #include <sys/types.h>	// opendir
 #include <dirent.h>		// opendir
@@ -47,8 +47,8 @@ typedef struct s_shell
 {
 	int				exit_status;
 	char			 *normalized_cmd_str;
-	t_command		all_commands;		// Exec requirement
-	t_env			*env_variables;		// Exec requirement
+	t_command		all_commands;			// Exec requirement
+	t_env			**env_variables;		// Exec requirement
 }	t_shell;
 
 
@@ -75,6 +75,14 @@ void	execute_export(t_shell minishell);
 void	execute_unset(t_shell minishell);
 void	execute_env(t_shell minishell);
 void	execute_exit(t_shell minishell);
+
+// env related functions
+t_env	**build_environment(void);
+t_env	*create_new_environment_variable(char *key, char *value);
+t_env	*search_last_var(t_env *env_var);
+void	add_env_var_to_list(t_env **head, t_env *new);
+void	delete_env_var_content(t_env *env_var, void (*del_string)(void *));
+void	del_string(char *param);
 
 // exec external functions
 char	**execute_ls(t_shell minishell, char *path);

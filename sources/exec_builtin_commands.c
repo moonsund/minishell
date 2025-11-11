@@ -1,15 +1,7 @@
 #include "minishell.h"
 #include "libft.h"
 
-void	execute_built_in_commands(t_shell minishell/*, TBD */);
-void	execute_echo(char **command_array);
-void	execute_cd(char *current_working_directory, char **command_array);
-void	execute_pwd(char *current_working_directory);
-void	execute_export(t_shell minishell);
-void	execute_unset(t_shell minishell);
-void	execute_env(t_shell minishell);
-void	execute_exit(t_shell minishell);
-void	create_env(t_env *env_variables);
+// Put all functions signatures here when done (Leo's way)
 
 void	execute_built_in_commands(t_shell minishell/*, TBD */)
 {
@@ -144,11 +136,7 @@ void	execute_unset(t_shell minishell)
 // Subject : "env with no options or arguments"
 void	execute_env(t_shell minishell)
 {
-	// Find where these variables are stored + call GNL in a loop to print all lines ?
-	// Or create them from scratch ?
-	char *env_ret;
-	env_ret = getenv(NULL);		// Test
-	printf("%s\n", env_ret);
+	// loop through all var and print them with '=' in between
 }
 
 // Subject : "exit with no options"
@@ -156,95 +144,4 @@ void	execute_exit(t_shell minishell)
 {
 	// Free memory (pass command_array) / Call a clean up function
 	exit(0);
-}
-
-// liste chainee - A convertir en char ** pour execve sinon pas pratique
-// Implémenter $ later (voir avec Leo qui s'en occupe)
-void	create_env(t_env *env_variables)
-{
-	t_env	*head;
-	t_env	*var_1;
-	t_env	*var_2;
-	head = create_new_environment_variable("USER", getenv("USER"));
-	var_1 = create_new_environment_variable("LANG", getenv("LANG"));
-	var_2 = create_new_environment_variable("HOME", getenv("HOME"));
-
-	// TO DO
-}
-
-t_env	*create_new_environment_variable(char *key, char *value)
-{
-	t_env	*new_env_var;
-	if (!key || !value)
-		return (NULL);
-	new_env_var = malloc(sizeof(t_env));
-	if (!new_env_var)
-		return (NULL);
-	new_env_var->variable_name = key;
-	new_env_var->variable_data = value;
-	new_env_var->next = NULL;
-	return (new_env_var);
-}
-
-t_env	*ft_lstlast(t_env *lst)
-{
-	t_env	*last;
-
-	// Creating a ptr to the node I'll return (aka last one)
-	if (!lst)
-		return (NULL);
-	// Giving 'last' the same address as the head node,
-	// so it starts the loop at the right place
-	last = lst;
-	// Leaving the loop at the node before the last node
-	while (last->next != NULL)
-	{
-		last = last->next;
-	}
-	// When 'last.next' is NULL, means 'last' is the last node,
-	// so I return a pointer to it
-	return (last);
-}
-
-void	ft_lstadd_back(t_env **lst, t_env *new)
-{
-	t_env	*last;
-
-	if (!lst || !new)
-		return ;
-	if (!*lst)
-	{
-		*lst = new;
-		// new->next = NULL; // NOPE, because 'new' may not be the last node
-		return ;
-	}
-	last = ft_lstlast(*lst);
-	last->next = new;
-	// new->next = NULL; // NOPE, because 'new' may not be the last node
-}
-
-void	ft_lstdelone(t_env *lst, void (*del)(void *))
-{
-	if (!lst || !del)
-		return ;
-	// Free the pointer to the node, as it's been malloc'd in ft_lstnew
-	if (lst)
-	{
-		//  Fetch the data to erase : `lst->content` (lst is a pointer,
-		// so I use the -> instead of the .)
-		del(lst->content);
-		free(lst);
-		//  Adding this to avoid dangling pointer
-		lst = NULL;
-		// this is actually useless, because it doesn't affect the original
-		// pointer (because I'm changing a local copy of it).
-		// A double ptr would work though
-	}
-}
-
-// del function takes any kind of data as a parameter, and frees this data
-void	del(void *param)
-{
-	if (param)
-		free(param);
 }

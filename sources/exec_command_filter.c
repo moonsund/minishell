@@ -1,6 +1,8 @@
 #include "minishell.h"
 #include "libft.h"
 
+// Put all functions signatures here when done (Leo's way)
+
 void	check_command_type_and_execute(t_shell minishell/*, TBD */)
 {
 	// Sujet : Handle environment variables ($ followed by a sequence of characters) which should expand to their values.
@@ -38,8 +40,7 @@ int		main(int ac, char **av)
 	minishell.all_commands.full_command[3] = ft_strdup(av[4]);			// Ⓜ️
 	// minishell.all_commands.next = /* TBC - Built in commands = NULL toujours ? */;
 
-	// Create environment variables ? For (at least) the built in commands : export / unset / env
-	// create_env(minishell.env_variables);
+	minishell.env_variables = build_environment();
 
 	check_command_type_and_execute(minishell);
 
