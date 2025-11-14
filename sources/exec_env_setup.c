@@ -11,7 +11,7 @@ t_env	**build_environment(void)
 	environment = malloc(sizeof(t_env*));
 	t_env	*new;
 
-	char *all_vars[] = {"HOME", "USER", "LANG", "HOME"};
+	char *all_vars[] = {"HOME", "USER", "LANG", "HOME"};		// Added twice home for testing
 	int	size_tab = (sizeof(all_vars) / sizeof(all_vars[0]));
 	int i = 0;
 	while (i < size_tab)

@@ -124,7 +124,11 @@ void	execute_export(t_shell minishell)
 {
 	// export = créer ou modifier variable d’environnement
 	// export ENV_VAR_NAME="Data in variable to add or edit"
-	// export with no options : print all env var that have been exported
+	// export with no options : print all env var that have been exported - NOT REQUIRED
+	// Modus operandi :
+	// Loop through variables
+	// If name not found, create note and add node to list
+	// If found, edit the value
 }
 
 // Subject : "unset with no options"
@@ -132,11 +136,23 @@ void	execute_unset(t_shell minishell)
 {
 	// In shell scripting, unset is a built-in command used to delete shell variables or functions.
 	// When you use unset on a variable, it removes the variable from the shell environment, making it undefined.
+	// Modus operandi :
+	// Loop through all variables and compare name with arg
+	// Backup the adress stored in 'next'
+	// When matching, delete this variable using the delete_env_var_content function
+	// Before that, update the next for the previous node, with the backup
 }
 // Subject : "env with no options or arguments"
 void	execute_env(t_shell minishell)
 {
-	// loop through all var and print them with '=' in between
+	// loop through all var and print them
+	t_env	*backup_ptr;
+	backup_ptr = *(minishell.env_variables);
+	while (backup_ptr != NULL)
+	{
+		printf("%s=%s\n", backup_ptr->variable_name, backup_ptr->variable_data);
+		backup_ptr = backup_ptr->next;
+	}
 }
 
 // Subject : "exit with no options"
