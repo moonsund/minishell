@@ -42,7 +42,7 @@ int main(int argc, char **argv, char **envp)
         
         // shell.pipeline = parse_command(shell.tokens);
         // execute();
-        clean(&shell.tokens);
+        free_tokens(&shell.tokens);
     }
 
     return (EXIT_SUCCESS);

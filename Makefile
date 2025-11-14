@@ -15,7 +15,7 @@ ifeq ($(UNAME), Darwin) # macOS (Homebrew readline)
   LDFLAGS += -L/opt/homebrew/opt/readline/lib
 endif
 
-# NB have not tested on Linux yet
+# NB have not been tested on Linux yet
 ifeq ($(UNAME), Linux)
   LDLIBS  += -lncurses
 endif
@@ -24,7 +24,15 @@ endif
 SRC_PATH = sources/
 OBJ_PATH = objects/
 
-SRC_FILES = main.c signals.c normalize.c lexer_qmap.c utils.c
+SRC_FILES = \
+	main.c \
+	signals.c \
+	utils.c \
+	lexer/lexer.c \
+	lexer/lexer_words.c \
+	lexer/lexer_operators.c \
+	lexer/lexer_chars.c \
+	lexer/lexer_utils.c
 
 SRCS = $(addprefix $(SRC_PATH),$(SRC_FILES))
 OBJS = $(addprefix $(OBJ_PATH),$(SRC_FILES:.c=.o))
@@ -39,7 +47,7 @@ $(NAME): $(LIBFT_A) $(OBJS)
 	@echo "✅ Built $(NAME)"
 
 $(OBJ_PATH)%.o: $(SRC_PATH)%.c
-	@mkdir -p $(OBJ_PATH)
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 
