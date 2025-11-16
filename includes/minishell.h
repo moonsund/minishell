@@ -142,13 +142,13 @@ void setup_signals(void);
 int		str_comp(char *s1, char *s2);
 
 // pre exec functions
-void	check_command_type_and_execute(t_shell minishell/*, TBD */);
-void	execute_built_in_commands(t_shell minishell/*, TBD */);
-void	execute_external_commands(t_shell minishell/*, TBD */);
+void	check_command_type_and_execute(t_shell minishell);
+void	execute_built_in_commands(t_shell minishell);
+void	execute_external_commands(t_shell minishell);
 
 // exec built in functions
-void	execute_echo(char **command_array);
-void	execute_cd(char *current_working_directory, char **command_array);
+void	execute_echo(t_token *first_command);
+void	execute_cd(char *current_working_directory, t_token *first_command);
 void	execute_pwd(char *current_working_directory);
 void	execute_export(t_shell minishell);
 void	execute_unset(t_shell minishell);
@@ -160,7 +160,7 @@ t_env	**build_environment(void);
 t_env	*create_new_environment_variable(char *key, char *value);
 t_env	*search_last_var(t_env *env_var);
 void	add_env_var_to_list(t_env **head, t_env *new);
-void	delete_env_var(t_env **head, char *var_to_delete, void (*del_string)(void *));
+void	delete_env_var(t_env **head, char *var_to_delete);
 
 // exec external functions
 char	**execute_ls(t_shell minishell, char *path);

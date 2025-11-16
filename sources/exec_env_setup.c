@@ -9,10 +9,11 @@ t_env	**build_environment(void)
 {
 	t_env	**environment;
 	environment = malloc(sizeof(t_env*));						// Ⓜ️
+	*environment = NULL;
 	t_env	*new;
 
 	char *all_vars[] = {"HOME", "USER", "LANG", "HOME"};		// Added twice HOME for testing
-	int	size_tab = (sizeof(all_vars) / sizeof(all_vars[0]));
+	int	size_tab = (sizeof(all_vars) / sizeof(all_vars[0]));	// Method to find out the size of the str array
 	int i = 0;
 	while (i < size_tab)
 	{
@@ -67,10 +68,9 @@ void	add_env_var_to_list(t_env **head, t_env *new)
 	backup_ptr->next = new;
 }
 
-// Probably not fully set up - Test & Check
-void	delete_env_var(t_env **head, char *var_to_delete, void (*del_string)(void *))
+void	delete_env_var(t_env **head, char *var_to_delete)
 {
-	if (!var_to_delete || !del_string || head == NULL)
+	if (head == NULL || !var_to_delete)
 		return ;
 	t_env	*copy_head;
 	t_env	*backup_previous;
