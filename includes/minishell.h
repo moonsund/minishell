@@ -108,6 +108,36 @@ typedef struct s_shell
 	t_pipeline		*pipeline;				// Abstract Syntax Tree
 }	t_shell;
 
+// ------------------------------------------------------------------------------------------ From Leo
+// lexer.c
+bool tokenize_with_qmap(const char *str, t_token_list *tokens);
+t_token *make_word_token(t_buf *buf);
+
+// lexer_words.c
+int process_word_token(t_token_list *tokens, t_lexer_context *ctx);
+
+// lexer_operators.c
+int check_operators(const char *str, t_token_list *tokens, t_lexer_context *context);
+
+// lexer_chars.c
+int append_char(t_buf *buf, char c, t_qmark quote_mark);
+
+// lexer_utils.c
+bool is_empty(const char *str);
+bool is_space(unsigned char c);
+bool is_operator(unsigned char c);
+void append_token(t_token_list *list, t_token *token);
+void reset_buf(t_buf *buf);
+void free_buf(t_buf *buf);
+
+
+// utils.c
+void free_tokens(t_token_list *list);
+
+// signals.c
+void setup_signals(void);
+
+// ------------------------------------------------------------------------------------------ Exec functions
 // utils
 int		str_comp(char *s1, char *s2);
 
