@@ -6,14 +6,14 @@
 void	execute_built_in_commands(t_shell minishell/*, TBD */)
 {
 	char	*current_working_directory;
-	current_working_directory = ft_calloc(sizeof(char), PATH_MAX);
+	current_working_directory = ft_calloc(sizeof(char), PATH_MAX);						// Ⓜ️
 	getcwd(current_working_directory, PATH_MAX);
 
-	if(ft_memcmp(minishell.all_commands.full_command[0], "echo", 5) == 0)
+	if(str_comp(minishell.all_commands.full_command[0], "echo") == 0)
 	{
 		execute_echo(minishell.all_commands.full_command);
 	}
-	else if(ft_memcmp(minishell.all_commands.full_command[0], "cd", 3) == 0)
+	else if(str_comp(minishell.all_commands.full_command[0], "cd") == 0)
 	{
 		printf("TestPrint cd command old path :\t%s\n", current_working_directory);
 		execute_cd(current_working_directory, minishell.all_commands.full_command);
@@ -21,33 +21,41 @@ void	execute_built_in_commands(t_shell minishell/*, TBD */)
 		getcwd(current_working_directory, PATH_MAX);							// Verif ✅
 		printf("TestPrint cd command new path :\t%s\n\n", current_working_directory);
 	}
-	else if(ft_memcmp(minishell.all_commands.full_command[0], "pwd", 4) == 0)
+	else if(str_comp(minishell.all_commands.full_command[0], "pwd") == 0)
 	{
 		execute_pwd(current_working_directory);									// Verif ✅
 	}
-	else if(ft_memcmp(minishell.all_commands.full_command[0], "export", 7) == 0)
+	else if(str_comp(minishell.all_commands.full_command[0], "export") == 0)
 	{
+		execute_env(minishell);				// Test ✅ Print vars before adding
+		write(1, "\n\n", 2);
 		execute_export(minishell);
+		execute_env(minishell);				// Test ✅ Print vars after adding
 	}
-	else if(ft_memcmp(minishell.all_commands.full_command[0], "unset", 6) == 0)
+	else if(str_comp(minishell.all_commands.full_command[0], "unset") == 0)
 	{
+		execute_env(minishell);				// Print vars before adding
+		write(1, "\n\n", 2);
 		execute_unset(minishell);
+		execute_env(minishell);				// Print vars after adding
 	}
-	else if(ft_memcmp(minishell.all_commands.full_command[0], "env", 4) == 0)
+	else if(str_comp(minishell.all_commands.full_command[0], "env") == 0)
 	{
 		execute_env(minishell);
 	}
-	else if(ft_memcmp(minishell.all_commands.full_command[0], "exit", 5) == 0)
+	else if(str_comp(minishell.all_commands.full_command[0], "exit") == 0)
 	{
+		free(current_working_directory);
 		execute_exit(minishell);
 	}
+	free(current_working_directory);
 }
 // Subject : "echo with option -n"
 // Check if string has been placed in a char* , or if each word is a char* -> VERY PROBABLY - Check w/ Leonid
 void	execute_echo(char **command_array)
 {
 	// the string to print is very probably made of many strings. Loop through command_array and print till the last element
-	if(ft_memcmp(command_array[1], "-n", 3) == 0)
+	if(str_comp(command_array[1], "-n") == 0)
 	{
 		printf("%s", command_array[2]);
 	}
@@ -60,56 +68,10 @@ void	execute_echo(char **command_array)
 // Subject : "cd with only a relative or absolute path"
 void	execute_cd(char *current_working_directory, char **command_array)
 {
-	char	*updated_path;
-	char	*path_section;
-	size_t	size_to_crop;
-	size_t	size_new_path;
-
-	updated_path = command_array[1];
-
-	// if(ft_memcmp(command_array[1], "/", 1) == 0)								// Absolute path
-	// {
-	// 	updated_path = command_array[1];
-	// }
-	// else if(ft_memcmp(command_array[1], ".", 2) == 0)							// Check 2 bytes to make sure there's a \0 after the .
-	// {
-	// 	updated_path = current_working_directory;
-	// }
-	// else if(ft_memcmp(command_array[1], "..", 3) == 0)							// Check in 3 bytes to make sure there's a \0 after the ..
-	// {
-	// 	path_section = ft_strrchr(current_working_directory, '/');				// Searches the last occurence of '/'
-	// 	size_to_crop = strlen(path_section);
-	// 	ft_memset(path_section, 0, size_to_crop);
-	// 	updated_path = current_working_directory;
-	// }
-	// else if(ft_memcmp(command_array[1], "./", 2) == 0)							// Relative path (same folder)
-	// {
-	// 	path_section = ft_strchr(command_array[1], '/');						// Ptr to the first occurence of '/'
-	// 	updated_path = ft_strjoin(current_working_directory, path_section);		// Ⓜ️
-	// }
-	// else if(ft_memcmp(command_array[1], "../", 2) == 0)							// Relative path (parent folder)
-	// {
-	// 	path_section = ft_strrchr(current_working_directory, '/');				// Ptr to the last occurence of '/'
-	// 	size_to_crop = strlen(path_section);
-	// 	ft_memset(path_section, 0, size_to_crop);
-	// 	path_section = ft_strchr(command_array[1], '/');						// Ptr to the first occurence of '/'
-	// 	updated_path = ft_strjoin(current_working_directory, path_section);		// Ⓜ️
-	// }
-	// else																		// Relative path but without ./ (classic simple cd)
-	// {
-	// 	path_section = ft_strjoin(current_working_directory, "/");				// Ⓜ️
-	// 	updated_path = ft_strjoin(path_section, command_array[1]);				// Ⓜ️
-	// 	free(path_section);
-	// }
-	// if forgotten edge case in the 'else', add an else with the following error message
-	// printf("Whoops - Command not recognized / Out of Minishell requirements\n");
-	// free + return;
-	if(chdir(updated_path) == -1)
+	if(chdir(command_array[1]) == -1)
 	{
-		free(updated_path);
 		perror("Error");											// Errno prints the rest of the message
 	}
-	free(updated_path);
 }
 
 // Subject : "pwd with no options"
@@ -129,23 +91,20 @@ void	execute_export(t_shell minishell)
 	// Loop through variables
 	// If name not found, create note and add node to list
 	// If found, edit the value
+	t_env	*new_environment_variable;
+	new_environment_variable = create_new_environment_variable(minishell.all_commands.full_command[1], minishell.all_commands.full_command[3]);
+	add_env_var_to_list(minishell.env_variables, new_environment_variable);
 }
 
 // Subject : "unset with no options"
 void	execute_unset(t_shell minishell)
 {
-	// In shell scripting, unset is a built-in command used to delete shell variables or functions.
-	// When you use unset on a variable, it removes the variable from the shell environment, making it undefined.
-	// Modus operandi :
-	// Loop through all variables and compare name with arg
-	// Backup the adress stored in 'next'
-	// When matching, delete this variable using the delete_env_var_content function
-	// Before that, update the next for the previous node, with the backup
+	delete_env_var(minishell.env_variables, minishell.all_commands.full_command[1], del_string);
 }
 // Subject : "env with no options or arguments"
+// Modus operandi : loop through all env vars and print them
 void	execute_env(t_shell minishell)
 {
-	// loop through all var and print them
 	t_env	*backup_ptr;
 	backup_ptr = *(minishell.env_variables);
 	while (backup_ptr != NULL)
@@ -158,6 +117,6 @@ void	execute_env(t_shell minishell)
 // Subject : "exit with no options"
 void	execute_exit(t_shell minishell)
 {
-	// Free memory (pass command_array) / Call a clean up function
+	free_everything(minishell);
 	exit(0);
 }
