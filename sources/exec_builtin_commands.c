@@ -15,29 +15,29 @@ void	execute_built_in_commands(t_shell minishell/*, TBD */)
 	}
 	else if(str_comp(minishell.all_commands.full_command[0], "cd") == 0)
 	{
-		printf("TestPrint cd command old path :\t%s\n", current_working_directory);
+		ft_printf("TestPrint cd command old path :\t%s\n", current_working_directory);
 		execute_cd(current_working_directory, minishell.all_commands.full_command);
-		current_working_directory = ft_calloc(sizeof(char), PATH_MAX);			// Verif ✅
-		getcwd(current_working_directory, PATH_MAX);							// Verif ✅
-		printf("TestPrint cd command new path :\t%s\n\n", current_working_directory);
+		// current_working_directory = ft_calloc(sizeof(char), PATH_MAX);					// Comment out for debug
+		// getcwd(current_working_directory, PATH_MAX);										// Comment out for debug
+		// ft_printf("TestPrint cd command new path :\t%s\n\n", current_working_directory);	// Comment out for debug
 	}
 	else if(str_comp(minishell.all_commands.full_command[0], "pwd") == 0)
 	{
-		execute_pwd(current_working_directory);									// Verif ✅
+		execute_pwd(current_working_directory);
 	}
 	else if(str_comp(minishell.all_commands.full_command[0], "export") == 0)
 	{
-		execute_env(minishell);				// Test ✅ Print vars before adding
-		write(1, "\n\n", 2);
+		// execute_env(minishell);															// Comment out for debug
+		// write(1, "\n\n", 2);																// Comment out for debug
 		execute_export(minishell);
-		execute_env(minishell);				// Test ✅ Print vars after adding
+		// execute_env(minishell);															// Comment out for debug
 	}
 	else if(str_comp(minishell.all_commands.full_command[0], "unset") == 0)
 	{
-		execute_env(minishell);				// Print vars before adding
-		write(1, "\n\n", 2);
+		// execute_env(minishell);															// Comment out for debug
+		// write(1, "\n\n", 2);																// Comment out for debug
 		execute_unset(minishell);
-		execute_env(minishell);				// Print vars after adding
+		// execute_env(minishell);															// Comment out for debug
 	}
 	else if(str_comp(minishell.all_commands.full_command[0], "env") == 0)
 	{
@@ -55,13 +55,14 @@ void	execute_built_in_commands(t_shell minishell/*, TBD */)
 void	execute_echo(char **command_array)
 {
 	// the string to print is very probably made of many strings. Loop through command_array and print till the last element
+	// print till next node = null
 	if(str_comp(command_array[1], "-n") == 0)
 	{
-		printf("%s", command_array[2]);
+		ft_printf("%s", command_array[2]);
 	}
 	else
 	{
-		printf("%s\n", command_array[1]);
+		ft_printf("%s\n", command_array[1]);
 	}
 }
 
@@ -77,20 +78,13 @@ void	execute_cd(char *current_working_directory, char **command_array)
 // Subject : "pwd with no options"
 void	execute_pwd(char *current_working_directory)
 {
-	printf("%s\n", current_working_directory);
+	ft_printf("%s\n", current_working_directory);
 }
 
 // Subject : "export with no options"
-// no options = no flags (TBC) - So I have to code export ENV_VAR_NAME="Data in variable to add or edit"
+// Loop through variables. If name not found, create note and add node to list. If found, edit the value
 void	execute_export(t_shell minishell)
 {
-	// export = créer ou modifier variable d’environnement
-	// export ENV_VAR_NAME="Data in variable to add or edit"
-	// export with no options : print all env var that have been exported - NOT REQUIRED
-	// Modus operandi :
-	// Loop through variables
-	// If name not found, create note and add node to list
-	// If found, edit the value
 	t_env	*new_environment_variable;
 	new_environment_variable = create_new_environment_variable(minishell.all_commands.full_command[1], minishell.all_commands.full_command[3]);
 	add_env_var_to_list(minishell.env_variables, new_environment_variable);
@@ -102,14 +96,14 @@ void	execute_unset(t_shell minishell)
 	delete_env_var(minishell.env_variables, minishell.all_commands.full_command[1], del_string);
 }
 // Subject : "env with no options or arguments"
-// Modus operandi : loop through all env vars and print them
+// Loop through all env vars and print them
 void	execute_env(t_shell minishell)
 {
 	t_env	*backup_ptr;
 	backup_ptr = *(minishell.env_variables);
 	while (backup_ptr != NULL)
 	{
-		printf("%s=%s\n", backup_ptr->variable_name, backup_ptr->variable_data);
+		ft_printf("%s=%s\n", backup_ptr->variable_name, backup_ptr->variable_data);
 		backup_ptr = backup_ptr->next;
 	}
 }

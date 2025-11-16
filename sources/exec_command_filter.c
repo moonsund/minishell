@@ -32,15 +32,36 @@ void	check_command_type_and_execute(t_shell minishell/*, TBD */)
 int		main(int ac, char **av)
 {
 	t_shell	minishell;
-	minishell.all_commands.full_command = malloc(sizeof(char*) * 4);		// Ⓜ️ Place pour 4 strings pour le 1er node (command + args/flags)
+	minishell.tokens.count = 6;											// I'll get that from Leo's work
+	minishell.all_commands.full_command = malloc(sizeof(char*) * minishell.tokens.count);	// Ⓜ️
 
-	int i = 0;
-	while (i < 4)
+	minishell.tokens.head = malloc(sizeof(t_token_list));
+	minishell.tokens.head->raw_str = ft_strdup("echo");
+	minishell.tokens.head->next = malloc(sizeof(t_token_list));
+	minishell.tokens.head->next->raw_str = ft_strdup("-n");
+	minishell.tokens.head->next->next = malloc(sizeof(t_token_list));
+	minishell.tokens.head->next->next->raw_str = ft_strdup("lol");
+
+	int				i = 0;
+	t_token_list	*head_copy;
+	head_copy = minishell.tokens.head;
+
+	while (i < minishell.tokens.count)
 	{
-		if(av[i] != NULL)
-			minishell.all_commands.full_command[i] = av[i+1];
+		if(head_copy != NULL)
+		{
+			minishell.all_commands.full_command[i] = head_copy->head->raw_str;
+		}
 		i++;
+		head_copy = head_copy->head->next;
 	}
+
+	// char *raw_str;				// '0\'-terminated string
+	// t_token_type type;			// WORD, PIPE, REDIR_IN, etc.
+	// t_qmark *quotes_map;		// array of qmarks for everysingle character in the raw_str
+	// size_t length;				// *raw_str length
+	// struct s_token  *next;
+
 
 	// minishell.all_commands.next = /* TBC - Built in commands = NULL toujours ? */;
 

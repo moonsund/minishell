@@ -18,7 +18,7 @@ int main(int argc, char **argv, char **envp)
         line = readline("minishell> ");
         if (!line)
         {
-            printf("exit\n");
+            ft_printf("exit\n");
             break;
         }
 
@@ -28,11 +28,11 @@ int main(int argc, char **argv, char **envp)
         shell.normalized_cmd_str = normalize_str(line);
         if (!shell.normalized_cmd_str)
             perror("normalize_str");
-        printf("[normalize_debug]: \"%s\"\n", shell.normalized_cmd_str);
+        ft_printf("[normalize_debug]: \"%s\"\n", shell.normalized_cmd_str);
 
         // tokenize(line);
         free(line);
-        
+
         // parser();
         // execute();
     }

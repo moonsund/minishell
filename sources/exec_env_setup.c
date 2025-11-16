@@ -28,7 +28,7 @@ t_env	*create_new_environment_variable(char *key, char *value)
 	t_env	*new_env_var;
 	if (!key || !value)
 	{
-		printf("Variable Name and/or Data missing\n");
+		ft_printf("Variable Name and/or Data missing\n");
 		return (NULL);
 	}
 	new_env_var = malloc(sizeof(t_env));						// Ⓜ️
@@ -93,7 +93,7 @@ void	delete_env_var(t_env **head, char *var_to_delete, void (*del_string)(void *
 		copy_head = copy_head->next;
 	}
 	// Leaving the while loop = nothing to delete / env var not found
-	printf("Environment variable not found\n");
+	ft_printf("Environment variable not found\n");
 }
 
 void	del_string(char *param)

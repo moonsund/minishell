@@ -6,8 +6,8 @@ int main() {
 	char	*argv[] = {"/bin/ls", "-l", NULL};			// Tableau de strings (arguments du programme)
 	char	*envp[] = {NULL};							// (Facultatif) - Tableau de strings (variables d’environnement)
 
-	printf("Avant execve\n");
+	ft_printf("Avant execve\n");
 	execve(ppath, argv, envp);
-	printf("This will never be printed\n");				// Ne sera pas affiché car ls a remplacé le binaire précédent
+	ft_printf("This will never be printed\n");				// Ne sera pas affiché car ls a remplacé le binaire précédent
 	return 0;
 }
