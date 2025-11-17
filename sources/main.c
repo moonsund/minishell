@@ -38,10 +38,10 @@ int main(int argc, char **argv, char **envp)
 			free(line);
 			continue;
 		}
-		print_token_list(&shell.tokens); // for debugging, to be deleted
+		print_token_list(&shell.tokens);		// for debugging, to be deleted (note from Sophie : super useful ! Please don't delete yet ^^')
 
 		// shell.pipeline = parse_command(shell.tokens);
-		check_command_type_and_execute(shell);												// Testing starts here
+		check_command_type_and_execute(shell);												// Exec testing starts here
 		free_tokens(&shell.tokens);
 	}
 

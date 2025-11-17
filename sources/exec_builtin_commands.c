@@ -11,7 +11,7 @@ void	execute_built_in_commands(t_shell minishell/*, TBD */)
 
 	if(str_comp(minishell.tokens.head->raw_str, "echo") == 0)
 	{
-		execute_echo(minishell.tokens.head);
+		execute_echo(minishell.tokens.head, minishell);
 	}
 	else if(str_comp(minishell.tokens.head->raw_str, "cd") == 0)
 	{
@@ -52,29 +52,35 @@ void	execute_built_in_commands(t_shell minishell/*, TBD */)
 }
 // Subject : "echo with option -n"
 // Check if string has been placed in a char* , or if each word is a char* -> VERY PROBABLY - Check w/ Leonid
-void	execute_echo(t_token *first_command)
+void	execute_echo(t_token *first_command, t_shell minishell)
 {
-	if(str_comp(first_command->next->raw_str, "-n") == 0)
-	{
-		first_command = first_command->next->next;
-		while (first_command != NULL)
-		{
-			ft_printf("%s", first_command->raw_str);
-			first_command = first_command->next;
-		}
-	}
-	else
+	bool	line_return = true;
+	char	*cropped_var;
+	char	*fetched_value;
+	first_command = first_command->next;
+	if(str_comp(first_command->raw_str, "-n") == 0)
 	{
 		first_command = first_command->next;
-		while (first_command != NULL)
+		line_return = false;
+	}
+	while (first_command != NULL)
+	{
+		if (first_command->raw_str[0] == '$')				// Maybe there is an easier/shorter way, see with Leo if parsing can replace a key by its value
+		{
+			cropped_var = ft_strchr(first_command->raw_str, '$') + 1;
+			fetched_value = fetch_value_from_key(minishell.env_variables, cropped_var);
+			ft_printf("%s", fetched_value);
+		}
+		else
 		{
 			ft_printf("%s", first_command->raw_str);
-			first_command = first_command->next;
-			if(first_command)
-				write(1, " ", 1);
 		}
-		write(1, "\n", 1);
+		first_command = first_command->next;
+		if(first_command)
+			write(1, " ", 1);
 	}
+	if(line_return == true)
+		write(1, "\n", 1);
 }
 
 // Subject : "cd with only a relative or absolute path"
@@ -124,6 +130,7 @@ void	execute_env(t_shell minishell)
 }
 
 // Subject : "exit with no options"
+// Memory leaks since I merged parsing & exec
 void	execute_exit(t_shell minishell)
 {
 	free_everything(minishell);

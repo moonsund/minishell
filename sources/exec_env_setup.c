@@ -3,8 +3,8 @@
 
 // Put all functions signatures here when done (Leo's way)
 
-// liste chainee - A convertir en char ** pour execve sinon pas pratique
-// Implémenter $ later (voir avec Leo pour decider ensemble qui s'en occupe)
+// Note for later - Convert the linked list to a char ** when using execve (simpler)
+// See w/ Leo what is the best between replacing key by value from the beginning (parsing) or do it later (exec)
 t_env	**build_environment(void)
 {
 	t_env	**environment;
@@ -45,6 +45,8 @@ void	add_env_var_to_list(t_env **head, t_env *new)
 {
 	t_env	*last;
 
+	if(!new)
+		return ;
 	if (*head == NULL)
 	{
 		*head = new;
@@ -66,6 +68,24 @@ void	add_env_var_to_list(t_env **head, t_env *new)
 		backup_ptr = backup_ptr->next;
 	}
 	backup_ptr->next = new;
+}
+
+char	*fetch_value_from_key(t_env **head, char *key)
+{
+	if (head == NULL || !key)
+		return (NULL);
+	t_env	*copy_head;
+	copy_head = *head;
+
+	while (copy_head != NULL)
+	{
+		if(str_comp(copy_head->variable_name, key) == 0)
+		{
+			return(copy_head->variable_data);
+		}
+		copy_head = copy_head->next;
+	}
+	return(NULL);
 }
 
 void	delete_env_var(t_env **head, char *var_to_delete)
@@ -92,8 +112,7 @@ void	delete_env_var(t_env **head, char *var_to_delete)
 		backup_previous = copy_head;
 		copy_head = copy_head->next;
 	}
-	// Leaving the while loop = nothing to delete / env var not found
-	ft_printf("Environment variable not found\n");
+	ft_printf("Environment variable not found\n");				// Keep for debug
 }
 
 void	del_string(char *param)
@@ -101,6 +120,7 @@ void	del_string(char *param)
 	if (param)
 		free(param);
 }
+
 int		str_comp(char *s1, char *s2)
 {
 	int	i = 0;
@@ -133,7 +153,7 @@ void	free_all_vars(t_env **head)
 		backup_next = copy_head->next;
 		del_string(copy_head->variable_name);
 		del_string(copy_head->variable_data);
-		free(copy_head);						// not necessary if node hasn't been malloc'ed
+		free(copy_head);
 		copy_head = copy_head->next;
 	}
 }

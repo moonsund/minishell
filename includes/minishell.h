@@ -147,7 +147,7 @@ void	execute_built_in_commands(t_shell minishell);
 void	execute_external_commands(t_shell minishell);
 
 // exec built in functions
-void	execute_echo(t_token *first_command);
+void	execute_echo(t_token *first_command, t_shell minishell);
 void	execute_cd(char *current_working_directory, t_token *first_command);
 void	execute_pwd(char *current_working_directory);
 void	execute_export(t_shell minishell);
@@ -158,6 +158,7 @@ void	execute_exit(t_shell minishell);
 // env related functions
 t_env	**build_environment(void);
 t_env	*create_new_environment_variable(char *key, char *value);
+char	*fetch_value_from_key(t_env **head, char *key);
 t_env	*search_last_var(t_env *env_var);
 void	add_env_var_to_list(t_env **head, t_env *new);
 void	delete_env_var(t_env **head, char *var_to_delete);
