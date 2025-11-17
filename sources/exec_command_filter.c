@@ -20,7 +20,8 @@ void	check_command_type_and_execute(t_shell minishell)
 	}
 	else
 	{
-		execute_external_commands(minishell);
+		// execute_external_commands(minishell);
+		return;		// To delete when ext commands done
 	}
 	free_everything(minishell);
 }
