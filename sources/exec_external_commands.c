@@ -1,12 +1,5 @@
 /*		NOTES :
 
-- Work with struct from parsing. This struct will provide :
-	- Args (first command splitted in command + flags)
-	- Potentionally an infile/outfile
-	- Pointer to the next node ( = next command)
-- Final output from parsing : a linked list (1 node = 1 command)
-- Example : ```ls -la | grep .c | wc -l``` = 3 nodes
-
 TASK LIST :
 
 - Create loop
@@ -40,27 +33,24 @@ void	execute_external_commands(t_shell minishell/*, TBD */);
 		>> should redirect output in append mode.
 • Implement pipes (| character). The output of each command in the pipeline is connected to the input of the next command via a pipe.
 • Handle environment variables ($ followed by a sequence of characters) which should expand to their values.
-• Handle $? which should expand to the exit status of the most recently executed foreground pipeline. */
+• Handle $? which should expand to the exit status of the most recently executed foreground pipeline.
 
-void	execute_external_commands(t_shell minishell/*, TBD */)
-{
-	// Fork / Pipe / FD
-	// Find out how many nodes ?
-	// Find out nodes types (pipes, redirections, )
-	// Create child process = fork + execve
-/*
+Fork / Pipe / FD
+Find out how many nodes ?
+Find out nodes types (pipes, redirections, )
+Create child process = fork + execve
+
 if(command type == pipe)
 {
 	fork
 }
-*/
 
-// if node command starts with 'ls'
+if node command starts with 'ls'
 	char **folder_content;
 	char *path = ft_strdup("/home/schappuy/00_Root");
 	folder_content = execute_ls(minishell, path);
 
-}
+*/
 
 char	**execute_ls(t_shell minishell, char *path)
 {
