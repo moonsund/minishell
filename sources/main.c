@@ -1,5 +1,6 @@
 #include "minishell.h"
 
+static int init_shell(t_shell *shell, char **envp);
 static void print_token_list(t_token_list *list);
 
 int main(int argc, char **argv, char **envp)
@@ -10,20 +11,18 @@ int main(int argc, char **argv, char **envp)
 	shell.exit_status = 1;
 	(void)argc;
 	(void)argv;
-	(void)envp;
 
+	if (!init_shell(&shell, envp))
+		return (EXIT_FAILURE);
 
 	setup_signals();
-	// init();
-	shell.tokens.head = NULL;
-	shell.tokens.count = 0;
-	shell.pipeline = NULL;
+	
 	while(true) // or exit_status
 	{
 		line = readline("minishell> ");
 		if (!line)
 		{
-			ft_printf("exit\n");
+			printf("exit\n");
 			break;
 		}
 
@@ -38,16 +37,40 @@ int main(int argc, char **argv, char **envp)
 			free(line);
 			continue;
 		}
-		print_token_list(&shell.tokens);		// for debugging, to be deleted (note from Sophie : super useful ! Please don't delete yet ^^')
+		print_token_list(&shell.tokens);	// for debugging, to be deleted (note from Sophie : super useful ! Please don't delete yet ^^')
 
-		// shell.pipeline = parse_command(shell.tokens);
-		check_command_type_and_execute(shell);												// Exec testing starts here
+		expand_tokens(&shell.tokens, &shell.env_vars);
+
+		print_token_list(&shell.tokens); // for debugging, to be deleted
+
+		// if (!build_pipeline_from_tokens(&shell))
+		// {
+		// 	free_tokens(&shell.tokens);
+		// 	free(line);
+		// 	continue;
+		// }
+
+		// print_pipe_line(&shell.pipeline);	// for debugging, to be deleted
+
+		// check_command_type _and_execute(shell);	// Exec testing starts here
+		shell.pipeline = NULL;
 		free_tokens(&shell.tokens);
+		free(line);
 	}
 
 	return (EXIT_SUCCESS);
 }
 
+static int init_shell(t_shell *shell, char **envp)
+{
+	shell->tokens.head = NULL;
+	shell->tokens.count = 0;
+	shell->pipeline = NULL;
+
+	if (!init_env_var_list(&shell->env_vars, envp))
+		return (0);
+	return (1);
+}
 
 static void print_token_list(t_token_list *tokens) // for debugging, to be deleted
 {
@@ -84,3 +107,11 @@ static void print_token_list(t_token_list *tokens) // for debugging, to be delet
 		idx++;
 	}
 }
+
+
+// void print_pipe_line(t_pipeline *pipeline)
+// {
+
+
+
+// }

@@ -3,7 +3,7 @@ NAME       = minishell
 CC         = cc
 UNAME := $(shell uname)
 
-CFLAGS     = -g -Wall -Wextra -Werror -Iincludes
+CFLAGS     = -g -Wall -Wextra -Werror -Iincludes -I$(LIBFT_DIR)
 
 LIBFT_DIR  = libft
 LIBFT_A    = $(LIBFT_DIR)/libft.a
@@ -32,7 +32,9 @@ SRC_FILES = \
 	lexer/lexer_words.c \
 	lexer/lexer_operators.c \
 	lexer/lexer_chars.c \
-	lexer/lexer_utils.c
+	lexer/lexer_utils.c \
+	parser/parser.c \
+	envp/envp.c
 
 SRCS = $(addprefix $(SRC_PATH),$(SRC_FILES))
 OBJS = $(addprefix $(OBJ_PATH),$(SRC_FILES:.c=.o))

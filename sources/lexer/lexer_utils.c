@@ -64,3 +64,11 @@ void free_buf(t_buf *buf)
     buf->capacity = 0;
     buf->used_length = 0;
 }
+
+void init_buffer(t_buf *buf)
+{
+    buf->characters = NULL;
+    buf->quotes_map = NULL;
+    buf->capacity = 0;
+    buf->used_length = 0;
+}

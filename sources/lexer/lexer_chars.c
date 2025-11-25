@@ -1,8 +1,8 @@
 #include "minishell.h"
 
-static int boost_buf(t_buf *buf, size_t needed_length);
+int boost_buf(t_buf *buf, size_t needed_length);
 
-int append_char(t_buf *buf, char c, t_qmark quote_mark)
+int append_char(char c, t_buf *buf, t_qmark quote_mark)
 {
     if (!boost_buf(buf, buf->used_length + 1))
         return (0);
@@ -13,7 +13,7 @@ int append_char(t_buf *buf, char c, t_qmark quote_mark)
     return (1);
 }
 
-static int boost_buf(t_buf *buf, size_t needed_length)
+int boost_buf(t_buf *buf, size_t needed_length)
 {
     size_t   new_capacity;
     char    *new_characters;

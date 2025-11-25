@@ -33,7 +33,7 @@ bool tokenize_with_qmap(const char *str, t_token_list *tokens)
             continue;
 
         // accumulate characters in the buffer
-        if (!append_char(&ctx.buf, str[ctx.i], ctx.quote_mark))
+        if (!append_char(str[ctx.i], &ctx.buf, ctx.quote_mark))
         {
             free_buf(&ctx.buf);
             return (false);
@@ -59,10 +59,8 @@ bool tokenize_with_qmap(const char *str, t_token_list *tokens)
 
 static void init_lexer_context(t_lexer_context *context)
 {
-    context->buf.characters = NULL;
-    context->buf.quotes_map = NULL;
-    context->buf.capacity = 0;
-    context->buf.used_length = 0;
+    init_buffer(&context->buf);
+
     context->quote_mark = Q_NONE;
     context->i = 0;
     context->in_dq = false;

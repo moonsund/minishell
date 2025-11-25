@@ -1,6 +1,8 @@
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
+#include "libft.h"
+
 #include <stdlib.h>		// EXIT_FAILURE, EXIT_SUCCESS
 #include <limits.h>		// INT_MAX
 #include <sys/time.h>	// time
@@ -16,7 +18,7 @@
 #include <sys/types.h>	// opendir
 #include <dirent.h>		// opendir
 
-#include <ft_printf.h>
+// #include <ft_printf.h>
 
 typedef enum e_token_type
 {
@@ -83,6 +85,25 @@ typedef struct s_pipeline
 	size_t count;
 } t_pipeline;
 
+typedef enum e_node_type
+{
+    NODE_CMD,
+    NODE_PIPE,
+}   t_node_type;
+
+typedef struct  s_ast
+{
+    t_node_type type;
+    struct s_ast *left;
+    struct s_ast *right;
+
+    char **argv;
+    char *infil;
+    char *outfile;
+    int append;
+}   t_ast;
+
+
 typedef struct s_temp_command				// To delete after code matching
 {
 	char					**full_command;	// Exec requirement
@@ -97,18 +118,48 @@ typedef struct s_env
 	struct s_env	*next;
 }	t_env;
 
+typedef struct s_var
+{
+	char			*name;
+	char			*value;
+	struct s_var	*next;
+}	t_var;
+
+typedef struct s_env_var_list
+{
+	t_var *head;
+	t_var *tail;
+	size_t count;
+} t_env_var_list;
+
 typedef struct s_shell
 {
 	int				exit_status;
-	char			*normalized_cmd_str;	// To delete TBC
 	char			**command_array;		// To delete TBC
 	t_temp_command	all_commands;			// To delete after code matching
+	t_env_var_list env_vars;
 	t_env			**env_variables;		// Exec requirement
 	t_token_list	tokens;					// The one to consider ? TBC
 	t_pipeline		*pipeline;				// Abstract Syntax Tree
+
+    t_ast ast;
+    
 }	t_shell;
 
 // ------------------------------------------------------------------------------------------ From Leo
+
+// main.c
+
+
+// envp.c
+int    init_env_var_list(t_env_var_list *list, char **envp);
+// t_var  *find_var(t_var_list *list, const char *name);
+// int     set_var(t_var_list *list, const char *name, const char *value);   // export
+// int     unset_var(t_var_list *list, const char *name);                    // unset
+char   *get_var_value(const char *name, t_env_var_list *var_list);                // my_getenv
+// char  **build_envp(t_var_list *list);                                     // for execve
+void    free_var_list(t_env_var_list *list);
+
 // lexer.c
 bool tokenize_with_qmap(const char *str, t_token_list *tokens);
 t_token *make_word_token(t_buf *buf);
@@ -120,7 +171,8 @@ int process_word_token(t_token_list *tokens, t_lexer_context *ctx);
 int check_operators(const char *str, t_token_list *tokens, t_lexer_context *context);
 
 // lexer_chars.c
-int append_char(t_buf *buf, char c, t_qmark quote_mark);
+int append_char(char c, t_buf *buf, t_qmark quote_mark);
+int boost_buf(t_buf *buf, size_t needed_length);
 
 // lexer_utils.c
 bool is_empty(const char *str);
@@ -129,6 +181,11 @@ bool is_operator(unsigned char c);
 void append_token(t_token_list *list, t_token *token);
 void reset_buf(t_buf *buf);
 void free_buf(t_buf *buf);
+void init_buffer(t_buf *buf);
+
+// parser.c
+int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars);
+int expand_word_token(t_token *token, t_env_var_list *env_vars);
 
 
 // utils.c
@@ -144,7 +201,7 @@ int		str_comp(char *s1, char *s2);
 // pre exec functions
 void	check_command_type_and_execute(t_shell minishell);
 void	execute_built_in_commands(t_shell minishell);
-void	execute_external_commands(t_shell minishell);
+// void	execute_external_commands(t_shell minishell);
 
 // exec built in functions
 void	execute_echo(t_token *first_command, t_shell minishell);
@@ -159,12 +216,12 @@ void	execute_exit(t_shell minishell);
 t_env	**build_environment(void);
 t_env	*create_new_environment_variable(char *key, char *value);
 char	*fetch_value_from_key(t_env **head, char *key);
-t_env	*search_last_var(t_env *env_var);
+// t_env	*search_last_var(t_env *env_var);
 void	add_env_var_to_list(t_env **head, t_env *new);
 void	delete_env_var(t_env **head, char *var_to_delete);
 
 // exec external functions
-char	**execute_ls(t_shell minishell, char *path);
+// char	**execute_ls(t_shell minishell, char *path);
 
 // Free functions
 void	del_string(char *param);
