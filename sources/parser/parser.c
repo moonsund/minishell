@@ -182,11 +182,7 @@ static bool token_needs_expansion(t_token *token)
     while (i < token->length)
     {
         if (str[i] == '$' && q_map[i] != Q_SQ)
-        {
-            printf("token_needs_expansion\n");
             return (true);
-        }
-            
     i++;
     }
     return (false);

@@ -1,12 +1,11 @@
 #include "minishell.h"
 
-
 int    init_env_var_list(t_env_var_list *list, char **envp);
 // t_var  *find_var(t_env_var_list *list, const char *name);
 // int     set_var(t_env_var_list *list, const char *name, const char *value);   // export
 // int     unset_var(t_env_var_list *list, const char *name);                    // unset
 char   *get_var_value(const char *name, t_env_var_list *var_list);                // my_getenv
-// char  **build_envp(t_env_var_list *list);                                     // перед execve
+// char  **build_envp(t_env_var_list *list);                                     // before execve
 void    free_var_list(t_env_var_list *list);
 
 int    init_env_var_list(t_env_var_list *list, char **envp)
@@ -31,7 +30,6 @@ int    init_env_var_list(t_env_var_list *list, char **envp)
             i++;
             continue;
         }
-
 
         var = malloc(sizeof(*var));
         if (!var)
@@ -69,6 +67,9 @@ char   *get_var_value(const char *name, t_env_var_list *var_list)
 {
     t_var *cur;
 
+    if (!var_list || !name)
+        return (NULL);
+
     cur = var_list->head;
 
     while (cur)
@@ -80,9 +81,24 @@ char   *get_var_value(const char *name, t_env_var_list *var_list)
     return (NULL);
 }
 
-void    free_var_list(t_env_var_list *list)
+void    free_var_list(t_env_var_list *vars)
 {
-    (void)*list;
+    t_var *cur;
+	t_var *next;
 
+	if (!vars)
+		return ;
 
+	cur = vars->head;
+	while (cur != NULL)
+	{
+		next = cur->next;
+		free(cur->name);
+		free(cur->value);
+        free(cur);
+		cur = next;
+	}
+	vars->head = NULL;
+    vars->tail = NULL;
+	vars->count = 0;
 }
