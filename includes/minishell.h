@@ -25,8 +25,8 @@ typedef enum e_token_type
 	TOK_WORD,
 	TOK_PIPE,		// |
 	TOK_REDIR_IN,	// <
-	TOK_HEREDOC,	// >
-	TOK_REDIR_OUT,	// <<
+	TOK_HEREDOC,	// <<
+	TOK_REDIR_OUT,	// >
 	TOK_APPEND,		// >>
 } t_token_type;
 
@@ -71,37 +71,37 @@ typedef struct s_token_list
 	size_t count;
 } t_token_list;
 
-typedef struct s_command
-{
-	char *command_name;
-	char **argv;
-	size_t argc;
-	struct s_command *next;
-} t_command;
+// typedef struct s_command
+// {
+// 	char *command_name;
+// 	char **args;
+// 	size_t argc;
+// 	struct s_command *next;
+// } t_command;
 
-typedef struct s_pipeline
-{
-	t_command *head;
-	size_t count;
-} t_pipeline;
+// typedef struct s_pipeline
+// {
+// 	t_command *head;
+// 	size_t count;
+// } t_pipeline;
 
-typedef enum e_node_type
-{
-    NODE_CMD,
-    NODE_PIPE,
-}   t_node_type;
+// typedef enum e_node_type
+// {
+//     NODE_CMD,
+//     NODE_PIPE,
+// }   t_node_type;
 
-typedef struct  s_ast
-{
-    t_node_type type;
-    struct s_ast *left;
-    struct s_ast *right;
+// typedef struct  s_ast
+// {
+//     t_node_type type;
+//     struct s_ast *left;
+//     struct s_ast *right;
 
-    char **argv;
-    char *infil;
-    char *outfile;
-    int append;
-}   t_ast;
+//     char **argv;
+//     char *infile;
+//     char *outfile;
+//     int append;
+// }   t_ast;
 
 
 typedef struct s_temp_command				// To delete after code matching
@@ -132,24 +132,45 @@ typedef struct s_env_var_list
 	size_t count;
 } t_env_var_list;
 
+typedef struct s_command
+{
+	char **args; // null-terminated array of arguments
+	char *infile; // < 
+	char *outfile; // > or >>
+	int append; // 0 for > and 1 for >>
+
+	char *heredoc_limiter;
+	int has_heredoc; // 0 or 1
+
+} t_command;
+
+
+typedef struct s_pipeline
+{
+	size_t count;
+	t_command *cmds;
+} t_pipeline;
+
+
 typedef struct s_shell
 {
 	int				exit_status;
 	char			**command_array;		// To delete TBC
 	t_temp_command	all_commands;			// To delete after code matching
-	t_env_var_list env_vars;
+	t_env_var_list env_vars;				// envp vars saved in linked list 
 	t_env			**env_variables;		// Exec requirement
 	t_token_list	tokens;					// The one to consider ? TBC
-	t_pipeline		*pipeline;				// Abstract Syntax Tree
+	t_pipeline		*pipeline;
 
-    t_ast ast;
+    // t_ast ast;
     
 }	t_shell;
 
 // ------------------------------------------------------------------------------------------ From Leo
 
 // main.c
-
+int build_pipeline_from_tokens(t_shell *shell);
+int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars);
 
 // envp.c
 int    init_env_var_list(t_env_var_list *list, char **envp);
@@ -159,6 +180,12 @@ int    init_env_var_list(t_env_var_list *list, char **envp);
 char   *get_var_value(const char *name, t_env_var_list *var_list);                // my_getenv
 // char  **build_envp(t_var_list *list);                                     // for execve
 void    free_var_list(t_env_var_list *list);
+
+
+// expand.c
+int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars);
+
+// parcer.c
 
 // lexer.c
 bool tokenize_with_qmap(const char *str, t_token_list *tokens);
@@ -185,7 +212,6 @@ void init_buffer(t_buf *buf);
 
 // parser.c
 int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars);
-int expand_word_token(t_token *token, t_env_var_list *env_vars);
 
 
 // utils.c

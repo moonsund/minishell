@@ -1,189 +1,243 @@
 #include "minishell.h"
 
-static bool token_needs_expansion(t_token *token);
-int expand_word_token(t_token *token, t_env_var_list *env_vars);
-static char *get_last_status_string();
-static int append_str(char *str, t_buf *buf, t_qmark quote_mark);
-char *get_var_value(const char *name, t_env_var_list *env_vars);
+static void init_command(t_command *cmd);
+static int append_arg(t_command *cmd, char *arg);
+static int append_cmd(t_pipeline *pl, t_command cmd);
+static void free_cmd(t_command *cmd);
+static void free_pipeline(t_pipeline *pl);
 
-int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars)
-{    
-    t_token *cur;
-    
-    if (!tokens)
-        return (0);
-    
-    cur = tokens->head;
-    while (cur)
-    {
-        if (cur->type == TOK_WORD)
-            expand_word_token(cur, env_vars);
-        cur = cur->next;
-    }
-    return (1);
-}
-
-int expand_word_token(t_token *token, t_env_var_list *env_vars)
+int build_pipeline_from_tokens(t_shell *shell)
 {
-    t_buf buf;
-    size_t i;
-    size_t j;
-    size_t start;
-    char *val;
-    size_t val_length;
-    char *name;
-
-    if (!token || token->type != TOK_WORD || !token->quotes_map || !token->raw_str)
+    t_pipeline *pl;
+    t_command current_cmd;
+    t_token *cur;
+    t_token *cur_next;
+    int cmd_started;
+    
+    if (!shell)
         return (0);
     
-    if (!token_needs_expansion(token))
-        return (1);
+    pl = malloc(sizeof(*pl));
+    if (!pl)
+        // shell->exit_status = 2;
+        return (0);
 
-    init_buffer(&buf);
+    pl->cmds = NULL;
+    pl->count = 0;
 
-    i = 0;
-    while (i < token->length)
+    init_command(&current_cmd);
+
+    cmd_started = 0;
+    cur = shell->tokens.head;
+
+    while(cur)
     {
-        start = 0;
-
-        if (token->raw_str[i] == '$')
+        cur_next = cur->next;
+        if (cur->type == TOK_WORD)
         {
-            start = i + 1;
-            if (start >= token->length)
+            if (!cmd_started)
             {
-                if (!append_char(token->raw_str[i], &buf, Q_NONE))
-                {
-                    free_buf(&buf);
-                    return (0);
-                }
-                i++;
-                continue;
+                init_command(&current_cmd);
+                cmd_started = 1;
             }
-
-            if (token->raw_str[start] == '?')
+            if (!append_arg(&current_cmd, cur->raw_str))
             {
-                val = get_last_status_string();
-                if (!val || !append_str(val, &buf, Q_NONE))
-                {
-                    free_buf(&buf);
-                    return (0);
-                }
-                i += 2;
-                continue;
-            }
-
-            j = start;
-            while (j < token->length && (ft_isalnum((unsigned char)token->raw_str[j]) 
-                    || token->raw_str[j] == '_'))
-                j++;
-
-            if (j == start)
-            {
-                if (!append_char(token->raw_str[i], &buf, Q_NONE))
-                {
-                    free_buf(&buf);
-                    return (0);
-                }
-                i++;
-                continue;
-            }
-
-            val_length = j - start;
-
-            name = (char *)malloc(sizeof(char) * (val_length + 1));
-            if (!name)
+                free_cmd(&current_cmd);
+                free_pipeline(pl);
+                shell->exit_status = 2;
                 return (0);
-            
-            ft_memcpy(name, token->raw_str + start, val_length);
-            name[val_length] = '\0';
-
-            val = get_var_value(name, env_vars);
-            free(name);
-
-            if (val && val[0] != '\0')
-            {
-                if (!append_str(val, &buf, Q_NONE))
-                {
-                    free_buf(&buf);
-                    return (0);
-                }                
             }
-            i = j;
-            continue;
         }
-
+        // else if (cur->type == TOK_REDIR_IN, cur->type == TOK_REDIR_OUT, cur->type == TOK_HEREDOC, cur->type == TOK_APPEND)
+        else if (cur->type == TOK_REDIR_IN
+                || cur->type == TOK_REDIR_OUT
+                || cur->type == TOK_APPEND)
+        {
+            if (!cmd_started)
+            {
+                init_command(&current_cmd);
+                cmd_started = 1;
+            }
+            if (!cur_next || cur_next->type != TOK_WORD)
+            {
+                // syntax_error("expected filename after redirection");
+                free_cmd(&current_cmd);
+                free_pipeline(pl);
+                shell->exit_status = 258;
+                return (0);
+            }
+            if (cur->type == TOK_REDIR_IN) // <
+            {
+                free(current_cmd.infile);
+                current_cmd.infile = ft_strdup(cur_next->raw_str);
+                // malloc
+            }
+            else
+            {
+                free(current_cmd.outfile);
+                current_cmd.outfile = ft_strdup(cur_next->raw_str);
+                // malloc
+                if (cur->type == TOK_REDIR_OUT) // >
+                    current_cmd.append = 0;
+                if (cur->type == TOK_APPEND) // >>
+                    current_cmd.append = 1;
+            }
+        }
+        else if (cur->type == TOK_PIPE)
+        {
+            if (!cmd_started || !cur_next || cur_next->type != TOK_WORD)
+            {
+                // syntax_error();
+                free_cmd(&current_cmd);
+                free_pipeline(pl);
+                shell->exit_status = 258;
+                return (0);
+            }
+            if (!append_cmd(pl, current_cmd))
+            {
+                free_cmd(&current_cmd);
+                free_pipeline(pl);
+                shell->exit_status = 2;
+                return (0);
+            }
+            cmd_started = 0;
+        }
         else
         {
-            if (!append_char(token->raw_str[i], &buf, Q_NONE))
-            {
-                free_buf(&buf);
-                return (0);
-            }
+            free_cmd(&current_cmd);
+            free_pipeline(pl);
+            shell->exit_status = 258;
+            return (0);
         }
-        i++;
+        cur = cur->next;
     }
-    append_char('\0', &buf, Q_NONE);
 
-    free(token->raw_str);
-    free(token->quotes_map);
+    if (cmd_started)
+    {
+        if (!append_cmd(pl, current_cmd))
+        {
+            free_cmd(&current_cmd);
+            free_pipeline(pl);
+            shell->exit_status = 2;
+            return (0);
+        }
+    }
 
-    token->quotes_map = buf.quotes_map;
-    token->raw_str = buf.characters;
-    token->length = buf.used_length - 1;
-    return (1);
-}
 
-static int append_str(char *str, t_buf *buf, t_qmark quote_mark)
-{
-    size_t i;
-    size_t str_length;
 
-    str_length = ft_strlen(str);
-
-    if (!boost_buf(buf, buf->used_length + str_length))
+    if (pl->count == 0)
+    {
+        free_pipeline(pl);
+        free_cmd(&current_cmd);
+        shell->exit_status = 2;
         return (0);
-
-    i = 0;
-    while (i < str_length)
-    {
-        buf->characters[buf->used_length] = str[i];
-        buf->quotes_map[buf->used_length] = quote_mark;
-        buf->used_length++;
-        i++;
     }
+
+
+
+
+    shell->pipeline = pl;
     return (1);
 }
 
-
-static char *get_last_status_string()
+static void init_command(t_command *cmd)
 {
-    return NULL;
+    cmd->args = NULL;
+    cmd->infile = NULL;
+    cmd->outfile = NULL;
+    cmd->heredoc_limiter = NULL;
+    cmd->append = 0;
 }
 
+static int append_arg(t_command *cmd, char *arg)
+{
+    size_t argc;
+    char **new_argv;
 
-// build_pipeline_from_tokens(t_shell *shell)
-// {
+    if (!arg)
+        return (1);
+    
+    if (!cmd->args)
+    {
+        new_argv = (char **)malloc(sizeof(* new_argv) * 2);
+        if (!new_argv)
+            return (0);
+        new_argv[0] = ft_strdup(arg);
+        if (!new_argv[0])
+        {
+            free(new_argv);
+            return (0);
+        }
+        new_argv[1] = NULL;
+        cmd->args = new_argv;
+        return (1);
+    }
+    argc = 0;
+    while(cmd->args[argc])
+        argc++;
+    
+    new_argv = (char **)realloc(cmd->args, sizeof(* new_argv) * (argc + 2)); // realloc
+    // malloc
+    
+    new_argv[argc] = ft_strdup(arg);
+    if (!new_argv[argc])
+    {
+        free(new_argv);
+        return (0);
+    }
 
+    new_argv[argc + 1] = NULL;
+    cmd->args = new_argv;
+    return (1);
+}
 
+static int append_cmd(t_pipeline *pl, t_command cmd)
+{
+    t_command *new_cmds;
 
+    new_cmds = (t_command *)realloc(pl->cmds, sizeof(* new_cmds) * (pl->count + 1)); // realloc
+    // malloc
+    pl->cmds = new_cmds;
 
-// }
+    pl->cmds[pl->count] = cmd;
+    pl->count++;
 
-static bool token_needs_expansion(t_token *token)
+    init_command(&cmd);
+    return (1);
+}
+
+static void free_cmd(t_command *cmd)
+{
+    size_t argc;
+
+    if (cmd->args)
+    {
+        argc = 0;
+        while (cmd->args[argc])
+        {
+            free(cmd->args[argc]);
+            argc++;
+        }
+    }
+    free(cmd->infile);
+    free(cmd->outfile);
+    free(cmd->heredoc_limiter);
+    init_command(cmd);
+}
+
+static void free_pipeline(t_pipeline *pl)
 {
     size_t i;
-    const char *str;
-    t_qmark *q_map;
 
-    str = token->raw_str;
-    q_map = token->quotes_map;
-
+    if (!pl)
+        return;
+    
     i = 0;
-    while (i < token->length)
+    while (i < pl->count)
     {
-        if (str[i] == '$' && q_map[i] != Q_SQ)
-            return (true);
-    i++;
+        free_cmd(&pl->cmds[i]);
+        i++;
     }
-    return (false);
+    free(pl->cmds);
+    free(pl);
 }

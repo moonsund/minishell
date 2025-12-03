@@ -1,7 +1,10 @@
 #include "minishell.h"
 
 static int init_shell(t_shell *shell, char **envp);
+int build_pipeline_from_tokens(t_shell *shell);
+int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars);
 static void print_token_list(t_token_list *list);
+static void print_pipe_line(t_pipeline *pipeline);
 
 int main(int argc, char **argv, char **envp)
 {
@@ -43,16 +46,17 @@ int main(int argc, char **argv, char **envp)
 
 		print_token_list(&shell.tokens); // for debugging, to be deleted
 
-		// if (!build_pipeline_from_tokens(&shell))
-		// {
-		// 	free_tokens(&shell.tokens);
-		// 	free(line);
-		// 	continue;
-		// }
+		if (!build_pipeline_from_tokens(&shell))
+		{
+			free_tokens(&shell.tokens);
+			free(line);
+			shell.exit_status = 258;
+			continue;
+		}
 
-		// print_pipe_line(&shell.pipeline);	// for debugging, to be deleted
+		print_pipe_line(shell.pipeline);	// for debugging, to be deleted
 
-		// check_command_type _and_execute(shell);	// Exec testing starts here
+		// check_command_type_and_execute(shell);	// Exec testing starts here
 		shell.pipeline = NULL;
 		free_tokens(&shell.tokens);
 		free(line);
@@ -109,9 +113,47 @@ static void print_token_list(t_token_list *tokens) // for debugging, to be delet
 }
 
 
-// void print_pipe_line(t_pipeline *pipeline)
+// void print_pipe_line(t_pipeline *pipeline) // for debugging, to be deleted
 // {
+// 	size_t i;
+// 	size_t j;
 
-
-
+// 	i = 0;
+// 	while (i < pipeline->count)
+// 	{
+// 		j = 0;
+// 		while(pipeline->cmds[i]->args[j])
+// 		{
+// 			printf("%s\n", pipeline->cmds->args[j]);
+// 			j++;
+// 		}
+// 		i++;
+// 	}
 // }
+
+static void print_pipe_line(t_pipeline *pipeline) // for debugging, to be deleted
+{
+    size_t i;
+    size_t j;
+
+    if (!pipeline || !pipeline->cmds)
+        return;
+
+    for (i = 0; i < pipeline->count; i++)
+    {
+        printf("Command %zu:\n", i);
+
+        if (!pipeline->cmds[i].args)
+        {
+            printf("  (no args)\n");
+            continue;
+        }
+
+        j = 0;
+        while (pipeline->cmds[i].args[j])
+        {
+            printf("  arg[%zu]: %s\n", j, pipeline->cmds[i].args[j]);
+            j++;
+        }
+    }
+}
