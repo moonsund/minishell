@@ -13,6 +13,7 @@ int build_pipeline_from_tokens(t_shell *shell)
     t_token *cur;
     t_token *cur_next;
     int cmd_started;
+    char *tmp;
     
     if (!shell)
         return (0);
@@ -32,6 +33,7 @@ int build_pipeline_from_tokens(t_shell *shell)
 
     while(cur)
     {
+        printf("TYPE=%d, STR='%s'\n", cur->type, cur->raw_str);
         cur_next = cur->next;
         if (cur->type == TOK_WORD)
         {
@@ -68,15 +70,31 @@ int build_pipeline_from_tokens(t_shell *shell)
             }
             if (cur->type == TOK_REDIR_IN) // <
             {
+                tmp = ft_strdup(cur_next->raw_str);
+                if (!tmp)
+                {
+                    free_cmd(&current_cmd);
+                    free_pipeline(pl);
+                    shell->exit_status = 2;
+                    return (0);
+                }
                 free(current_cmd.infile);
-                current_cmd.infile = ft_strdup(cur_next->raw_str);
-                // malloc
+                current_cmd.infile = tmp;
             }
             else
             {
                 free(current_cmd.outfile);
-                current_cmd.outfile = ft_strdup(cur_next->raw_str);
-                // malloc
+                tmp = ft_strdup(cur_next->raw_str);
+                if (!tmp)
+                {
+                    free_cmd(&current_cmd);
+                    free_pipeline(pl);
+                    shell->exit_status = 2;
+                    return (0);
+                }
+                free(current_cmd.infile);
+                current_cmd.infile = tmp;
+                
                 if (cur->type == TOK_REDIR_OUT) // >
                     current_cmd.append = 0;
                 if (cur->type == TOK_APPEND) // >>
@@ -85,7 +103,7 @@ int build_pipeline_from_tokens(t_shell *shell)
         }
         else if (cur->type == TOK_PIPE)
         {
-            if (!cmd_started || !cur_next || cur_next->type != TOK_WORD)
+            if (!cmd_started || !cur_next)
             {
                 // syntax_error();
                 free_cmd(&current_cmd);
@@ -123,8 +141,6 @@ int build_pipeline_from_tokens(t_shell *shell)
         }
     }
 
-
-
     if (pl->count == 0)
     {
         free_pipeline(pl);
@@ -133,16 +149,13 @@ int build_pipeline_from_tokens(t_shell *shell)
         return (0);
     }
 
-
-
-
     shell->pipeline = pl;
     return (1);
 }
 
 static void init_command(t_command *cmd)
 {
-    cmd->args = NULL;
+    cmd->argv = NULL;
     cmd->infile = NULL;
     cmd->outfile = NULL;
     cmd->heredoc_limiter = NULL;
@@ -151,58 +164,70 @@ static void init_command(t_command *cmd)
 
 static int append_arg(t_command *cmd, char *arg)
 {
-    size_t argc;
     char **new_argv;
+    char *dup;
+    size_t argc;
+    size_t i;
+
+    if (!cmd)
+        return (0);
 
     if (!arg)
         return (1);
-    
-    if (!cmd->args)
-    {
-        new_argv = (char **)malloc(sizeof(* new_argv) * 2);
-        if (!new_argv)
-            return (0);
-        new_argv[0] = ft_strdup(arg);
-        if (!new_argv[0])
-        {
-            free(new_argv);
-            return (0);
-        }
-        new_argv[1] = NULL;
-        cmd->args = new_argv;
-        return (1);
-    }
+
     argc = 0;
-    while(cmd->args[argc])
-        argc++;
+    if (cmd->argv)
+    {
+        while(cmd->argv[argc])
+            argc++;
+    }
+
+    new_argv = (char **)malloc(sizeof(* new_argv) * (argc + 2));
+    if (!new_argv)
+        return (0);
     
-    new_argv = (char **)realloc(cmd->args, sizeof(* new_argv) * (argc + 2)); // realloc
-    // malloc
-    
-    new_argv[argc] = ft_strdup(arg);
-    if (!new_argv[argc])
+    i = 0;
+    while (i < argc)
+    {
+        new_argv[i] = cmd->argv[i];
+        i++;
+    }
+
+    dup = ft_strdup(arg);
+    if (!dup)
     {
         free(new_argv);
         return (0);
     }
 
+    new_argv[argc] = dup;
     new_argv[argc + 1] = NULL;
-    cmd->args = new_argv;
+
+    free(cmd->argv);
+    cmd->argv = new_argv;
     return (1);
 }
 
 static int append_cmd(t_pipeline *pl, t_command cmd)
 {
     t_command *new_cmds;
+    size_t i;
 
-    new_cmds = (t_command *)realloc(pl->cmds, sizeof(* new_cmds) * (pl->count + 1)); // realloc
-    // malloc
+    i = 0;
+    new_cmds = (t_command *)malloc(sizeof(* new_cmds) * (pl->count + 1));
+
+    while (i < pl->count)
+    {
+        new_cmds[i] = pl->cmds[i];
+        i++;
+    }
+    new_cmds[pl->count] = cmd;
+
+    free(pl->cmds);
+
     pl->cmds = new_cmds;
-
-    pl->cmds[pl->count] = cmd;
     pl->count++;
 
-    init_command(&cmd);
     return (1);
 }
 
@@ -210,12 +235,12 @@ static void free_cmd(t_command *cmd)
 {
     size_t argc;
 
-    if (cmd->args)
+    if (cmd->argv)
     {
         argc = 0;
-        while (cmd->args[argc])
+        while (cmd->argv[argc])
         {
-            free(cmd->args[argc]);
+            free(cmd->argv[argc]);
             argc++;
         }
     }

@@ -113,24 +113,6 @@ static void print_token_list(t_token_list *tokens) // for debugging, to be delet
 }
 
 
-// void print_pipe_line(t_pipeline *pipeline) // for debugging, to be deleted
-// {
-// 	size_t i;
-// 	size_t j;
-
-// 	i = 0;
-// 	while (i < pipeline->count)
-// 	{
-// 		j = 0;
-// 		while(pipeline->cmds[i]->args[j])
-// 		{
-// 			printf("%s\n", pipeline->cmds->args[j]);
-// 			j++;
-// 		}
-// 		i++;
-// 	}
-// }
-
 static void print_pipe_line(t_pipeline *pipeline) // for debugging, to be deleted
 {
     size_t i;
@@ -143,16 +125,16 @@ static void print_pipe_line(t_pipeline *pipeline) // for debugging, to be delete
     {
         printf("Command %zu:\n", i);
 
-        if (!pipeline->cmds[i].args)
+        if (!pipeline->cmds[i].argv)
         {
             printf("  (no args)\n");
             continue;
         }
 
         j = 0;
-        while (pipeline->cmds[i].args[j])
+        while (pipeline->cmds[i].argv[j])
         {
-            printf("  arg[%zu]: %s\n", j, pipeline->cmds[i].args[j]);
+            printf("  arg[%zu]: %s\n", j, pipeline->cmds[i].argv[j]);
             j++;
         }
     }

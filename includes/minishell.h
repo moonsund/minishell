@@ -71,39 +71,6 @@ typedef struct s_token_list
 	size_t count;
 } t_token_list;
 
-// typedef struct s_command
-// {
-// 	char *command_name;
-// 	char **args;
-// 	size_t argc;
-// 	struct s_command *next;
-// } t_command;
-
-// typedef struct s_pipeline
-// {
-// 	t_command *head;
-// 	size_t count;
-// } t_pipeline;
-
-// typedef enum e_node_type
-// {
-//     NODE_CMD,
-//     NODE_PIPE,
-// }   t_node_type;
-
-// typedef struct  s_ast
-// {
-//     t_node_type type;
-//     struct s_ast *left;
-//     struct s_ast *right;
-
-//     char **argv;
-//     char *infile;
-//     char *outfile;
-//     int append;
-// }   t_ast;
-
-
 typedef struct s_temp_command				// To delete after code matching
 {
 	char					**full_command;	// Exec requirement
@@ -134,7 +101,7 @@ typedef struct s_env_var_list
 
 typedef struct s_command
 {
-	char **args; // null-terminated array of arguments
+	char **argv; // null-terminated array of arguments
 	char *infile; // < 
 	char *outfile; // > or >>
 	int append; // 0 for > and 1 for >>
