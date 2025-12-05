@@ -33,7 +33,7 @@ int build_pipeline_from_tokens(t_shell *shell)
 
     while(cur)
     {
-        printf("TYPE=%d, STR='%s'\n", cur->type, cur->raw_str);
+        printf("DEBUG: TOK_TYPE=%d, TOK_STR='%s'\n", cur->type, cur->raw_str);
         cur_next = cur->next;
         if (cur->type == TOK_WORD)
         {
@@ -50,10 +50,10 @@ int build_pipeline_from_tokens(t_shell *shell)
                 return (0);
             }
         }
-        // else if (cur->type == TOK_REDIR_IN, cur->type == TOK_REDIR_OUT, cur->type == TOK_HEREDOC, cur->type == TOK_APPEND)
         else if (cur->type == TOK_REDIR_IN
                 || cur->type == TOK_REDIR_OUT
-                || cur->type == TOK_APPEND)
+                || cur->type == TOK_APPEND
+                || cur->type == TOK_HEREDOC)
         {
             if (!cmd_started)
             {
@@ -81,9 +81,8 @@ int build_pipeline_from_tokens(t_shell *shell)
                 free(current_cmd.infile);
                 current_cmd.infile = tmp;
             }
-            else
+            else if (cur->type == TOK_HEREDOC) // <<
             {
-                free(current_cmd.outfile);
                 tmp = ft_strdup(cur_next->raw_str);
                 if (!tmp)
                 {
@@ -92,14 +91,29 @@ int build_pipeline_from_tokens(t_shell *shell)
                     shell->exit_status = 2;
                     return (0);
                 }
-                free(current_cmd.infile);
-                current_cmd.infile = tmp;
-                
+                free(current_cmd.heredoc_limiter);
+                current_cmd.heredoc_limiter = tmp;
+                current_cmd.has_heredoc = 1;
+            }
+            else
+            {
+                tmp = ft_strdup(cur_next->raw_str);
+                if (!tmp)
+                {
+                    free_cmd(&current_cmd);
+                    free_pipeline(pl);
+                    shell->exit_status = 2;
+                    return (0);
+                }
+                free(current_cmd.outfile);
+                current_cmd.outfile = tmp;
+
                 if (cur->type == TOK_REDIR_OUT) // >
                     current_cmd.append = 0;
                 if (cur->type == TOK_APPEND) // >>
                     current_cmd.append = 1;
             }
+            cur = cur_next;
         }
         else if (cur->type == TOK_PIPE)
         {
@@ -160,6 +174,7 @@ static void init_command(t_command *cmd)
     cmd->outfile = NULL;
     cmd->heredoc_limiter = NULL;
     cmd->append = 0;
+    cmd->has_heredoc = 0;
 }
 
 static int append_arg(t_command *cmd, char *arg)

@@ -180,6 +180,8 @@ void init_buffer(t_buf *buf);
 // parser.c
 int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars);
 
+// heredoc
+int process_heredocs(t_shell *shell);
 
 // utils.c
 void free_tokens(t_token_list *list);

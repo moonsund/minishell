@@ -31,7 +31,7 @@ int main(int argc, char **argv, char **envp)
 
 		if (!is_empty(line))
 			add_history(line);
-		printf("[readline_debug]: \"%s\"\n", line);
+		printf("[readline_debug]: \"%s\"\n", line); // for debugging, to be deleted
 
 		if (!tokenize_with_qmap(line, &shell.tokens))
 		{
@@ -53,8 +53,16 @@ int main(int argc, char **argv, char **envp)
 			shell.exit_status = 258;
 			continue;
 		}
-
+		
 		print_pipe_line(shell.pipeline);	// for debugging, to be deleted
+
+		if (!process_heredocs(&shell))
+		{
+			free_tokens(&shell.tokens);
+			free(line);
+			shell.exit_status = 258;
+			continue;
+		}
 
 		// check_command_type_and_execute(shell);	// Exec testing starts here
 		shell.pipeline = NULL;
@@ -137,5 +145,14 @@ static void print_pipe_line(t_pipeline *pipeline) // for debugging, to be delete
             printf("  arg[%zu]: %s\n", j, pipeline->cmds[i].argv[j]);
             j++;
         }
+
+		if (pipeline->cmds[i].infile)
+			printf("infile: %s\n", pipeline->cmds[i].infile);
+		if (pipeline->cmds[i].outfile)
+			printf("outfile: %s\n", pipeline->cmds[i].outfile);
+		printf("append: %i\n", pipeline->cmds[i].append);
+		if (pipeline->cmds[i].heredoc_limiter)
+			printf("heredoc_limiter: %s\n", pipeline->cmds[i].heredoc_limiter);
+		printf("has_heredoc: %i\n", pipeline->cmds[i].has_heredoc);
     }
 }

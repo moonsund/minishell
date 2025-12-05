@@ -35,6 +35,7 @@ SRC_FILES = \
 	lexer/lexer_utils.c \
 	parser/parser.c \
 	expand/expand.c \
+	heredoc/heredoc.c \
 	envp/envp.c
 
 SRCS = $(addprefix $(SRC_PATH),$(SRC_FILES))
