@@ -10,8 +10,8 @@ int build_pipeline_from_tokens(t_shell *shell)
 {
     t_pipeline *pl;
     t_command current_cmd;
-    t_token *cur;
-    t_token *cur_next;
+    t_token *current;
+    t_token *next;
     int cmd_started;
     char *tmp;
     
@@ -29,20 +29,20 @@ int build_pipeline_from_tokens(t_shell *shell)
     init_command(&current_cmd);
 
     cmd_started = 0;
-    cur = shell->tokens.head;
+    current = shell->tokens.head;
 
-    while(cur)
+    while(current)
     {
-        printf("DEBUG: TOK_TYPE=%d, TOK_STR='%s'\n", cur->type, cur->raw_str);
-        cur_next = cur->next;
-        if (cur->type == TOK_WORD)
+        printf("DEBUG: TOK_TYPE=%d, TOK_STR='%s'\n", current->type, current->raw_str);
+        next = current->next;
+        if (current->type == TOK_WORD)
         {
             if (!cmd_started)
             {
                 init_command(&current_cmd);
                 cmd_started = 1;
             }
-            if (!append_arg(&current_cmd, cur->raw_str))
+            if (!append_arg(&current_cmd, current->raw_str))
             {
                 free_cmd(&current_cmd);
                 free_pipeline(pl);
@@ -50,17 +50,17 @@ int build_pipeline_from_tokens(t_shell *shell)
                 return (0);
             }
         }
-        else if (cur->type == TOK_REDIR_IN
-                || cur->type == TOK_REDIR_OUT
-                || cur->type == TOK_APPEND
-                || cur->type == TOK_HEREDOC)
+        else if (current->type == TOK_REDIR_IN
+                || current->type == TOK_REDIR_OUT
+                || current->type == TOK_APPEND
+                || current->type == TOK_HEREDOC)
         {
             if (!cmd_started)
             {
                 init_command(&current_cmd);
                 cmd_started = 1;
             }
-            if (!cur_next || cur_next->type != TOK_WORD)
+            if (!next || next->type != TOK_WORD)
             {
                 // syntax_error("expected filename after redirection");
                 free_cmd(&current_cmd);
@@ -68,9 +68,9 @@ int build_pipeline_from_tokens(t_shell *shell)
                 shell->exit_status = 258;
                 return (0);
             }
-            if (cur->type == TOK_REDIR_IN) // <
+            if (current->type == TOK_REDIR_IN) // <
             {
-                tmp = ft_strdup(cur_next->raw_str);
+                tmp = ft_strdup(next->raw_str);
                 if (!tmp)
                 {
                     free_cmd(&current_cmd);
@@ -81,9 +81,9 @@ int build_pipeline_from_tokens(t_shell *shell)
                 free(current_cmd.infile);
                 current_cmd.infile = tmp;
             }
-            else if (cur->type == TOK_HEREDOC) // <<
+            else if (current->type == TOK_HEREDOC) // <<
             {
-                tmp = ft_strdup(cur_next->raw_str);
+                tmp = ft_strdup(next->raw_str);
                 if (!tmp)
                 {
                     free_cmd(&current_cmd);
@@ -97,7 +97,7 @@ int build_pipeline_from_tokens(t_shell *shell)
             }
             else
             {
-                tmp = ft_strdup(cur_next->raw_str);
+                tmp = ft_strdup(next->raw_str);
                 if (!tmp)
                 {
                     free_cmd(&current_cmd);
@@ -108,16 +108,16 @@ int build_pipeline_from_tokens(t_shell *shell)
                 free(current_cmd.outfile);
                 current_cmd.outfile = tmp;
 
-                if (cur->type == TOK_REDIR_OUT) // >
+                if (current->type == TOK_REDIR_OUT) // >
                     current_cmd.append = 0;
-                if (cur->type == TOK_APPEND) // >>
+                if (current->type == TOK_APPEND) // >>
                     current_cmd.append = 1;
             }
-            cur = cur_next;
+            current = next;
         }
-        else if (cur->type == TOK_PIPE)
+        else if (current->type == TOK_PIPE)
         {
-            if (!cmd_started || !cur_next)
+            if (!cmd_started || !next)
             {
                 // syntax_error();
                 free_cmd(&current_cmd);
@@ -141,7 +141,7 @@ int build_pipeline_from_tokens(t_shell *shell)
             shell->exit_status = 258;
             return (0);
         }
-        cur = cur->next;
+        current = current->next;
     }
 
     if (cmd_started)

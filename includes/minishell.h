@@ -105,17 +105,15 @@ typedef struct s_command
 	char *infile; // < 
 	char *outfile; // > or >>
 	int append; // 0 for > and 1 for >>
-
 	char *heredoc_limiter;
 	int has_heredoc; // 0 or 1
-
 } t_command;
 
 
 typedef struct s_pipeline
 {
-	size_t count;
 	t_command *cmds;
+	size_t count;
 } t_pipeline;
 
 
@@ -144,7 +142,7 @@ int    init_env_var_list(t_env_var_list *list, char **envp);
 // t_var  *find_var(t_var_list *list, const char *name);
 // int     set_var(t_var_list *list, const char *name, const char *value);   // export
 // int     unset_var(t_var_list *list, const char *name);                    // unset
-char   *get_var_value(const char *name, t_env_var_list *var_list);                // my_getenv
+char   *get_var_value(t_env_var_list *var_list, const char *var);                // my_getenv
 // char  **build_envp(t_var_list *list);                                     // for execve
 void    free_var_list(t_env_var_list *list);
 

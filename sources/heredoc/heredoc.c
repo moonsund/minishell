@@ -21,8 +21,7 @@ int process_heredocs(t_shell *shell)
                     return (0);
 
                 if (shell->pipeline->cmds[i].heredoc_limiter
-                    && ft_strcmp(line,
-                        shell->pipeline->cmds[i].heredoc_limiter) == 0)
+                    && ft_strcmp(line, shell->pipeline->cmds[i].heredoc_limiter) == 0)
                 {
                     free(line);
                     break;

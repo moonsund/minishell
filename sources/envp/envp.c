@@ -4,7 +4,7 @@ int    init_env_var_list(t_env_var_list *list, char **envp);
 // t_var  *find_var(t_env_var_list *list, const char *name);
 // int     set_var(t_env_var_list *list, const char *name, const char *value);   // export
 // int     unset_var(t_env_var_list *list, const char *name);                    // unset
-char   *get_var_value(const char *name, t_env_var_list *var_list);                // my_getenv
+char   *get_var_value(t_env_var_list *var_list, const char *var);                // my_getenv
 // char  **build_envp(t_env_var_list *list);                                     // before execve
 void    free_var_list(t_env_var_list *list);
 
@@ -63,18 +63,18 @@ int    init_env_var_list(t_env_var_list *list, char **envp)
 	return (1);
 }
 
-char   *get_var_value(const char *name, t_env_var_list *var_list)
+char   *get_var_value(t_env_var_list *var_list, const char *var)
 {
     t_var *cur;
 
-    if (!var_list || !name)
+    if (!var_list || !var)
         return (NULL);
 
     cur = var_list->head;
 
     while (cur)
     {
-        if (ft_strcmp(cur->name, name) == 0)
+        if (ft_strcmp(cur->name, var) == 0)
             return (cur->value);
         cur = cur->next;
     }

@@ -68,6 +68,7 @@ int main(int argc, char **argv, char **envp)
 		shell.pipeline = NULL;
 		free_tokens(&shell.tokens);
 		free(line);
+		// free_everything(shell);
 	}
 
 	return (EXIT_SUCCESS);

@@ -4,7 +4,6 @@ static bool token_needs_expansion(t_token *token);
 static int expand_word_token(t_token *token, t_env_var_list *env_vars);
 static char *get_last_status_string();
 static int append_str(char *str, t_buf *buf, t_qmark quote_mark);
-char *get_var_value(const char *name, t_env_var_list *env_vars);
 
 int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars)
 {    
@@ -16,7 +15,8 @@ int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars)
     cur = tokens->head;
     while (cur)
     {
-        if (cur->type == TOK_WORD)
+        if (cur->type == TOK_WORD) 
+            // is_heredoc_limiter = (prev && prev->type == TOK_HEREDOC);
             expand_word_token(cur, env_vars);
         cur = cur->next;
     }
@@ -30,8 +30,8 @@ static int expand_word_token(t_token *token, t_env_var_list *env_vars)
     size_t j;
     size_t start;
     char *val;
-    size_t val_length;
-    char *name;
+    size_t var_length;
+    char *var_name;
 
     if (!token || token->type != TOK_WORD || !token->quotes_map || !token->raw_str)
         return (0);
@@ -88,17 +88,17 @@ static int expand_word_token(t_token *token, t_env_var_list *env_vars)
                 continue;
             }
 
-            val_length = j - start;
+            var_length = j - start;
 
-            name = (char *)malloc(sizeof(char) * (val_length + 1));
-            if (!name)
+            var_name = (char *)malloc(sizeof(char) * (var_length + 1));
+            if (!var_name)
                 return (0);
             
-            ft_memcpy(name, token->raw_str + start, val_length);
-            name[val_length] = '\0';
+            ft_memcpy(var_name, token->raw_str + start, var_length);
+            var_name[var_length] = '\0';
 
-            val = get_var_value(name, env_vars);
-            free(name);
+            val = get_var_value(env_vars, var_name);
+            free(var_name);
 
             if (val && val[0] != '\0')
             {

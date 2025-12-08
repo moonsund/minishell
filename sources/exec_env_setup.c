@@ -35,8 +35,8 @@ t_env	*create_new_environment_variable(char *key, char *value)
 	new_env_var = malloc(sizeof(t_env));						// Ⓜ️
 	if (!new_env_var)
 		return (NULL);
-	new_env_var->variable_name = ft_strdup(key);
-	new_env_var->variable_data = ft_strdup(value);
+	new_env_var->variable_name = ft_strdup(key);  // malloc
+	new_env_var->variable_data = ft_strdup(value);  // malloc
 	new_env_var->next = NULL;
 	return (new_env_var);
 }
@@ -90,7 +90,7 @@ char	*fetch_value_from_key(t_env **head, char *key)
 
 void	delete_env_var(t_env **head, char *var_to_delete)
 {
-	if (head == NULL || !var_to_delete)
+	if (head == NULL || !var_to_delete) // (!head || !*head || !var_to_delete)
 		return ;
 	t_env	*copy_head;
 	t_env	*backup_previous;
@@ -102,7 +102,7 @@ void	delete_env_var(t_env **head, char *var_to_delete)
 	{
 		if(str_comp(copy_head->variable_name, var_to_delete) == 0)
 		{
-			backup_previous->next = copy_head->next;
+			backup_previous->next = copy_head->next; // NULL->next == copy_head->next;
 			del_string(copy_head->variable_name);
 			del_string(copy_head->variable_data);
 			free(copy_head);
@@ -110,7 +110,7 @@ void	delete_env_var(t_env **head, char *var_to_delete)
 			return;
 		}
 		backup_previous = copy_head;
-		copy_head = copy_head->next;
+		copy_head = copy_head->next; // useless
 	}
 	ft_printf("Environment variable not found\n");				// Keep for debug
 }
@@ -144,16 +144,17 @@ void	free_all_vars(t_env **head)
 {
 	if (head == NULL)
 		return ;
-	t_env	*copy_head;
-	t_env	*backup_next;
+	t_env	*copy_head; // cur
+	t_env	*backup_next; // next or cur_next
 	copy_head = *head;
 
 	while (copy_head != NULL)
 	{
 		backup_next = copy_head->next;
-		del_string(copy_head->variable_name);
+		del_string(copy_head->variable_name); // free()
 		del_string(copy_head->variable_data);
 		free(copy_head);
-		copy_head = copy_head->next;
+		copy_head = copy_head->next; // cur = next;
 	}
+	// *head = NULL;
 }

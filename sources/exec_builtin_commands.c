@@ -3,10 +3,10 @@
 
 // Put all functions signatures here when done (Leo's way)
 
-void	execute_built_in_commands(t_shell minishell/*, TBD */)
+void	execute_built_in_commands(t_shell minishell/*, TBD */) // *minishell
 {
 	char	*current_working_directory;
-	current_working_directory = ft_calloc(sizeof(char), PATH_MAX);						// Ⓜ️
+	current_working_directory = ft_calloc(sizeof(char), PATH_MAX);		// calloc dont need everytime		// Ⓜ️
 	getcwd(current_working_directory, PATH_MAX);
 
 	if(str_comp(minishell.tokens.head->raw_str, "echo") == 0)
