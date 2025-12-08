@@ -7,7 +7,7 @@ void free_tokens(t_token_list *list)
 	t_token *cur;
 	t_token *next;
 
-	if (!list || list->head == NULL)
+	if (!list)
 		return ;
 
 	cur = list->head;
@@ -19,5 +19,6 @@ void free_tokens(t_token_list *list)
 		cur = next;
 	}
 	list->head = NULL;
+	list->tail = NULL;
 	list->count = 0;
 }

@@ -1,6 +1,10 @@
 #include "minishell.h"
 
+static int init_shell(t_shell *shell, char **envp);
+int build_pipeline_from_tokens(t_shell *shell);
+int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars);
 static void print_token_list(t_token_list *list);
+static void print_pipe_line(t_pipeline *pipeline);
 
 int main(int argc, char **argv, char **envp)
 {
@@ -10,26 +14,24 @@ int main(int argc, char **argv, char **envp)
 	shell.exit_status = 1;
 	(void)argc;
 	(void)argv;
-	(void)envp;
 
+	if (!init_shell(&shell, envp))
+		return (EXIT_FAILURE);
 
 	setup_signals();
-	// init();
-	shell.tokens.head = NULL;
-	shell.tokens.count = 0;
-	shell.pipeline = NULL;
+	
 	while(true) // or exit_status
 	{
 		line = readline("minishell> ");
 		if (!line)
 		{
-			ft_printf("exit\n");
+			printf("exit\n");
 			break;
 		}
 
 		if (!is_empty(line))
 			add_history(line);
-		printf("[readline_debug]: \"%s\"\n", line);
+		printf("[readline_debug]: \"%s\"\n", line); // for debugging, to be deleted
 
 		if (!tokenize_with_qmap(line, &shell.tokens))
 		{
@@ -38,16 +40,49 @@ int main(int argc, char **argv, char **envp)
 			free(line);
 			continue;
 		}
-		print_token_list(&shell.tokens);		// for debugging, to be deleted (note from Sophie : super useful ! Please don't delete yet ^^')
+		print_token_list(&shell.tokens);	// for debugging, to be deleted (note from Sophie : super useful ! Please don't delete yet ^^')
 
-		// shell.pipeline = parse_command(shell.tokens);
-		check_command_type_and_execute(shell);												// Exec testing starts here
+		expand_tokens(&shell.tokens, &shell.env_vars);
+
+		print_token_list(&shell.tokens); // for debugging, to be deleted
+
+		if (!build_pipeline_from_tokens(&shell))
+		{
+			free_tokens(&shell.tokens);
+			free(line);
+			shell.exit_status = 258;
+			continue;
+		}
+		
+		print_pipe_line(shell.pipeline);	// for debugging, to be deleted
+
+		if (!process_heredocs(&shell))
+		{
+			free_tokens(&shell.tokens);
+			free(line);
+			shell.exit_status = 258;
+			continue;
+		}
+
+		// check_command_type_and_execute(shell);	// Exec testing starts here
+		shell.pipeline = NULL;
 		free_tokens(&shell.tokens);
+		free(line);
 	}
 
 	return (EXIT_SUCCESS);
 }
 
+static int init_shell(t_shell *shell, char **envp)
+{
+	shell->tokens.head = NULL;
+	shell->tokens.count = 0;
+	shell->pipeline = NULL;
+
+	if (!init_env_var_list(&shell->env_vars, envp))
+		return (0);
+	return (1);
+}
 
 static void print_token_list(t_token_list *tokens) // for debugging, to be deleted
 {
@@ -83,4 +118,41 @@ static void print_token_list(t_token_list *tokens) // for debugging, to be delet
 		token = token->next;
 		idx++;
 	}
+}
+
+
+static void print_pipe_line(t_pipeline *pipeline) // for debugging, to be deleted
+{
+    size_t i;
+    size_t j;
+
+    if (!pipeline || !pipeline->cmds)
+        return;
+
+    for (i = 0; i < pipeline->count; i++)
+    {
+        printf("Command %zu:\n", i);
+
+        if (!pipeline->cmds[i].argv)
+        {
+            printf("  (no args)\n");
+            continue;
+        }
+
+        j = 0;
+        while (pipeline->cmds[i].argv[j])
+        {
+            printf("  arg[%zu]: %s\n", j, pipeline->cmds[i].argv[j]);
+            j++;
+        }
+
+		if (pipeline->cmds[i].infile)
+			printf("infile: %s\n", pipeline->cmds[i].infile);
+		if (pipeline->cmds[i].outfile)
+			printf("outfile: %s\n", pipeline->cmds[i].outfile);
+		printf("append: %i\n", pipeline->cmds[i].append);
+		if (pipeline->cmds[i].heredoc_limiter)
+			printf("heredoc_limiter: %s\n", pipeline->cmds[i].heredoc_limiter);
+		printf("has_heredoc: %i\n", pipeline->cmds[i].has_heredoc);
+    }
 }
