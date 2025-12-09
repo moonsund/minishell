@@ -40,10 +40,12 @@ int main(int argc, char **argv, char **envp)
 			free(line);
 			continue;
 		}
+		printf("\n[tokens_list_debug]:\n");
 		print_token_list(&shell.tokens);	// for debugging, to be deleted (note from Sophie : super useful ! Please don't delete yet ^^')
 
 		expand_tokens(&shell.tokens, &shell.env_vars);
 
+		printf("\n[expanded_tokens_list_debug]:\n");
 		print_token_list(&shell.tokens); // for debugging, to be deleted
 
 		if (!build_pipeline_from_tokens(&shell))
@@ -54,6 +56,7 @@ int main(int argc, char **argv, char **envp)
 			continue;
 		}
 		
+		printf("\n[pipelines_debug]:\n");
 		print_pipe_line(shell.pipeline);	// for debugging, to be deleted
 
 		if (!process_heredocs(&shell))
@@ -135,17 +138,16 @@ static void print_pipe_line(t_pipeline *pipeline) // for debugging, to be delete
         printf("Command %zu:\n", i);
 
         if (!pipeline->cmds[i].argv)
-        {
             printf("  (no args)\n");
-            continue;
-        }
-
-        j = 0;
-        while (pipeline->cmds[i].argv[j])
-        {
-            printf("  arg[%zu]: %s\n", j, pipeline->cmds[i].argv[j]);
-            j++;
-        }
+		else
+		{
+			j = 0;
+			while (pipeline->cmds[i].argv[j])
+			{
+				printf("  arg[%zu]: %s\n", j, pipeline->cmds[i].argv[j]);
+				j++;
+			}
+		}
 
 		if (pipeline->cmds[i].infile)
 			printf("infile: %s\n", pipeline->cmds[i].infile);
@@ -155,5 +157,6 @@ static void print_pipe_line(t_pipeline *pipeline) // for debugging, to be delete
 		if (pipeline->cmds[i].heredoc_limiter)
 			printf("heredoc_limiter: %s\n", pipeline->cmds[i].heredoc_limiter);
 		printf("has_heredoc: %i\n", pipeline->cmds[i].has_heredoc);
+		printf("heredoc_expand_needed: %i\n", pipeline->cmds[i].heredoc_expand_needed);
     }
 }

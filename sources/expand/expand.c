@@ -7,18 +7,23 @@ static int append_str(char *str, t_buf *buf, t_qmark quote_mark);
 
 int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars)
 {    
+    t_token *prev;
     t_token *cur;
     
     if (!tokens)
         return (0);
     
+    prev = NULL;
     cur = tokens->head;
     while (cur)
     {
-        if (cur->type == TOK_WORD) 
-            // is_heredoc_limiter = (prev && prev->type == TOK_HEREDOC);
-            expand_word_token(cur, env_vars);
-        cur = cur->next;
+        if (cur->type == TOK_WORD)
+        {
+            if (!prev || prev->type != TOK_HEREDOC)
+                expand_word_token(cur, env_vars);
+        }
+            prev = cur;
+            cur = cur->next;
     }
     return (1);
 }

@@ -5,6 +5,7 @@ static int append_arg(t_command *cmd, char *arg);
 static int append_cmd(t_pipeline *pl, t_command cmd);
 static void free_cmd(t_command *cmd);
 static void free_pipeline(t_pipeline *pl);
+static int token_has_any_quotes(t_token *token);
 
 int build_pipeline_from_tokens(t_shell *shell)
 {
@@ -83,13 +84,32 @@ int build_pipeline_from_tokens(t_shell *shell)
             }
             else if (current->type == TOK_HEREDOC) // <<
             {
-                tmp = ft_strdup(next->raw_str);
-                if (!tmp)
+                if (token_has_any_quotes(next))
                 {
-                    free_cmd(&current_cmd);
-                    free_pipeline(pl);
-                    shell->exit_status = 2;
-                    return (0);
+                    tmp = (char *)malloc(sizeof(char) * (next->length - 1));
+                    if (!tmp)
+                    {
+                        free_cmd(&current_cmd);
+                        free_pipeline(pl);
+                        shell->exit_status = 2;
+                        return (0);
+                    }
+                    
+                    ft_memcpy(tmp, next->raw_str + 1, next->length - 2);
+                    tmp[next->length - 2] = '\0';
+                    current_cmd.heredoc_expand_needed = 0;
+                }
+                else
+                {
+                    tmp = ft_strdup(next->raw_str);
+                    if (!tmp)
+                    {
+                        free_cmd(&current_cmd);
+                        free_pipeline(pl);
+                        shell->exit_status = 2;
+                        return (0);
+                    }
+                    current_cmd.heredoc_expand_needed = 1;
                 }
                 free(current_cmd.heredoc_limiter);
                 current_cmd.heredoc_limiter = tmp;
@@ -280,4 +300,18 @@ static void free_pipeline(t_pipeline *pl)
     }
     free(pl->cmds);
     free(pl);
+}
+
+static int token_has_any_quotes(t_token *token)
+{
+    size_t i = 0;
+    if (!token || !token->quotes_map)
+        return 0;
+    while (i < token->length)
+    {
+        if (token->quotes_map[i] == Q_SQ || token->quotes_map[i] == Q_DQ)
+            return 1;
+        i++;
+    }
+    return 0;
 }

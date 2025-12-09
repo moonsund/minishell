@@ -14,6 +14,8 @@
 #include <signal.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <fcntl.h>   // open
+#include <unistd.h>  // write, close
 
 #include <sys/types.h>	// opendir
 #include <dirent.h>		// opendir
@@ -107,8 +109,8 @@ typedef struct s_command
 	int append; // 0 for > and 1 for >>
 	char *heredoc_limiter;
 	int has_heredoc; // 0 or 1
+	int heredoc_expand_needed; // 0 or 1
 } t_command;
-
 
 typedef struct s_pipeline
 {
