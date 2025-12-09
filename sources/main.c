@@ -19,7 +19,7 @@ int main(int argc, char **argv, char **envp)
 		return (EXIT_FAILURE);
 
 	setup_signals();
-	
+
 	while(true) // or exit_status
 	{
 		line = readline("minishell> ");
@@ -55,7 +55,7 @@ int main(int argc, char **argv, char **envp)
 			shell.exit_status = 258;
 			continue;
 		}
-		
+
 		printf("\n[pipelines_debug]:\n");
 		print_pipe_line(shell.pipeline);	// for debugging, to be deleted
 
@@ -67,7 +67,7 @@ int main(int argc, char **argv, char **envp)
 			continue;
 		}
 
-		// check_command_type_and_execute(shell);	// Exec testing starts here
+		check_command_type_and_execute(&shell);	// Exec testing starts here
 		shell.pipeline = NULL;
 		free_tokens(&shell.tokens);
 		free(line);

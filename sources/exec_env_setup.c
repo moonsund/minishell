@@ -1,6 +1,8 @@
 #include "minishell.h"
 #include "libft.h"
 
+// FILE TO DELETE - Handled better by Leo
+
 // Put all functions signatures here when done (Leo's way)
 
 // Note for later - Convert the linked list to a char ** when using execve (simpler)
@@ -21,7 +23,7 @@ t_env	**build_environment(void)
 		add_env_var_to_list(environment, new);
 		i++;
 	}
-	return(environment);
+	return (environment);
 }
 
 t_env	*create_new_environment_variable(char *key, char *value)
@@ -29,22 +31,20 @@ t_env	*create_new_environment_variable(char *key, char *value)
 	t_env	*new_env_var;
 	if (!key || !value)
 	{
-		ft_printf("Variable Name and/or Data missing\n");
+		printf("Variable Name and/or Data missing\n");
 		return (NULL);
 	}
 	new_env_var = malloc(sizeof(t_env));						// Ⓜ️
 	if (!new_env_var)
 		return (NULL);
-	new_env_var->variable_name = ft_strdup(key);  // malloc
-	new_env_var->variable_data = ft_strdup(value);  // malloc
+	new_env_var->variable_name = ft_strdup(key);
+	new_env_var->variable_data = ft_strdup(value);
 	new_env_var->next = NULL;
 	return (new_env_var);
 }
 
 void	add_env_var_to_list(t_env **head, t_env *new)
 {
-	t_env	*last;
-
 	if(!new)
 		return ;
 	if (*head == NULL)
@@ -55,7 +55,7 @@ void	add_env_var_to_list(t_env **head, t_env *new)
 	t_env	*backup_ptr = *head;
 	while (backup_ptr->next != NULL)
 	{
-		if(str_comp(backup_ptr->variable_name, new->variable_name) == 0)
+		if(ft_strcmp(backup_ptr->variable_name, new->variable_name) == 0)
 		{
 			free(backup_ptr->variable_data);
 			backup_ptr->variable_data = ft_strdup(new->variable_data);
@@ -79,18 +79,18 @@ char	*fetch_value_from_key(t_env **head, char *key)
 
 	while (copy_head != NULL)
 	{
-		if(str_comp(copy_head->variable_name, key) == 0)
+		if(ft_strcmp(copy_head->variable_name, key) == 0)
 		{
-			return(copy_head->variable_data);
+			return (copy_head->variable_data);
 		}
 		copy_head = copy_head->next;
 	}
-	return(NULL);
+	return (NULL);
 }
 
 void	delete_env_var(t_env **head, char *var_to_delete)
 {
-	if (head == NULL || !var_to_delete) // (!head || !*head || !var_to_delete)
+	if (head == NULL || !var_to_delete)
 		return ;
 	t_env	*copy_head;
 	t_env	*backup_previous;
@@ -100,9 +100,9 @@ void	delete_env_var(t_env **head, char *var_to_delete)
 
 	while (copy_head != NULL)
 	{
-		if(str_comp(copy_head->variable_name, var_to_delete) == 0)
+		if(ft_strcmp(copy_head->variable_name, var_to_delete) == 0)
 		{
-			backup_previous->next = copy_head->next; // NULL->next == copy_head->next;
+			backup_previous->next = copy_head->next;
 			del_string(copy_head->variable_name);
 			del_string(copy_head->variable_data);
 			free(copy_head);
@@ -110,9 +110,9 @@ void	delete_env_var(t_env **head, char *var_to_delete)
 			return;
 		}
 		backup_previous = copy_head;
-		copy_head = copy_head->next; // useless
+		copy_head = copy_head->next;
 	}
-	ft_printf("Environment variable not found\n");				// Keep for debug
+	printf("Environment variable not found\n");				// Keep for debug
 }
 
 void	del_string(char *param)
@@ -121,40 +121,39 @@ void	del_string(char *param)
 		free(param);
 }
 
-int		str_comp(char *s1, char *s2)
+int		ft_strcmp(char *s1, char *s2)
 {
 	int	i = 0;
 	if(!s1 || !s2)
-		return(-1);
+		return (-1);
 	if(ft_strlen(s1) != ft_strlen(s2))
-		return(-1);
+		return (-1);
 
 	while (s1[i] != '\0')
 	{
 		if(s1[i] != s2[i])
 		{
-			return(-1);
+			return (-1);
 		}
 		i++;
 	}
-	return(0);
+	return (0);
 }
 
 void	free_all_vars(t_env **head)
 {
 	if (head == NULL)
 		return ;
-	t_env	*copy_head; // cur
-	t_env	*backup_next; // next or cur_next
+	t_env	*copy_head;
+	t_env	*backup_next;
 	copy_head = *head;
 
 	while (copy_head != NULL)
 	{
 		backup_next = copy_head->next;
-		del_string(copy_head->variable_name); // free()
+		del_string(copy_head->variable_name);
 		del_string(copy_head->variable_data);
 		free(copy_head);
-		copy_head = copy_head->next; // cur = next;
+		copy_head = copy_head->next;
 	}
-	// *head = NULL;
 }

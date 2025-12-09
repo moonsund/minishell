@@ -14,13 +14,19 @@
 #include <signal.h>
 #include <readline/readline.h>
 #include <readline/history.h>
-#include <fcntl.h>   // open
-#include <unistd.h>  // write, close
-
+#include <fcntl.h>		// open
 #include <sys/types.h>	// opendir
 #include <dirent.h>		// opendir
+#include <sys/stat.h>	// open
 
-// #include <ft_printf.h>
+// Easier Debug
+# define NC "\e[0m"
+# define BLUE "\e[34m"
+# define MAGENTA "\e[35m"
+# define YELLOW "\e[33m"
+# define RED "\e[31m"
+# define GREEN "\e[32m"
+# define CYAN "\e[36m"
 
 typedef enum e_token_type
 {
@@ -73,13 +79,6 @@ typedef struct s_token_list
 	size_t count;
 } t_token_list;
 
-typedef struct s_temp_command				// To delete after code matching
-{
-	char					**full_command;	// Exec requirement
-	struct s_temp_command	*next;
-	// demander a Leo pour infiles/outfiles - Qu'est ce qu'il va me donner du parsing pour que je bosse avec une redirection par exemple
-}	t_temp_command;
-
 typedef struct s_env
 {
 	char			*variable_name;
@@ -103,13 +102,13 @@ typedef struct s_env_var_list
 
 typedef struct s_command
 {
-	char **argv; // null-terminated array of arguments
-	char *infile; // < 
-	char *outfile; // > or >>
-	int append; // 0 for > and 1 for >>
+	char **argv;				// null-terminated array of arguments
+	char *infile;				// <
+	char *outfile;				// > or >>
+	int append;					// 0 for > and 1 for >>
 	char *heredoc_limiter;
-	int has_heredoc; // 0 or 1
-	int heredoc_expand_needed; // 0 or 1
+	int has_heredoc;			// 0 or 1
+	int heredoc_expand_needed;	// 0 or 1
 } t_command;
 
 typedef struct s_pipeline
@@ -122,15 +121,13 @@ typedef struct s_pipeline
 typedef struct s_shell
 {
 	int				exit_status;
-	char			**command_array;		// To delete TBC
-	t_temp_command	all_commands;			// To delete after code matching
-	t_env_var_list env_vars;				// envp vars saved in linked list 
-	t_env			**env_variables;		// Exec requirement
-	t_token_list	tokens;					// The one to consider ? TBC
-	t_pipeline		*pipeline;
+	t_env_var_list	env_vars;				// envp vars saved in linked list
+	// t_env			**env_variables;		// TO DELETE
+	t_token_list	tokens;
+	t_pipeline		*pipeline;				// Only base to consider for exec
 
     // t_ast ast;
-    
+
 }	t_shell;
 
 // ------------------------------------------------------------------------------------------ From Leo
@@ -190,36 +187,35 @@ void free_tokens(t_token_list *list);
 void setup_signals(void);
 
 // ------------------------------------------------------------------------------------------ Exec functions
-// utils
-int		str_comp(char *s1, char *s2);
-
 // pre exec functions
-void	check_command_type_and_execute(t_shell minishell);
-void	execute_built_in_commands(t_shell minishell);
-// void	execute_external_commands(t_shell minishell);
+void	check_command_type_and_execute(t_shell *minishell);
+void	execute_built_in_commands(t_shell *minishell);
+void	execute_external_commands(t_shell *minishell);
 
 // exec built in functions
-void	execute_echo(t_token *first_command, t_shell minishell);
-void	execute_cd(char *current_working_directory, t_token *first_command);
+char	*fetch_current_working_directory(void);
+void	execute_echo(t_token *first_command);
+void	execute_cd(t_token *first_command);
 void	execute_pwd(char *current_working_directory);
-void	execute_export(t_shell minishell);
-void	execute_unset(t_shell minishell);
-void	execute_env(t_shell minishell);
-void	execute_exit(t_shell minishell);
+// void	execute_export(t_shell *minishell);			// Leo handles
+// void	execute_unset(t_shell *minishell);			// Leo handles
+// void	execute_env(t_shell *minishell);			// Leo handles
+void	execute_exit(t_shell *minishell);
 
-// env related functions
-t_env	**build_environment(void);
-t_env	*create_new_environment_variable(char *key, char *value);
-char	*fetch_value_from_key(t_env **head, char *key);
+// env related functions -- TO DELETE
+// t_env	**build_environment(void);
+// t_env	*create_new_environment_variable(char *key, char *value);
+// char	*fetch_value_from_key(t_env **head, char *key);
 // t_env	*search_last_var(t_env *env_var);
-void	add_env_var_to_list(t_env **head, t_env *new);
-void	delete_env_var(t_env **head, char *var_to_delete);
+// void	add_env_var_to_list(t_env **head, t_env *new);
+// void	delete_env_var(t_env **head, char *var_to_delete);
 
 // exec external functions
-// char	**execute_ls(t_shell minishell, char *path);
+char	*build_path(char *file_name);
+int		fetch_fd(char *file_name);
+void	fork_and_exec(int fd_stdin, int fd_stdout, char	**execve_args);
 
 // Free functions
-void	del_string(char *param);
-void	free_all_vars(t_env **head);
-void	free_everything(t_shell minishell);
+// void	del_string(char *param);
+// void	free_all_vars(t_env **head);
 #endif
