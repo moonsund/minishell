@@ -14,6 +14,8 @@
 #include <signal.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <fcntl.h>   // open
+#include <unistd.h>  // write, close
 
 #include <sys/types.h>	// opendir
 #include <dirent.h>		// opendir
