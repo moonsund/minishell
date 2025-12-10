@@ -194,8 +194,8 @@ void	execute_external_commands(t_shell *minishell);
 
 // exec built in functions
 char	*fetch_current_working_directory(void);
-void	execute_echo(t_token *first_command);
-void	execute_cd(t_token *first_command);
+void	execute_echo(t_command *cmds);
+void	execute_cd(t_command *cmds);
 void	execute_pwd(char *current_working_directory);
 // void	execute_export(t_shell *minishell);			// Leo handles
 // void	execute_unset(t_shell *minishell);			// Leo handles

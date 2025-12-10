@@ -1,48 +1,51 @@
 #include "minishell.h"
 #include "libft.h"
 
-// Put all functions signatures here when done (Leo's way)
+void	execute_built_in_commands(t_shell *minishell);
+char	*fetch_current_working_directory(void);
+void	execute_echo(t_command *cmds);
+void	execute_exit(t_shell *minishell);
 
-void	execute_built_in_commands(t_shell *minishell/*, TBD */)
+void	execute_built_in_commands(t_shell *minishell)
 {
 	char	*current_working_directory;
 	current_working_directory = fetch_current_working_directory();												// Ⓜ️
 
-	if(ft_strcmp(minishell->tokens.head->raw_str, "echo") == 0)
+	if(ft_strcmp(minishell->pipeline->cmds->argv[0], "echo") == 0)
 	{
-		execute_echo(minishell->tokens.head);
+		execute_echo(minishell->pipeline->cmds);
 	}
-	else if(ft_strcmp(minishell->tokens.head->raw_str, "cd") == 0)
+	else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "cd") == 0)
 	{
-		printf("TestPrint cd command old path :\t%s\n", current_working_directory);
-		execute_cd(minishell->tokens.head);
-		// current_working_directory = ft_calloc(sizeof(char), PATH_MAX);					// Comment out for debug
-		// getcwd(current_working_directory, PATH_MAX);										// Comment out for debug
-		// printf("TestPrint cd command new path :\t%s\n\n", current_working_directory);	// Comment out for debug
+		printf("%sDEBUG - Old path :\t%s\n", GREEN, current_working_directory);
+		execute_cd(minishell->pipeline->cmds);
+		current_working_directory = ft_calloc(sizeof(char), PATH_MAX);						// Comment out for debug
+		getcwd(current_working_directory, PATH_MAX);										// Comment out for debug
+		printf("DEBUG - New path :\t%s\n\n%s", current_working_directory, NC);	// Comment out for debug
 	}
-	else if(ft_strcmp(minishell->tokens.head->raw_str, "pwd") == 0)
+	else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "pwd") == 0)
 	{
 		execute_pwd(current_working_directory);
 	}
-	// else if(ft_strcmp(minishell->tokens.head->raw_str, "export") == 0)
+	// else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "export") == 0)
 	// {
 	// 	// execute_env(minishell);															// Comment out for debug
 	// 	// write(1, "\n\n", 2);																// Comment out for debug
 	// 	execute_export(minishell);
 	// 	// execute_env(minishell);															// Comment out for debug
 	// }
-	// else if(ft_strcmp(minishell->tokens.head->raw_str, "unset") == 0)
+	// else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "unset") == 0)
 	// {
 	// 	// execute_env(minishell);															// Comment out for debug
 	// 	// write(1, "\n\n", 2);																// Comment out for debug
 	// 	execute_unset(minishell);
 	// 	// execute_env(minishell);															// Comment out for debug
 	// }
-	// else if(ft_strcmp(minishell->tokens.head->raw_str, "env") == 0)
+	// else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "env") == 0)
 	// {
 	// 	execute_env(minishell);
 	// }
-	else if(ft_strcmp(minishell->tokens.head->raw_str, "exit") == 0)
+	else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "exit") == 0)
 	{
 		free(current_working_directory);
 		execute_exit(minishell);
@@ -59,51 +62,47 @@ char	*fetch_current_working_directory(void)
 }
 
 // Subject : "echo with option -n"
-// Check if string has been placed in a char* , or if each word is a char* -> VERY PROBABLY - Check w/ Leonid
-void	execute_echo(t_token *first_command)
+void	execute_echo(t_command *cmds)
 {
 	bool	line_return = true;
-	// char	*cropped_var;
-	// char	*fetched_value;
-	first_command = first_command->next;
-	if(ft_strcmp(first_command->raw_str, "-n") == 0)
+	int		i = 1;
+
+	if (cmds->argv[1] && (ft_strcmp(cmds->argv[1], "-n")) == 0)
 	{
-		first_command = first_command->next;
 		line_return = false;
+		i++;
 	}
-	while (first_command != NULL)
+	while(cmds->argv[i])
 	{
-		// if (first_command->raw_str[0] == '$')				// Maybe there is an easier/shorter way, see with Leo if parsing can replace a key by its value
-		// {
-		// 	cropped_var = ft_strchr(first_command->raw_str, '$') + 1;
-		// 	fetched_value = fetch_value_from_key(minishell->env_variables, cropped_var);
-		// 	printf("%s", fetched_value);
-		// }
-		// else
-		// {
-			printf("%s", first_command->raw_str);
-		// }
-		first_command = first_command->next;
-		if(first_command)
+		printf("%s%s%s", GREEN, cmds->argv[i], NC);
+		fflush(0);									// Only for debug
+		if(cmds->argv[i+1])
+		{
 			write(1, " ", 1);
+		}
+		i++;
 	}
 	if(line_return == true)
 		write(1, "\n", 1);
+	line_return = true;
 }
 
 // Subject : "cd with only a relative or absolute path"
-void	execute_cd(t_token *first_command)
+void	execute_cd(t_command *cmds)
 {
-	if(chdir(first_command->next->raw_str) == -1)
+	if (cmds->argv[1])
 	{
-		perror("Error");											// Errno prints the rest of the message
+		if(chdir(cmds->argv[1]) == -1)
+		{
+			perror("Error");											// Errno prints the rest of the message
+		}
 	}
 }
 
 // Subject : "pwd with no options"
 void	execute_pwd(char *current_working_directory)
 {
-	printf("%s\n", current_working_directory);
+	printf("%s%s\n%s", GREEN, current_working_directory, NC);
 }
 
 // The 3 next cmds are handled better by Leo
@@ -139,10 +138,10 @@ void	execute_pwd(char *current_working_directory)
 // 	}
 // }
 
-// Subject : "exit with no options"
-// Memory leaks since I merged parsing & exec
+// Subject : "exit with no options
 void	execute_exit(t_shell *minishell)
 {
-	minishell->exit_status = 1;				// Check w/ Leo if ok
-	return;
+	minishell->exit_status = 0;
+	printf("%sAbout to exit -- Notes : Test w/ echo $? when implemented + Free memory\n%s", RED, NC);
+	exit(0);
 }
