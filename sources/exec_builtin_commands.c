@@ -21,7 +21,7 @@ void	execute_built_in_commands(t_shell *minishell)
 		execute_cd(minishell->pipeline->cmds);
 		current_working_directory = ft_calloc(sizeof(char), PATH_MAX);						// Comment out for debug
 		getcwd(current_working_directory, PATH_MAX);										// Comment out for debug
-		printf("DEBUG - New path :\t%s\n\n%s", current_working_directory, NC);	// Comment out for debug
+		printf("DEBUG - New path :\t%s\n%s", current_working_directory, NC);	// Comment out for debug
 	}
 	else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "pwd") == 0)
 	{
@@ -57,6 +57,11 @@ char	*fetch_current_working_directory(void)
 {
 	char	*current_working_directory;
 	current_working_directory = ft_calloc(sizeof(char), PATH_MAX);						// Ⓜ️
+	if (!current_working_directory)
+	{
+		perror("");
+		return(NULL);
+	}
 	getcwd(current_working_directory, PATH_MAX);
 	return (current_working_directory);
 }
