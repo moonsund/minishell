@@ -5,6 +5,7 @@ int build_pipeline_from_tokens(t_shell *shell);
 int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars);
 static void print_token_list(t_token_list *list);
 static void print_pipe_line(t_pipeline *pipeline);
+static int debug_print_heredoc_files(t_pipeline *pipeline);
 
 int main(int argc, char **argv, char **envp)
 {
@@ -66,6 +67,8 @@ int main(int argc, char **argv, char **envp)
 			shell.exit_status = 258;
 			continue;
 		}
+
+		debug_print_heredoc_files(shell.pipeline);
 		
 		// check_command_type_and_execute(shell);	// Exec testing starts here
 		shell.pipeline = NULL;
@@ -159,4 +162,41 @@ static void print_pipe_line(t_pipeline *pipeline) // for debugging, to be delete
 		printf("has_heredoc: %i\n", pipeline->cmds[i].has_heredoc);
 		printf("heredoc_expand_needed: %i\n", pipeline->cmds[i].heredoc_expand_needed);
     }
+}
+
+
+static int debug_print_heredoc_files(t_pipeline *pipeline) // for debugging, to be deleted
+{
+	size_t i;
+	int fd;
+	char buffer[1024];
+	ssize_t bytes;
+
+	i = 0;
+	while (i < pipeline->count)
+	{
+		if (pipeline->cmds[i].infile)
+		{
+			fd = open(pipeline[i].cmds->infile, O_RDONLY);
+			if (fd < 0)
+				return (0);
+			
+			while (true)
+			{
+				bytes = read(fd, buffer, sizeof(buffer));
+				if (bytes < 0)
+				{
+					close(fd);
+					return 0;
+				}
+				if (bytes == 0)
+					break;
+
+				write(1, buffer, bytes);
+			}
+			close(fd);
+		}
+		i++;
+	}
+	return (1);
 }
