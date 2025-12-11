@@ -195,6 +195,7 @@ static void init_command(t_command *cmd)
     cmd->heredoc_limiter = NULL;
     cmd->append = 0;
     cmd->has_heredoc = 0;
+    cmd->heredoc_expand_needed = 0;
 }
 
 static int append_arg(t_command *cmd, char *arg)
@@ -304,14 +305,16 @@ static void free_pipeline(t_pipeline *pl)
 
 static int token_has_any_quotes(t_token *token)
 {
-    size_t i = 0;
+    size_t i;
+    
+    i = 0;
     if (!token || !token->quotes_map)
-        return 0;
+        return (0);
     while (i < token->length)
     {
         if (token->quotes_map[i] == Q_SQ || token->quotes_map[i] == Q_DQ)
-            return 1;
+            return (1);
         i++;
     }
-    return 0;
+    return (0);
 }

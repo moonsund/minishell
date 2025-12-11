@@ -124,10 +124,11 @@ typedef struct s_shell
 	int				exit_status;
 	char			**command_array;		// To delete TBC
 	t_temp_command	all_commands;			// To delete after code matching
+	t_env			**env_variables;		// To be removed: link list is more convinient for handling
+
 	t_env_var_list env_vars;				// envp vars saved in linked list 
-	t_env			**env_variables;		// Exec requirement
 	t_token_list	tokens;					// The one to consider ? TBC
-	t_pipeline		*pipeline;
+	t_pipeline		*pipeline;				// array of commands ready to be executed 
 
     // t_ast ast;
     
@@ -151,6 +152,7 @@ void    free_var_list(t_env_var_list *list);
 
 // expand.c
 int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars);
+char *get_last_status_string();
 
 // parcer.c
 
@@ -181,7 +183,7 @@ void init_buffer(t_buf *buf);
 int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars);
 
 // heredoc
-int process_heredocs(t_shell *shell);
+int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars);
 
 // utils.c
 void free_tokens(t_token_list *list);

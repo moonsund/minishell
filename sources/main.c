@@ -59,14 +59,14 @@ int main(int argc, char **argv, char **envp)
 		printf("\n[pipelines_debug]:\n");
 		print_pipe_line(shell.pipeline);	// for debugging, to be deleted
 
-		if (!process_heredocs(&shell))
+		if (!process_heredoc(shell.pipeline, &shell.env_vars))
 		{
 			free_tokens(&shell.tokens);
 			free(line);
 			shell.exit_status = 258;
 			continue;
 		}
-
+		
 		// check_command_type_and_execute(shell);	// Exec testing starts here
 		shell.pipeline = NULL;
 		free_tokens(&shell.tokens);
