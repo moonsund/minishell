@@ -36,7 +36,7 @@ int boost_buf(t_buf *buf, size_t needed_length)
     {
         free(new_characters);
         free(new_quotes_map);
-        return 0;
+        return (0);
     }
 
     if (buf->characters)
@@ -51,5 +51,5 @@ int boost_buf(t_buf *buf, size_t needed_length)
     buf->characters = new_characters;
     buf->quotes_map = new_quotes_map;
     buf->capacity = new_capacity;
-    return 1;
+    return (1);
 }

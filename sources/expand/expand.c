@@ -2,7 +2,7 @@
 
 static bool token_needs_expansion(t_token *token);
 static int expand_word_token(t_token *token, t_env_var_list *env_vars);
-static char *get_last_status_string();
+char *get_last_status_string();
 static int append_str(char *str, t_buf *buf, t_qmark quote_mark);
 
 int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars)
@@ -68,7 +68,7 @@ static int expand_word_token(t_token *token, t_env_var_list *env_vars)
             if (token->raw_str[start] == '?')
             {
                 val = get_last_status_string();
-                if (!val || !append_str(val, &buf, Q_NONE))
+                if (!val || !append_str(val, &buf, Q_NONE)) // (&buf, val, Q_NONE)
                 {
                     free_buf(&buf);
                     return (0);
@@ -160,7 +160,7 @@ static int append_str(char *str, t_buf *buf, t_qmark quote_mark)
 }
 
 
-static char *get_last_status_string()  // using global variable?
+char *get_last_status_string()  // using global variable?
 {
     return NULL;
 }
