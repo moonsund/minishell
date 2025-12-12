@@ -78,21 +78,21 @@ void	fork_and_exec(int fd_stdin, int fd_stdout, char	**execve_args)
 	{
 		printf("%sDEBUG * From Child - PID : %d - Parent PID : %d\n%s", CYAN, getpid(), getppid(), NC);
 		printf("%sDEBUG * Param FD_in : %d - Param FD_out : %d - Command : %s\n%s", CYAN, fd_stdin, fd_stdout, execve_args[0], NC);
-		printf("%s", GREEN);
-		fflush(0);				// Remove after debug
 		if(fd_stdin != STDIN_FILENO)
 		{
-			printf("%sNew infile - FD %d is now FD 0\n%s", YELLOW, fd_stdin, NC);
-			dup2(fd_stdin, STDOUT_FILENO);
+			printf("%sNew infile - FD %d is now FD 0 *** Stdout theorically unchanged : %d\n%s", YELLOW, fd_stdin, fd_stdout, NC);
+			dup2(fd_stdin, STDIN_FILENO);
 			close(fd_stdin);					// Ok to close because it's been duplicated and it's now 0
 		}
 		if(fd_stdout != STDOUT_FILENO)
 		{
-			printf("%sNew outfile - FD %d is now FD 1\n%s", YELLOW, fd_stdout, NC);
+			printf("%sNew outfile - FD %d is now FD 1 *** Stdin theorically unchanged : %d\n%s", YELLOW, fd_stdout, fd_stdin, NC);
 			dup2(fd_stdout, STDOUT_FILENO);
 			// From here, nothing will printed on monitor because FD has changed
 			close(fd_stdout);					// Ok to close because it's been duplicated and it's now 1
 		}
+		printf("%s", GREEN);	// So that the official output stands out
+		fflush(0);				// Remove after debug
 		if (execve(execve_args[0], execve_args, envp) == -1)
 		{
 			perror("------------------ Error");
@@ -102,13 +102,12 @@ void	fork_and_exec(int fd_stdin, int fd_stdout, char	**execve_args)
 	}
 }
 
-// ls > test.txt
 int		fetch_fd(char *file_name)
 {
 	int		fd;
 	char	*file_path = NULL;
 	file_path = build_path(file_name);
-	fd = open(file_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);					// HYPER IMPORTANT - Tout se joue ici
+	fd = open(file_path, O_CREAT | O_TRUNC | O_RDWR/* , 0666 */);		// HYPER IMPORTANT - Tout se joue dans les flags - 0666 = permissions
 	free(file_path);
 	if (fd == -1)
 	{
