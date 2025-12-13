@@ -23,7 +23,9 @@ void	execute_external_commands(t_shell *minishell)
 	int		execve_args_count = 0;
 	// Option for later : construire argv dans une boucle (mais requiert une realloc a chaque ajout TBC)
 
-	while (minishell->pipeline->cmds->argv[i])
+	int	commands_left = minishell->pipeline->count;
+
+	while(commands_left > 0)									// 🟣 |				ls | grep sources
 	{
 		if (!cmd_binary_found)
 		{
@@ -32,30 +34,41 @@ void	execute_external_commands(t_shell *minishell)
 			cmd_binary_found = true;															// Maybe useless ?
 			execve_args_count++;
 			i++;
+			while (all_commands->argv[i])														// (If applicable) Flag(s)
+			{
+				execve_args[execve_args_count] = ft_strdup(all_commands->argv[i]);
+				execve_args_count++;
+				i++;
+			}
 		}
-		if (all_commands->argv[i])
+		if(all_commands->infile)							// 🟣 <				wc -l < doc		sort < doc
 		{
-			execve_args[execve_args_count] = ft_strdup(all_commands->argv[i]);				// (If applicable) Flag
-			execve_args_count++;
+			fd_in = fetch_fd(all_commands->infile, false);
 		}
-		if(all_commands->infile)					// 🟣 <				wc -l < doc		sort < doc
+		if(all_commands->outfile)							// 🟣 >				ls > doc
 		{
-			fd_in = fetch_fd(all_commands->infile);
-			execve_args_count++;
+			if (all_commands->append == 1)					// 🟣 >>			ls >> doc
+			{
+				fd_out = fetch_fd(all_commands->outfile, true);
+			}
+			else
+			{
+				fd_out = fetch_fd(all_commands->outfile, false);
+			}
 		}
-		if(all_commands->outfile)					// 🟣 >				ls > doc
+		if(all_commands->has_heredoc == 1)					// 🟣 <<			grep ok << fin
 		{
-			fd_out = fetch_fd(all_commands->outfile);
-			execve_args_count++;
+			// all input has been typed (but not saved ?)
+			// delimiter saved in struct
+			// Leo is working on it, wait till he's done
+			return;
 		}
-		// if(all_commands->has_heredoc == TOK_HEREDOC) {}		// 🟣 <<
-		// if(all_commands->append) {}							// 🟣 >>
-		// if(???) {}											// 🟣 |
-		i++;
+		fork_and_exec(fd_in, fd_out, execve_args);
+		commands_left--;
+		all_commands++;
 	}
-	fork_and_exec(fd_in, fd_out, execve_args);
 }
-// ls > test.txt
+
 void	fork_and_exec(int fd_stdin, int fd_stdout, char	**execve_args)
 {
 	char	*envp[] = {NULL};								// Fetch from struct using build_envp function (Done by Leo TBC)
@@ -102,12 +115,19 @@ void	fork_and_exec(int fd_stdin, int fd_stdout, char	**execve_args)
 	}
 }
 
-int		fetch_fd(char *file_name)
+int		fetch_fd(char *file_name, bool append)
 {
 	int		fd;
 	char	*file_path = NULL;
 	file_path = build_path(file_name);
-	fd = open(file_path, O_CREAT | O_TRUNC | O_RDWR/* , 0666 */);		// HYPER IMPORTANT - Tout se joue dans les flags - 0666 = permissions
+	if(append)
+	{
+		fd = open(file_path, O_CREAT | O_APPEND | O_RDWR, 0666);	// HYPER IMPORTANT - Tout se joue dans les flags - 0666 = permissions
+	}
+	else
+	{
+		fd = open(file_path, O_CREAT | O_RDWR, 0666);		// HYPER IMPORTANT - Tout se joue dans les flags - 0666 = permissions
+	}
 	free(file_path);
 	if (fd == -1)
 	{

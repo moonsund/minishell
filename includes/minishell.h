@@ -212,7 +212,7 @@ void	execute_exit(t_shell *minishell);
 
 // exec external functions
 char	*build_path(char *file_name);
-int		fetch_fd(char *file_name);
+int		fetch_fd(char *file_name, bool append);
 void	fork_and_exec(int fd_stdin, int fd_stdout, char	**execve_args);
 
 // Free functions
