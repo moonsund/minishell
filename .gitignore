@@ -9,6 +9,7 @@ minishell
 
 # Ignore text files
 *.txt
+*.heredoc_*
 
 # Ignore object files
 /object/

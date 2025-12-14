@@ -84,36 +84,21 @@ int build_pipeline_from_tokens(t_shell *shell)
             }
             else if (current->type == TOK_HEREDOC) // <<
             {
-                if (token_has_any_quotes(next))
+                tmp = ft_strdup(next->raw_str);
+                if (!tmp)
                 {
-                    tmp = (char *)malloc(sizeof(char) * (next->length - 1));
-                    if (!tmp)
-                    {
-                        free_cmd(&current_cmd);
-                        free_pipeline(pl);
-                        shell->exit_status = 2;
-                        return (0);
-                    }
-                    
-                    ft_memcpy(tmp, next->raw_str + 1, next->length - 2);
-                    tmp[next->length - 2] = '\0';
-                    current_cmd.heredoc_expand_needed = 0;
-                }
-                else
-                {
-                    tmp = ft_strdup(next->raw_str);
-                    if (!tmp)
-                    {
-                        free_cmd(&current_cmd);
-                        free_pipeline(pl);
-                        shell->exit_status = 2;
-                        return (0);
-                    }
-                    current_cmd.heredoc_expand_needed = 1;
+                    free_cmd(&current_cmd);
+                    free_pipeline(pl);
+                    shell->exit_status = 2;
+                    return (0);
                 }
                 free(current_cmd.heredoc_limiter);
                 current_cmd.heredoc_limiter = tmp;
                 current_cmd.has_heredoc = 1;
+                if (token_has_any_quotes(next))
+                    current_cmd.heredoc_expand_needed = 0;
+                else
+                    current_cmd.heredoc_expand_needed = 1;
             }
             else
             {
@@ -195,6 +180,7 @@ static void init_command(t_command *cmd)
     cmd->heredoc_limiter = NULL;
     cmd->append = 0;
     cmd->has_heredoc = 0;
+    cmd->heredoc_expand_needed = 0;
 }
 
 static int append_arg(t_command *cmd, char *arg)
@@ -304,14 +290,16 @@ static void free_pipeline(t_pipeline *pl)
 
 static int token_has_any_quotes(t_token *token)
 {
-    size_t i = 0;
+    size_t i;
+    
+    i = 0;
     if (!token || !token->quotes_map)
-        return 0;
+        return (0);
     while (i < token->length)
     {
         if (token->quotes_map[i] == Q_SQ || token->quotes_map[i] == Q_DQ)
-            return 1;
+            return (1);
         i++;
     }
-    return 0;
+    return (0);
 }

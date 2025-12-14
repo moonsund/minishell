@@ -122,11 +122,10 @@ typedef struct s_shell
 {
 	int				exit_status;
 	t_env_var_list	env_vars;				// envp vars saved in linked list
-	// t_env			**env_variables;		// TO DELETE
 	t_token_list	tokens;
 	t_pipeline		*pipeline;				// Only base to consider for exec
 
-    // t_ast ast;
+	// t_ast ast;
 
 }	t_shell;
 
@@ -148,6 +147,7 @@ void    free_var_list(t_env_var_list *list);
 
 // expand.c
 int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars);
+char *get_last_status_string();
 
 // parcer.c
 
@@ -178,7 +178,7 @@ void init_buffer(t_buf *buf);
 int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars);
 
 // heredoc
-int process_heredocs(t_shell *shell);
+int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars);
 
 // utils.c
 void free_tokens(t_token_list *list);
