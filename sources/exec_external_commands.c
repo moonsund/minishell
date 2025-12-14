@@ -50,15 +50,19 @@ void	execute_external_commands(t_shell *minishell)
 		}
 		if(all_commands->has_heredoc == 1)					// 🟣 <<			grep ok << fin
 		{
-			// all input has been typed (but not saved ?)
+			// all input has been saved
 			// delimiter saved in struct
 			// Leo is working on it, wait till he's done
 			return;
 		}
 		if(minishell->pipeline->count > 1)
 		{
+			// fork before using pipe ? or after.
+			// place before the exec loop ?
 			// use pipe somewhere around here
-
+			// fd[0] read
+			// fd[1] write
+			// -1 ret if fail
 		}
 		fork_and_exec(fd, execve_args);
 		commands_left--;
