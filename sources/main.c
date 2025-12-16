@@ -5,7 +5,6 @@ int build_pipeline_from_tokens(t_shell *shell);
 int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars);
 static void print_token_list(t_token_list *list);
 static void print_pipe_line(t_pipeline *pipeline);
-static int debug_print_heredoc_files(t_pipeline *pipeline);
 
 int main(int argc, char **argv, char **envp)
 {

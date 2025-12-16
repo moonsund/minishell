@@ -1,6 +1,11 @@
 #include "minishell.h"
 #include "libft.h"
 
+// Fetch cmd 1
+// Put output in pipe
+// Fetch md2
+// Read input from pipe
+
 void	execute_external_commands(t_shell *minishell)
 {
 	t_command	*all_commands = minishell->pipeline->cmds;
@@ -33,7 +38,7 @@ void	execute_external_commands(t_shell *minishell)
 			execve_args_count++;
 			i++;
 		}
-		if(all_commands->infile)							// 🟣 <				wc -l < doc		sort < doc
+		if(all_commands->infile)							// 🟣 <	<<			wc -l < doc		sort < doc		grep ok << fin
 		{
 			fd[0] = fetch_fd(all_commands->infile, false, false);
 		}
@@ -48,29 +53,39 @@ void	execute_external_commands(t_shell *minishell)
 				fd[1] = fetch_fd(all_commands->outfile, false, true);
 			}
 		}
-		if(all_commands->has_heredoc == 1)					// 🟣 <<			grep ok << fin
-		{
-			// all input has been saved
-			// delimiter saved in struct
-			// Leo is working on it, wait till he's done
-			return;
-		}
-		if(minishell->pipeline->count > 1)
-		{
-			// fork before using pipe ? or after.
-			// place before the exec loop ?
-			// use pipe somewhere around here
-			// fd[0] read
-			// fd[1] write
-			// -1 ret if fail
-		}
-		fork_and_exec(fd, execve_args);
+		// if(all_commands->has_heredoc == 1)					// 🟣 << No need to do anything, same behaviour as < w/ infile
+		// {
+		// 	// delimiter saved in struct
+		// 	// input saved in .heredoc_0 (struct infile)
+		// 	// shell behavior handled already
+		// }
+
+		// open pipe here ?
+		// return fd from fork_and_exec ?
+		// consider this fd input of next command
+
+// Fetch cmd 1
+// Put output in pipe
+// Fetch md2
+// Read input from pipe
+
+		// if only one command
+		fork_and_exec(minishell, fd, execve_args);
+		// else
+		// { open pipe - execute fork_and_exec in child, and write in fd_pipe[1] - parent waits and reads from fd_pipe[0]. replace stdin by fd_pipe[0] for next command}
 		commands_left--;
 		all_commands++;
 	}
+	// if(ft_strcmp(minishell->pipeline->cmds->infile, ".heredoc_0") == 0)			// Test & Comment out when the rest is functional
+	// {
+	// 	char	*heredoc_file = build_path(".heredoc_0");
+	// 	unlink(heredoc_file);
+	// 	free(heredoc_file);
+	// }
 }
 
-void	fork_and_exec(int *fd, char	**execve_args)
+// Fetch env variables w/ Leo's build_envp function when he's done
+void	fork_and_exec(t_shell *minishell, int *fd, char	**execve_args)
 {
 	char	*envp[] = {NULL};								// Fetch from struct using build_envp function (Done by Leo TBC)
 	pid_t	fork_pid_return = fork();						// Seulement utile en cas de < << > >> |
@@ -107,9 +122,52 @@ void	fork_and_exec(int *fd, char	**execve_args)
 		}
 		printf("%s", GREEN);	// So that the official output stands out
 		fflush(0);				// Remove after debug
-		if (execve(execve_args[0], execve_args, envp) == -1)
+
+		int	pipe_fd[2] = {0};		// FDs for the pipe only, not related to the other fd
+		if (minishell->pipeline->count > 1)
 		{
-			perror("------------------ Error");
+			if(pipe(pipe_fd) == -1)		// Opens a new pipe
+			{
+				perror("----------------- Error");
+			}
+			// fd[0] read
+			// fd[1] write
+			pid_t	pipe_fork_return = fork();				// fd[2] will be duplicated/copied -> This is what we want
+															//		= The processes can communicate through these FD
+															//		Also means that if a process closes a fd, it stays open in the other process
+			if (pipe_fork_return == -1)
+			{
+				perror("----------------- Error");
+			}
+			if (pipe_fork_return == 0)		// Child = writes
+			{
+				close(pipe_fd[0]);			// No need to read
+				dup2(pipe_fd[1], fd[1]);	// The output of execve will now be in pipe_fd[1]
+				close(pipe_fd[1]);			// Because job is done
+			}
+			else							// Parent = reads
+			{
+				if(waitpid(pipe_fork_return, &status, 0) == -1)
+					perror("------------------ Error");
+				if(status != 0)
+					printf("status is not 0 (%d) - Check macro in 'man waitpid' to find out what that means\n", status);
+				close(pipe_fd[1]);			// No need to write
+				dup2(pipe_fd[0], fd[0]);
+				close(pipe_fd[0]);			// Because job is done
+				// Read from fd[0] (added in fd[1] by child)
+				// give it as a param to next command, by putting fd content in stdin
+				if (execve(execve_args[0], execve_args, envp) == -1)
+				{
+					perror("------------------ Error");
+				}
+			}
+		}
+		else		// No pipes = keep things easy - one fork is enough
+		{
+			if (execve(execve_args[0], execve_args, envp) == -1)
+			{
+				perror("------------------ Error");
+			}
 		}
 		printf("%s", NC);
 		// No need to revert FD back to normal as everything is happening only within the child
