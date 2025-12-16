@@ -142,11 +142,11 @@ int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars);
 
 // envp.c
 int    init_env_var_list(t_env_var_list *list, char **envp);
-// t_var  *find_var(t_var_list *list, const char *name);
-// int     set_var(t_var_list *list, const char *name, const char *value);   // export
-// int     unset_var(t_var_list *list, const char *name);                    // unset
+t_var  *find_var(t_env_var_list *list, const char *name);
+int     set_var(t_env_var_list *list, const char *name, const char *value);   // export
+int     unset_var(t_env_var_list *list, const char *name);                    // unset
 char   *get_var_value(t_env_var_list *var_list, const char *var);                // my_getenv
-// char  **build_envp(t_var_list *list);                                     // for execve
+char  **build_envp(t_env_var_list *list);                                     // for execve
 void    free_var_list(t_env_var_list *list);
 
 
