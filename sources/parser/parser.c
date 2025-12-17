@@ -137,6 +137,7 @@ int build_pipeline_from_tokens(t_shell *shell)
                 shell->exit_status = 2;
                 return (0);
             }
+            init_command(&current_cmd);
             cmd_started = 0;
         }
         else
@@ -234,9 +235,11 @@ static int append_cmd(t_pipeline *pl, t_command cmd)
     t_command *new_cmds;
     size_t i;
 
-    i = 0;
-    new_cmds = (t_command *)malloc(sizeof(* new_cmds) * (pl->count + 1));
+    new_cmds = malloc(sizeof(* new_cmds) * (pl->count + 1));
+    if (!new_cmds)
+        return (0);
 
+    i = 0;
     while (i < pl->count)
     {
         new_cmds[i] = pl->cmds[i];
@@ -245,7 +248,6 @@ static int append_cmd(t_pipeline *pl, t_command cmd)
     new_cmds[pl->count] = cmd;
 
     free(pl->cmds);
-
     pl->cmds = new_cmds;
     pl->count++;
 
@@ -265,6 +267,7 @@ static void free_cmd(t_command *cmd)
             argc++;
         }
     }
+    free(cmd->argv);
     free(cmd->infile);
     free(cmd->outfile);
     free(cmd->heredoc_limiter);

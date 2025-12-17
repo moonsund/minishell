@@ -50,6 +50,7 @@ int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, int exit_sta
 
                 if (!line)
                 {
+                    unlink(heredoc_filename);
                     free(heredoc_filename);
                     close(fd);
                     return (0);
@@ -72,6 +73,7 @@ int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, int exit_sta
                         free(line);
                         close(fd);
                         free(heredoc_filename);
+                        unlink(heredoc_filename);
                         return (0);
                     }
                 }
@@ -115,12 +117,14 @@ static int expand_heredoc(char **line, t_env_var_list *env_vars, int exit_status
     char    *new_line;
     char    *var_name;
     size_t  var_length;
-    char    *val;
+    char    *value;
 
     if (!line)
         return (0);
 
-    new_line = NULL;
+    new_line = ft_strdup("");
+    if (!new_line)
+        return (0);
     i = 0;
 
     while ((*line)[i])
@@ -178,12 +182,12 @@ static int expand_heredoc(char **line, t_env_var_list *env_vars, int exit_status
             ft_memcpy(var_name, *line + start, var_length);
             var_name[var_length] = '\0';
 
-            val = get_var_value(env_vars, var_name);
+            value = get_var_value(env_vars, var_name);
             free(var_name);
 
-            if (val && val[0] != '\0')
+            if (value && value[0] != '\0')
             {
-                if (!append_string(&new_line, val))
+                if (!append_string(&new_line, value))
                 {
                     free(new_line);
                     return (0);
@@ -213,8 +217,14 @@ static int write_heredoc_line(int fd, char *line)
     size_t line_length;
 
     if (!line)
+    {
+        bytes_written = write(fd, "\n", 1);
+        if (bytes_written < 0)
+                return (0);
         return (1);
-    
+    }
+        
+
     line_length = ft_strlen(line);
     if (line_length > 0)
     {
@@ -292,7 +302,7 @@ static int append_string(char **line, const char *str)
         ft_memcpy(new_line + line_length, str, str_length);
         new_line[str_length + line_length] = '\0';
         
-        free(line);
+        free(*line);
         *line = new_line;
         return (1);
     }
