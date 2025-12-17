@@ -1,11 +1,11 @@
 #include "minishell.h"
 
 static bool token_needs_expansion(t_token *token);
-static int expand_word_token(t_token *token, t_env_var_list *env_vars);
-char *get_last_status_string();
+static int expand_word_token(t_token *token, t_env_var_list *env_vars, int exit_status);
+char *get_last_status_string(int exit_status);
 static int append_str(char *str, t_buf *buf, t_qmark quote_mark);
 
-int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars)
+int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars, int exit_status)
 {    
     t_token *prev;
     t_token *cur;
@@ -20,7 +20,7 @@ int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars)
         if (cur->type == TOK_WORD)
         {
             if (!prev || prev->type != TOK_HEREDOC)
-                expand_word_token(cur, env_vars);
+                expand_word_token(cur, env_vars, exit_status);
         }
             prev = cur;
             cur = cur->next;
@@ -28,7 +28,7 @@ int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars)
     return (1);
 }
 
-static int expand_word_token(t_token *token, t_env_var_list *env_vars)
+static int expand_word_token(t_token *token, t_env_var_list *env_vars, int exit_status)
 {
     t_buf buf;
     size_t i;
@@ -67,7 +67,7 @@ static int expand_word_token(t_token *token, t_env_var_list *env_vars)
 
             if (token->raw_str[start] == '?')
             {
-                val = get_last_status_string();
+                val = get_last_status_string(exit_status);
                 if (!val || !append_str(val, &buf, Q_NONE)) // (&buf, val, Q_NONE)
                 {
                     free_buf(&buf);
@@ -160,9 +160,11 @@ static int append_str(char *str, t_buf *buf, t_qmark quote_mark)
 }
 
 
-char *get_last_status_string()  // using global variable?
+char *get_last_status_string(int exit_status)
 {
-    return NULL;
+    if (!exit_status)
+        return (NULL);
+    return (ft_itoa(exit_status));
 }
 
 static bool token_needs_expansion(t_token *token)

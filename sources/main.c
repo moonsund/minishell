@@ -1,8 +1,6 @@
 #include "minishell.h"
 
 static int init_shell(t_shell *shell, char **envp);
-int build_pipeline_from_tokens(t_shell *shell);
-int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars);
 static void print_token_list(t_token_list *list);
 static void print_pipe_line(t_pipeline *pipeline);
 static int debug_print_heredoc_files(t_pipeline *pipeline);
@@ -21,13 +19,25 @@ int main(int argc, char **argv, char **envp)
 
 	setup_signals();
 	
-	while(true) // or exit_status
+	while(true)
 	{
 		line = readline("minishell> ");
-		if (!line)
+
+		if (!line) // Ctrl+D (EOF)
 		{
 			printf("exit\n");
 			break;
+		}
+
+		if (g_sigint) // Ctrl+C
+		{
+			g_sigint = 0;              
+			shell.exit_status = 130;  
+			free(line);
+			// rl_on_new_line();
+			// rl_replace_line("", 0);
+			// rl_redisplay();
+			continue;
 		}
 
 		if (!is_empty(line))
@@ -44,7 +54,7 @@ int main(int argc, char **argv, char **envp)
 		printf("\n[tokens_list_debug]:\n");
 		print_token_list(&shell.tokens);	// for debugging, to be deleted (note from Sophie : super useful ! Please don't delete yet ^^')
 
-		expand_tokens(&shell.tokens, &shell.env_vars);
+		expand_tokens(&shell.tokens, &shell.env_vars, shell.exit_status);
 
 		printf("\n[expanded_tokens_list_debug]:\n");
 		print_token_list(&shell.tokens); // for debugging, to be deleted
@@ -60,11 +70,21 @@ int main(int argc, char **argv, char **envp)
 		printf("\n[pipelines_debug]:\n");
 		print_pipe_line(shell.pipeline);	// for debugging, to be deleted
 
-		if (!process_heredoc(shell.pipeline, &shell.env_vars))
+		g_sigint = 0;
+
+		if (!process_heredoc(shell.pipeline, &shell.env_vars, shell.exit_status))
 		{
+			if (g_sigint)
+			{
+				g_sigint = 0;
+				shell.exit_status = 130;
+			}
+			else
+			{
+				shell.exit_status = 1;
+			}
 			free_tokens(&shell.tokens);
 			free(line);
-			shell.exit_status = 258;
 			continue;
 		}
 
@@ -127,7 +147,6 @@ static void print_token_list(t_token_list *tokens) // for debugging, to be delet
 	}
 }
 
-
 static void print_pipe_line(t_pipeline *pipeline) // for debugging, to be deleted
 {
     size_t i;
@@ -163,7 +182,6 @@ static void print_pipe_line(t_pipeline *pipeline) // for debugging, to be delete
 		printf("heredoc_expand_needed: %i\n", pipeline->cmds[i].heredoc_expand_needed);
     }
 }
-
 
 static int debug_print_heredoc_files(t_pipeline *pipeline) // for debugging, to be deleted
 {
