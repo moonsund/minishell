@@ -20,7 +20,14 @@
 #include <sys/types.h>	// opendir
 #include <dirent.h>		// opendir
 
-// #include <ft_printf.h>
+#ifndef SIGNALS_H
+#define SIGNALS_H
+
+extern volatile sig_atomic_t g_sigint;
+
+void setup_signals(void);
+
+#endif
 
 typedef enum e_token_type
 {
@@ -137,8 +144,6 @@ typedef struct s_shell
 // ------------------------------------------------------------------------------------------ From Leo
 
 // main.c
-int build_pipeline_from_tokens(t_shell *shell);
-int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars);
 
 // envp.c
 int    init_env_var_list(t_env_var_list *list, char **envp);
@@ -149,12 +154,12 @@ char   *get_var_value(t_env_var_list *var_list, const char *var);               
 char  **build_envp(t_env_var_list *list);                                     // for execve
 void    free_var_list(t_env_var_list *list);
 
-
 // expand.c
-int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars);
-char *get_last_status_string();
+int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars, int exit_status);
+char *get_last_status_string(int exit_status);
 
-// parcer.c
+// parser.c
+int build_pipeline_from_tokens(t_shell *shell);
 
 // lexer.c
 bool tokenize_with_qmap(const char *str, t_token_list *tokens);
@@ -179,11 +184,8 @@ void reset_buf(t_buf *buf);
 void free_buf(t_buf *buf);
 void init_buffer(t_buf *buf);
 
-// parser.c
-int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars);
-
 // heredoc
-int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars);
+int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, int exit_status);
 
 // utils.c
 void free_tokens(t_token_list *list);

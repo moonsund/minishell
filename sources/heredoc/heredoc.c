@@ -1,13 +1,13 @@
 #include "minishell.h"
 
-int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars);
+int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, int exit_status);
 static char *generate_heredoc_filename(size_t heredoc_index);
-static int expand_heredoc(char **line, t_env_var_list *env_vars);
+static int expand_heredoc(char **line, t_env_var_list *env_vars, int exit_status);
 static int write_heredoc_line(int fd, char *line);
 static int append_charter(char **line, char c);
 static int append_string(char **line, const char *str);
 
-int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars)
+int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, int exit_status)
 {
     size_t  i;
     char    *line;
@@ -39,13 +39,22 @@ int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars)
             while (true)
             {
                 line = readline("heredoc> ");
+                
+                if (g_sigint) // ctrl+c
+                {
+                    close(fd);
+                    unlink(heredoc_filename);
+                    free(heredoc_filename);
+                    return (0);
+                }
+
                 if (!line)
                 {
                     free(heredoc_filename);
                     close(fd);
                     return (0);
                 }
-                    
+
                 if (pipeline->cmds[i].heredoc_limiter
                     && ft_strcmp(line, pipeline->cmds[i].heredoc_limiter) == 0)
                 {
@@ -58,7 +67,7 @@ int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars)
 
                 if (pipeline->cmds[i].heredoc_expand_needed)
                 {
-                    if (!expand_heredoc(&line, env_vars))
+                    if (!expand_heredoc(&line, env_vars, exit_status))
                     {
                         free(line);
                         close(fd);
@@ -98,7 +107,7 @@ static char *generate_heredoc_filename(size_t heredoc_index)
     return (file_name);
 }
 
-static int expand_heredoc(char **line, t_env_var_list *env_vars)
+static int expand_heredoc(char **line, t_env_var_list *env_vars, int exit_status)
 {
     size_t  i;
     size_t  j;
@@ -131,7 +140,7 @@ static int expand_heredoc(char **line, t_env_var_list *env_vars)
 
             else if ((*line)[i + 1] == '?')
             {
-                if (!append_string(&new_line, get_last_status_string()))
+                if (!append_string(&new_line, get_last_status_string(exit_status)))
                 {
                     free(new_line);
                     return (0);
