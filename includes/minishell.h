@@ -136,8 +136,6 @@ typedef struct s_shell
 	t_env_var_list env_vars;				// envp vars saved in linked list 
 	t_token_list	tokens;					// The one to consider ? TBC
 	t_pipeline		*pipeline;				// array of commands ready to be executed 
-
-    // t_ast ast;
     
 }	t_shell;
 
@@ -145,8 +143,10 @@ typedef struct s_shell
 
 // main.c
 
+// int.c
+int init_shell(t_shell *shell, char **envp);
+
 // envp.c
-int    init_env_var_list(t_env_var_list *list, char **envp);
 t_var  *find_var(t_env_var_list *list, const char *name);
 int     set_var(t_env_var_list *list, const char *name, const char *value);   // export
 int     unset_var(t_env_var_list *list, const char *name);                    // unset
@@ -196,6 +196,7 @@ void setup_signals(void);
 // ------------------------------------------------------------------------------------------ Exec functions
 // utils
 int		str_comp(char *s1, char *s2);
+int err_message(const char *where);
 
 // pre exec functions
 void	check_command_type_and_execute(t_shell minishell);

@@ -26,6 +26,7 @@ OBJ_PATH = objects/
 
 SRC_FILES = \
 	main.c \
+	init/init_shell.c \
 	signals.c \
 	utils.c \
 	lexer/lexer.c \

@@ -1,6 +1,5 @@
 #include "minishell.h"
 
-static int init_shell(t_shell *shell, char **envp);
 static void print_token_list(t_token_list *list);
 static void print_pipe_line(t_pipeline *pipeline);
 static int debug_print_heredoc_files(t_pipeline *pipeline);
@@ -10,13 +9,14 @@ int main(int argc, char **argv, char **envp)
 	char *line;
 	t_shell	shell;
 
-	shell.exit_status = 1;
 	(void)argc;
 	(void)argv;
 
 	if (!init_shell(&shell, envp))
+	{
+		err_message("init_shell");
 		return (EXIT_FAILURE);
-
+	}
 	setup_signals();
 	
 	while(true)
@@ -91,25 +91,31 @@ int main(int argc, char **argv, char **envp)
 		debug_print_heredoc_files(shell.pipeline);
 		
 		// check_command_type_and_execute(shell);	// Exec testing starts here
-		shell.pipeline = NULL;
-		free_tokens(&shell.tokens);
 		free(line);
-		// free_everything(shell);
+		// shell_reset_iteration(&shell):
+		// 	free_tokens(&shell.tokens);
+		// 	free_pipeline(&shell.pipeline);
+		// 	shell->pipeline = NULL;
 	}
+
+	// shell_destroy(&shell):
+	// 	reset_iteration(&shell);
+	// 	free_env_var_list(&shell->env_vars);
+	// 	rl_clear_history();
 
 	return (EXIT_SUCCESS);
 }
 
-static int init_shell(t_shell *shell, char **envp)
-{
-	shell->tokens.head = NULL;
-	shell->tokens.count = 0;
-	shell->pipeline = NULL;
 
-	if (!init_env_var_list(&shell->env_vars, envp))
-		return (0);
-	return (1);
-}
+
+
+
+
+
+
+
+
+
 
 static void print_token_list(t_token_list *tokens) // for debugging, to be deleted
 {

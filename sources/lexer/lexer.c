@@ -12,7 +12,6 @@ bool tokenize_with_qmap(const char *str, t_token_list *tokens)
 
     init_lexer_context(&ctx);
  
-
     while (str[ctx.i]) 
     {
         if (process_quotes(str, &ctx))

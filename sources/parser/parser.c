@@ -21,8 +21,10 @@ int build_pipeline_from_tokens(t_shell *shell)
     
     pl = malloc(sizeof(*pl));
     if (!pl)
-        // shell->exit_status = 2;
+    {
+        shell->exit_status = 2;
         return (0);
+    }
 
     pl->cmds = NULL;
     pl->count = 0;
