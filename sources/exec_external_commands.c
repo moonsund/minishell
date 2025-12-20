@@ -12,6 +12,7 @@ void	execute_external_commands(t_shell *minishell)
 	char		*current_command;
 	size_t	i = 0;
 	int		fd[2] = {0, 1};			// fd[0] = in --- fd[1] = out
+	int		pipe_fd[2] = {0};		// fd[0] = read - fd[1] = write
 
 	char	**execve_args;						// Tableau de strings (arguments du programme executé par execve)
 	execve_args = ft_calloc(sizeof(char *), 4);	// Room for 4 args
@@ -60,19 +61,25 @@ void	execute_external_commands(t_shell *minishell)
 		// 	// shell behavior handled already
 		// }
 
-		// open pipe here ?
-		// return fd from fork_and_exec ?
-		// consider this fd input of next command
-
 // Fetch cmd 1
 // Put output in pipe
 // Fetch md2
 // Read input from pipe
 
-		// if only one command
-		fork_and_exec(minishell, fd, execve_args);
-		// else
-		// { open pipe - execute fork_and_exec in child, and write in fd_pipe[1] - parent waits and reads from fd_pipe[0]. replace stdin by fd_pipe[0] for next command}
+		if(minishell->pipeline->count == 1)					// No pipes = keep things easy - at least for now
+			fork_and_exec(minishell, fd, execve_args);
+		else												// command :	ls | grep sources
+		{
+			pipe_fd[0] = fd[1];								// 				pipe_fd read side = stdout de ls
+			// pipe_fd[1] = NO NEED, done automatically;	//				pipe_fd write side = stdin de grep (same as above, nothing to do)
+			if(pipe(pipe_fd) == -1)							// Open pipe w/ fd above
+				perror("----------------- Error");
+			// next step : executer ls dans une fork ?
+			// dans le child : executer ls + faire en sorte que l'output de 'ls' soit ecrit dans pipe_fd[1]
+			// dans le parent : wait + lire l'output de ls dans le pipe_fd[0], et le donner a grep (en replacant stdin by fd_pipe[0] avec dup2() ?)
+			// la prochaine commande 'grep' doit lire depuis pipe_fd en le considerant comme son stdin
+
+		}
 		commands_left--;
 		all_commands++;
 	}
@@ -123,52 +130,52 @@ void	fork_and_exec(t_shell *minishell, int *fd, char	**execve_args)
 		printf("%s", GREEN);	// So that the official output stands out
 		fflush(0);				// Remove after debug
 
-		int	pipe_fd[2] = {0};		// FDs for the pipe only, not related to the other fd
-		if (minishell->pipeline->count > 1)
-		{
-			if(pipe(pipe_fd) == -1)		// Opens a new pipe
-			{
-				perror("----------------- Error");
-			}
-			// fd[0] read
-			// fd[1] write
-			pid_t	pipe_fork_return = fork();				// fd[2] will be duplicated/copied -> This is what we want
-															//		= The processes can communicate through these FD
-															//		Also means that if a process closes a fd, it stays open in the other process
-			if (pipe_fork_return == -1)
-			{
-				perror("----------------- Error");
-			}
-			if (pipe_fork_return == 0)		// Child = writes
-			{
-				close(pipe_fd[0]);			// No need to read
-				dup2(pipe_fd[1], fd[1]);	// The output of execve will now be in pipe_fd[1]
-				close(pipe_fd[1]);			// Because job is done
-			}
-			else							// Parent = reads
-			{
-				if(waitpid(pipe_fork_return, &status, 0) == -1)
-					perror("------------------ Error");
-				if(status != 0)
-					printf("status is not 0 (%d) - Check macro in 'man waitpid' to find out what that means\n", status);
-				close(pipe_fd[1]);			// No need to write
-				dup2(pipe_fd[0], fd[0]);
-				close(pipe_fd[0]);			// Because job is done
-				// Read from fd[0] (added in fd[1] by child)
-				// give it as a param to next command, by putting fd content in stdin
-				if (execve(execve_args[0], execve_args, envp) == -1)
-				{
-					perror("------------------ Error");
-				}
-			}
-		}
-		else		// No pipes = keep things easy - one fork is enough
-		{
+		// int	pipe_fd[2] = {0};		// FDs for the pipe only, not related to the other fd
+		// if (minishell->pipeline->count > 1)
+		// {
+		// 	if(pipe(pipe_fd) == -1)		// Opens a new pipe
+		// 	{
+		// 		perror("----------------- Error");
+		// 	}
+		// 	// fd[0] read
+		// 	// fd[1] write
+		// 	pid_t	pipe_fork_return = fork();				// fd[2] will be duplicated/copied -> This is what we want
+		// 													//		= The processes can communicate through these FD
+		// 													//		Also means that if a process closes a fd, it stays open in the other process
+		// 	if (pipe_fork_return == -1)
+		// 	{
+		// 		perror("----------------- Error");
+		// 	}
+		// 	if (pipe_fork_return == 0)		// Child = writes
+		// 	{
+		// 		close(pipe_fd[0]);			// No need to read
+		// 		dup2(pipe_fd[1], fd[1]);	// The output of execve will now be in pipe_fd[1]
+		// 		close(pipe_fd[1]);			// Because job is done
+		// 	}
+		// 	else							// Parent = reads
+		// 	{
+		// 		if(waitpid(pipe_fork_return, &status, 0) == -1)
+		// 			perror("------------------ Error");
+		// 		if(status != 0)
+		// 			printf("status is not 0 (%d) - Check macro in 'man waitpid' to find out what that means\n", status);
+		// 		close(pipe_fd[1]);			// No need to write
+		// 		dup2(pipe_fd[0], fd[0]);
+		// 		close(pipe_fd[0]);			// Because job is done
+		// 		// Read from fd[0] (added in fd[1] by child)
+		// 		// give it as a param to next command, by putting fd content in stdin
+		// 		if (execve(execve_args[0], execve_args, envp) == -1)
+		// 		{
+		// 			perror("------------------ Error");
+		// 		}
+		// 	}
+		// }
+		// else		// No pipes = keep things easy - one fork is enough
+		// {
 			if (execve(execve_args[0], execve_args, envp) == -1)
 			{
 				perror("------------------ Error");
 			}
-		}
+		// }
 		printf("%s", NC);
 		// No need to revert FD back to normal as everything is happening only within the child
 	}
