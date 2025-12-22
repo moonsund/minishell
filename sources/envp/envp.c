@@ -3,10 +3,8 @@
 t_var  *find_var(t_env_var_list *list, const char *name);
 int     set_var(t_env_var_list *list, const char *name, const char *value);   // export
 int     unset_var(t_env_var_list *list, const char *name);                    // unset
-char   *get_var_value(t_env_var_list *var_list, const char *var);                // my_getenv
+char   *get_var_value(t_env_var_list *var_list, const char *var);             // my_getenv
 char  **build_envp(t_env_var_list *list);                                     // before execve
-void    free_var_list(t_env_var_list *list);
-static void free_envp_partial(char **envp, size_t used);
 
 t_var   *find_var(t_env_var_list *list, const char *name)
 {
@@ -197,42 +195,4 @@ char  **build_envp(t_env_var_list *list)
     }
     envp[i] = NULL;
     return (envp);
-}
-
-static void free_envp_partial(char **envp, size_t used)
-{
-    size_t i;
-
-    if (!envp)
-        return;
-
-    i = 0;
-    while (i < used)
-    {
-        free(envp[i]);
-        i++;
-    }
-    free(envp);
-}
-
-void    free_var_list(t_env_var_list *vars)
-{
-    t_var *cur;
-	t_var *next;
-
-	if (!vars)
-		return ;
-
-	cur = vars->head;
-	while (cur != NULL)
-	{
-		next = cur->next;
-		free(cur->name);
-		free(cur->value);
-        free(cur);
-		cur = next;
-	}
-	vars->head = NULL;
-    vars->tail = NULL;
-	vars->count = 0;
 }

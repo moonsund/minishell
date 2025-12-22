@@ -14,7 +14,7 @@ int main(int argc, char **argv, char **envp)
 
 	if (!init_shell(&shell, envp))
 	{
-		err_message("init_shell");
+		err_print(ERR_SYS, "init_shell");
 		return (EXIT_FAILURE);
 	}
 	setup_signals();
@@ -42,7 +42,6 @@ int main(int argc, char **argv, char **envp)
 
 		if (!is_empty(line))
 			add_history(line);
-		printf("[readline_debug]: \"%s\"\n", line); // for debugging, to be deleted
 
 		if (!tokenize_with_qmap(line, &shell.tokens))
 		{
@@ -51,24 +50,23 @@ int main(int argc, char **argv, char **envp)
 			free(line);
 			continue;
 		}
-		printf("\n[tokens_list_debug]:\n");
-		print_token_list(&shell.tokens);	// for debugging, to be deleted (note from Sophie : super useful ! Please don't delete yet ^^')
+		printf("\n[tokens_list_debug]:\n");	// for debugging, to be deleted
+		print_token_list(&shell.tokens);
 
 		expand_tokens(&shell.tokens, &shell.env_vars, shell.exit_status);
 
-		printf("\n[expanded_tokens_list_debug]:\n");
-		print_token_list(&shell.tokens); // for debugging, to be deleted
+		printf("\n[expanded_tokens_list_debug]:\n"); // for debugging, to be deleted
+		print_token_list(&shell.tokens);
 
 		if (!build_pipeline_from_tokens(&shell))
 		{
 			free_tokens(&shell.tokens);
 			free(line);
-			shell.exit_status = 258;
 			continue;
 		}
 		
-		printf("\n[pipelines_debug]:\n");
-		print_pipe_line(shell.pipeline);	// for debugging, to be deleted
+		printf("\n[pipelines_debug]:\n");	// for debugging, to be deleted
+		print_pipe_line(shell.pipeline);
 
 		g_sigint = 0;
 
@@ -88,21 +86,13 @@ int main(int argc, char **argv, char **envp)
 			continue;
 		}
 
-		debug_print_heredoc_files(shell.pipeline);
+		debug_print_heredoc_files(shell.pipeline); // for debugging, to be deleted
 		
 		// check_command_type_and_execute(shell);	// Exec testing starts here
 		free(line);
-		// shell_reset_iteration(&shell):
-		// 	free_tokens(&shell.tokens);
-		// 	free_pipeline(&shell.pipeline);
-		// 	shell->pipeline = NULL;
+		reset_iteration(&shell);
 	}
-
-	// shell_destroy(&shell):
-	// 	reset_iteration(&shell);
-	// 	free_env_var_list(&shell->env_vars);
-	// 	rl_clear_history();
-
+	shell_destroy(&shell);
 	return (EXIT_SUCCESS);
 }
 

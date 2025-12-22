@@ -34,10 +34,14 @@ SRC_FILES = \
 	lexer/lexer_operators.c \
 	lexer/lexer_chars.c \
 	lexer/lexer_utils.c \
+	parser/parser_init.c \
+	parser/parser_tokens.c \
+	parser/parser_utils.c \
 	parser/parser.c \
 	expand/expand.c \
 	heredoc/heredoc.c \
-	envp/envp.c
+	envp/envp.c \
+	envp/envp_utils.c
 
 SRCS = $(addprefix $(SRC_PATH),$(SRC_FILES))
 OBJS = $(addprefix $(OBJ_PATH),$(SRC_FILES:.c=.o))

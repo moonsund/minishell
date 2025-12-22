@@ -2,7 +2,6 @@
 
 int init_shell(t_shell *shell, char **envp);
 static int init_env_var_list(t_env_var_list *list, char **envp);
-static void free_env_var_list(t_env_var_list *list);
 
 int init_shell(t_shell *shell, char **envp)
 {
@@ -17,7 +16,7 @@ int init_shell(t_shell *shell, char **envp)
 	return (1);
 }
 
-static int    init_env_var_list(t_env_var_list *list, char **envp)
+static int init_env_var_list(t_env_var_list *list, char **envp)
 {
 	t_var *var;
 	size_t i;
@@ -70,27 +69,4 @@ static int    init_env_var_list(t_env_var_list *list, char **envp)
         i++;
     }
 	return (1);
-}
-
-static void free_env_var_list(t_env_var_list *list)
-{
-    t_var *cur;
-    t_var *next;
-
-    if (!list)
-        return ;
-
-    cur = list->head;
-
-    while (cur != NULL)
-    {
-        next = cur->next;
-        free(cur->name);
-        free(cur->value);
-        free(cur);
-        cur = next;
-    }
-    list->head = NULL;
-    list->tail = NULL;
-    list->count = 0;
 }

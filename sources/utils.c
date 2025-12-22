@@ -1,7 +1,25 @@
 #include "minishell.h"
 
+void reset_iteration(t_shell *shell);
+void shell_destroy(t_shell *shell);
 void free_tokens(t_token_list *list);
-int err_message(const char *where);
+void free_pipeline(t_pipeline *pl);
+void free_env_var_list(t_env_var_list *vars);
+void err_print(t_error_type type, const char *ctx);
+
+void reset_iteration(t_shell *shell)
+{
+	free_tokens(&shell->tokens);
+	free_pipeline(shell->pipeline);
+	shell->pipeline = NULL;
+}
+
+void shell_destroy(t_shell *shell)
+{
+	reset_iteration(shell);
+	free_env_var_list(&shell->env_vars);
+	rl_clear_history();
+}
 
 void free_tokens(t_token_list *list)
 {
@@ -16,6 +34,7 @@ void free_tokens(t_token_list *list)
 	{
 		next = cur->next;
 		free(cur->raw_str);
+		free(cur->quotes_map);
 		free(cur);
 		cur = next;
 	}
@@ -24,10 +43,51 @@ void free_tokens(t_token_list *list)
 	list->count = 0;
 }
 
-int err_message(const char *where)
+void free_pipeline(t_pipeline *pl)
 {
-	if (where)
-		printf("minishell: %s: %s", where, strerror(perror));
-	else
-		printf("minishell: %s", where, strerror(perror));
+    size_t i;
+
+    if (!pl)
+        return;
+    
+    i = 0;
+    while (i < pl->count)
+    {
+        free_cmd(&pl->cmds[i]);
+        i++;
+    }
+    free(pl->cmds);
+    free(pl);
+}
+
+void free_env_var_list(t_env_var_list *vars)
+{
+    t_var *cur;
+	t_var *next;
+
+	if (!vars)
+		return ;
+
+	cur = vars->head;
+	while (cur != NULL)
+	{
+		next = cur->next;
+		free(cur->name);
+		free(cur->value);
+        free(cur);
+		cur = next;
+	}
+	vars->head = NULL;
+    vars->tail = NULL;
+	vars->count = 0;
+}
+
+void err_print(t_error_type type, const char *ctx)
+{
+	if (type == ERR_SYS)
+		printf("minishell: %s: %s\n", ctx, strerror(errno));
+	else if (type == ERR_SYNTAX)
+		printf("minishell: syntax_error: %s\n", ctx);
+	else if (type == ERR_GENERAL)
+        fprintf(stderr, "minishell: %s\n", ctx);
 }
