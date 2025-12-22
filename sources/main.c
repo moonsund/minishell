@@ -1,6 +1,5 @@
 #include "minishell.h"
 
-static int init_shell(t_shell *shell, char **envp);
 static void print_token_list(t_token_list *list);
 static void print_pipe_line(t_pipeline *pipeline);
 static int debug_print_heredoc_files(t_pipeline *pipeline);
@@ -10,13 +9,14 @@ int main(int argc, char **argv, char **envp)
 	char *line;
 	t_shell	shell;
 
-	shell.exit_status = 1;
 	(void)argc;
 	(void)argv;
 
 	if (!init_shell(&shell, envp))
+	{
+		err_print(ERR_SYS, "init_shell");
 		return (EXIT_FAILURE);
-
+	}
 	setup_signals();
 	
 	while(true)
@@ -42,7 +42,6 @@ int main(int argc, char **argv, char **envp)
 
 		if (!is_empty(line))
 			add_history(line);
-		printf("[readline_debug]: \"%s\"\n", line); // for debugging, to be deleted
 
 		if (!tokenize_with_qmap(line, &shell.tokens))
 		{
@@ -51,24 +50,23 @@ int main(int argc, char **argv, char **envp)
 			free(line);
 			continue;
 		}
-		printf("\n[tokens_list_debug]:\n");
-		print_token_list(&shell.tokens);	// for debugging, to be deleted (note from Sophie : super useful ! Please don't delete yet ^^')
+		printf("\n[tokens_list_debug]:\n");	// for debugging, to be deleted
+		print_token_list(&shell.tokens);
 
 		expand_tokens(&shell.tokens, &shell.env_vars, shell.exit_status);
 
-		printf("\n[expanded_tokens_list_debug]:\n");
-		print_token_list(&shell.tokens); // for debugging, to be deleted
+		printf("\n[expanded_tokens_list_debug]:\n"); // for debugging, to be deleted
+		print_token_list(&shell.tokens);
 
 		if (!build_pipeline_from_tokens(&shell))
 		{
 			free_tokens(&shell.tokens);
 			free(line);
-			shell.exit_status = 258;
 			continue;
 		}
 		
-		printf("\n[pipelines_debug]:\n");
-		print_pipe_line(shell.pipeline);	// for debugging, to be deleted
+		printf("\n[pipelines_debug]:\n");	// for debugging, to be deleted
+		print_pipe_line(shell.pipeline);
 
 		g_sigint = 0;
 
@@ -88,28 +86,26 @@ int main(int argc, char **argv, char **envp)
 			continue;
 		}
 
-		debug_print_heredoc_files(shell.pipeline);
+		debug_print_heredoc_files(shell.pipeline); // for debugging, to be deleted
 		
 		// check_command_type_and_execute(shell);	// Exec testing starts here
-		shell.pipeline = NULL;
-		free_tokens(&shell.tokens);
 		free(line);
-		// free_everything(shell);
+		reset_iteration(&shell);
 	}
-
+	shell_destroy(&shell);
 	return (EXIT_SUCCESS);
 }
 
-static int init_shell(t_shell *shell, char **envp)
-{
-	shell->tokens.head = NULL;
-	shell->tokens.count = 0;
-	shell->pipeline = NULL;
 
-	if (!init_env_var_list(&shell->env_vars, envp))
-		return (0);
-	return (1);
-}
+
+
+
+
+
+
+
+
+
 
 static void print_token_list(t_token_list *tokens) // for debugging, to be deleted
 {

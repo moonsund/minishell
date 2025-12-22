@@ -29,6 +29,13 @@ void setup_signals(void);
 
 #endif
 
+typedef enum e_error_type
+{
+	ERR_SYS,
+	ERR_SYNTAX,
+	ERR_GENERAL
+} t_error_type;
+
 typedef enum e_token_type
 {
 	TOK_WORD,
@@ -125,6 +132,15 @@ typedef struct s_pipeline
 	size_t count;
 } t_pipeline;
 
+typedef struct s_parser_context
+{
+    t_command current_cmd;
+    t_token *current;
+    t_token *next;
+    int cmd_started;
+    char *tmp;
+} t_parser_context;
+
 
 typedef struct s_shell
 {
@@ -136,23 +152,29 @@ typedef struct s_shell
 	t_env_var_list env_vars;				// envp vars saved in linked list 
 	t_token_list	tokens;					// The one to consider ? TBC
 	t_pipeline		*pipeline;				// array of commands ready to be executed 
-
-    // t_ast ast;
     
 }	t_shell;
+
+
+
+
 
 // ------------------------------------------------------------------------------------------ From Leo
 
 // main.c
 
+// init.c
+int init_shell(t_shell *shell, char **envp);
+
 // envp.c
-int    init_env_var_list(t_env_var_list *list, char **envp);
 t_var  *find_var(t_env_var_list *list, const char *name);
 int     set_var(t_env_var_list *list, const char *name, const char *value);   // export
 int     unset_var(t_env_var_list *list, const char *name);                    // unset
 char   *get_var_value(t_env_var_list *var_list, const char *var);                // my_getenv
 char  **build_envp(t_env_var_list *list);                                     // for execve
-void    free_var_list(t_env_var_list *list);
+
+// envp_utils.c
+void free_envp_partial(char **envp, size_t used);
 
 // expand.c
 int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars, int exit_status);
@@ -161,12 +183,27 @@ char *get_last_status_string(int exit_status);
 // parser.c
 int build_pipeline_from_tokens(t_shell *shell);
 
+// parcer_init.c
+t_pipeline *init_pipeline();
+void init_parser_context(t_parser_context *ctx);
+void init_command(t_command *cmd);
+
+// parcer_tokens.c
+int process_tokens(t_pipeline *pl, t_token_list *list, t_parser_context *ctx, int *exit_status);
+
+// parcer_utils.c
+void free_cmd(t_command *cmd);
+
+// parser.c
+int build_pipeline_from_tokens(t_shell *shell);
+int append_cmd(t_pipeline *pl, t_command cmd);
+
 // lexer.c
 bool tokenize_with_qmap(const char *str, t_token_list *tokens);
 t_token *make_word_token(t_buf *buf);
 
 // lexer_words.c
-int process_word_token(t_token_list *tokens, t_lexer_context *ctx);
+int process_word(t_token_list *tokens, t_lexer_context *ctx);
 
 // lexer_operators.c
 int check_operators(const char *str, t_token_list *tokens, t_lexer_context *context);
@@ -188,7 +225,12 @@ void init_buffer(t_buf *buf);
 int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, int exit_status);
 
 // utils.c
+void reset_iteration(t_shell *shell);
+void shell_destroy(t_shell *shell);
 void free_tokens(t_token_list *list);
+void free_pipeline(t_pipeline *pl);
+void free_env_var_list(t_env_var_list *vars);
+void err_print(t_error_type type, const char *ctx);
 
 // signals.c
 void setup_signals(void);

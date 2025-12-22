@@ -12,7 +12,6 @@ bool tokenize_with_qmap(const char *str, t_token_list *tokens)
 
     init_lexer_context(&ctx);
  
-
     while (str[ctx.i]) 
     {
         if (process_quotes(str, &ctx))
@@ -49,7 +48,7 @@ bool tokenize_with_qmap(const char *str, t_token_list *tokens)
 
     if (ctx.buf.used_length > 0)
     {
-        if (!process_word_token(tokens, &ctx)) 
+        if (!process_word(tokens, &ctx)) 
             return (false);
     }
     
@@ -109,7 +108,7 @@ int process_spaces_outside_quotes(const char *str, t_token_list *tokens, t_lexer
 
     if (ctx->buf.used_length > 0)
     {
-        if (!process_word_token(tokens, ctx))
+        if (!process_word(tokens, ctx))
             return (-1);
         return (1);
     }

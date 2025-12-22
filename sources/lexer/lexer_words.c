@@ -2,7 +2,7 @@
 
 t_token *make_word_token(t_buf *buf);
 
-int process_word_token(t_token_list *tokens, t_lexer_context *ctx)
+int process_word(t_token_list *tokens, t_lexer_context *ctx)
 {
     t_token *token;
 
