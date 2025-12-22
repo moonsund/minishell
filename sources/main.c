@@ -23,7 +23,7 @@ int main(int argc, char **argv, char **envp)
 	{
 		line = readline("minishell> ");
 
-		if (!line) // Ctrl+D (EOF)
+		if (!line || ft_strcmp(line, "exit") == 0) // Ctrl+D (EOF) or exit command
 		{
 			printf("exit\n");
 			break;
@@ -40,8 +40,12 @@ int main(int argc, char **argv, char **envp)
 			continue;
 		}
 
-		if (!is_empty(line))
-			add_history(line);
+		if (is_empty(line) || ft_strcmp(line, "") == 0)
+		{
+			free(line);
+			continue;
+		}
+		add_history(line);
 
 		if (!tokenize_with_qmap(line, &shell.tokens))
 		{
