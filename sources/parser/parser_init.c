@@ -11,7 +11,7 @@ t_pipeline *init_pipeline()
     pl = malloc(sizeof(*pl));
     if (!pl)
     {
-        err_print(ERR_SYS, "init_pipeline");
+        err_malloc_print("init_pipeline");
         return (NULL);
     }
 

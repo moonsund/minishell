@@ -1,16 +1,17 @@
 #include "minishell.h"
 
-static int process_word_token(t_parser_context *ctx, int *exit_status);
+static int process_word_token(t_parser_context *ctx);
 static int append_arg(t_command *cmd, char *arg);
-static int process_pipe_token(t_pipeline *pl, t_parser_context *ctx, int *exit_status);
-static int process_redir_tokens(t_parser_context *ctx, int *exit_status);
+static t_exit_status process_pipe_token(t_pipeline *pl, t_parser_context *ctx);
+static t_exit_status process_redir_tokens(t_parser_context *ctx);
 static int process_redir_in_token(char **tmp, char *raw_str, char **infile);
 static int process_redir_out_append_tokens(t_parser_context *ctx);
 static int token_has_any_quotes(t_token *token);
 static int process_heredoc_token(t_parser_context *ctx);
 
-int process_tokens(t_pipeline *pl, t_token_list *list, t_parser_context *ctx, int *exit_status)
+t_exit_status process_tokens(t_pipeline *pl, t_token_list *list, t_parser_context *ctx)
 {
+    t_exit_status exit_status;
     ctx->current = list->head;
 
     while(ctx->current)
@@ -18,21 +19,20 @@ int process_tokens(t_pipeline *pl, t_token_list *list, t_parser_context *ctx, in
         ctx->next = ctx->current->next;
         if (ctx->current->type == TOK_WORD)
         {
-            if (!process_word_token(ctx, exit_status))
-            {
-                err_print(ERR_SYS, "process_tokens");
-                return (0);
-            }
+            if (!process_word_token(ctx))
+                return (ES_GENERAL);
         }
         else if (ctx->current->type == TOK_PIPE) // |
         {
-            if (!process_pipe_token(pl, ctx, exit_status))
-                return (0);
+            exit_status = process_pipe_token(pl, ctx);
+            if (exit_status != ES_SUCCESS)
+                return (exit_status);
         }
         else // < << > >>
         {
-            if (!process_redir_tokens(ctx, exit_status))
-                return (0);
+            exit_status = process_redir_tokens(ctx);
+            if (exit_status != ES_SUCCESS)
+                return (exit_status);
         }
         ctx->current = ctx->current->next;
     }
@@ -41,20 +41,16 @@ int process_tokens(t_pipeline *pl, t_token_list *list, t_parser_context *ctx, in
     {
         if (ctx->current_cmd.argv == NULL || ctx->current_cmd.argv[0] == NULL)
         {
-            err_print(ERR_SYNTAX, "near 'newline'");
-            *exit_status = 258;
-            return (0);
+            err_print(ES_SYNTAX, "near 'newline'");
+            return (ES_SYNTAX);
         }
         if (!append_cmd(pl, ctx->current_cmd))
-        {
-            *exit_status = 2;
-            return (0);
-        }
+            return (ES_GENERAL);
     }
-    return (1);
+    return (ES_SUCCESS);
 }
 
-static int process_word_token(t_parser_context *ctx, int *exit_status)
+static int process_word_token(t_parser_context *ctx)
 {
     if (!ctx->cmd_started)
     {
@@ -63,7 +59,7 @@ static int process_word_token(t_parser_context *ctx, int *exit_status)
     }
     if (!append_arg(&ctx->current_cmd, ctx->current->raw_str))
     {
-        *exit_status = 1;
+        err_malloc_print("parser: append arg");
         return (0);
     }
     return (1);
@@ -115,25 +111,22 @@ static int append_arg(t_command *cmd, char *arg)
     return (1);
 }
 
-static int process_pipe_token(t_pipeline *pl, t_parser_context *ctx, int *exit_status)
+static t_exit_status process_pipe_token(t_pipeline *pl, t_parser_context *ctx)
 {
     if (!ctx->cmd_started || !ctx->next || ctx->current_cmd.argv == NULL || ctx->current_cmd.argv[0] == NULL)
     {
-        err_print(ERR_SYNTAX, "parse error near '|'");
-        *exit_status = 258;
-        return (0);
+        err_print(ES_SYNTAX, "parse error near '|'");
+        return (ES_SYNTAX);
     }
     if (!append_cmd(pl, ctx->current_cmd))
-    {
-        *exit_status = 2;
-        return (0);
-    }
+        return (ES_GENERAL);
+
     init_command(&ctx->current_cmd);
     ctx->cmd_started = 0;
-    return (1);
+    return (ES_SUCCESS);
 }
 
-static int process_redir_tokens(t_parser_context *ctx, int *exit_status)
+static t_exit_status process_redir_tokens(t_parser_context *ctx)
 {
     if (!ctx->cmd_started)
     {
@@ -143,37 +136,27 @@ static int process_redir_tokens(t_parser_context *ctx, int *exit_status)
 
     if (!ctx->next || ctx->next->type != TOK_WORD)
     {
-        err_print(ERR_SYNTAX, "expected filename or limiter"); 
-        *exit_status = 258;
-        return (0);
+        err_print(ES_SYNTAX, "expected filename or limiter"); 
+        return (ES_SYNTAX);
     }
 
     if (ctx->current->type == TOK_REDIR_IN) // <
     {
         if (!process_redir_in_token(&ctx->tmp, ctx->next->raw_str, &ctx->current_cmd.infile))
-        {
-            *exit_status = 1;
-            return (0);
-        }
+            return (ES_GENERAL);
     }
     else if (ctx->current->type == TOK_HEREDOC) // <<
     {
         if (!process_heredoc_token(ctx))
-        {    
-            *exit_status = 1;
-            return (0);
-        }
+            return (ES_GENERAL);
     }
     else
     {
         if (!process_redir_out_append_tokens(ctx))
-        {
-            *exit_status = 1;
-            return (0);
-        }
+            return (ES_GENERAL);
     }
     ctx->current = ctx->next;
-    return (1);
+    return (ES_SUCCESS);
 }
 
 static int process_redir_in_token(char **tmp, char *raw_str, char **infile)
@@ -181,7 +164,7 @@ static int process_redir_in_token(char **tmp, char *raw_str, char **infile)
     *tmp = ft_strdup(raw_str);
     if (!*tmp)
     {
-        err_print(ERR_SYS, "process_redir_in_token");
+        err_malloc_print("parser: redir in token");
         return (0);
     }
     free(*infile);
@@ -195,7 +178,7 @@ static int process_heredoc_token(t_parser_context *ctx)
     ctx->tmp = ft_strdup(ctx->next->raw_str);
     if (!ctx->tmp)
     {
-        err_print(ERR_SYS, "process_heredoc_token");
+        err_malloc_print("parser: heredoc token");
         return (0);
     }
     free(ctx->current_cmd.heredoc_limiter);
@@ -230,7 +213,7 @@ static int process_redir_out_append_tokens(t_parser_context *ctx)
     ctx->tmp = ft_strdup(ctx->next->raw_str);
     if (!ctx->tmp)
     {
-        err_print(ERR_SYS, "process_redir_out_token");
+        err_malloc_print("parser: redir out token");
         return (0);
     }
     free(ctx->current_cmd.outfile);

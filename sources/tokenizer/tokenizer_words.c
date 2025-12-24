@@ -9,6 +9,7 @@ int process_word(t_token_list *tokens, t_lexer_context *ctx)
     token = make_word_token(&ctx->buf);
     if (!token)
     {
+        err_malloc_print("tokenizer: word token");
         free_buf(&ctx->buf);
         return (0);
     }

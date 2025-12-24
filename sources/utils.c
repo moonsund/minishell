@@ -5,7 +5,7 @@ void shell_destroy(t_shell *shell);
 void free_tokens(t_token_list *list);
 void free_pipeline(t_pipeline *pl);
 void free_env_var_list(t_env_var_list *vars);
-void err_print(t_error_type type, const char *ctx);
+void err_print(t_exit_status type, const char *ctx);
 
 void reset_iteration(t_shell *shell)
 {
@@ -82,12 +82,17 @@ void free_env_var_list(t_env_var_list *vars)
 	vars->count = 0;
 }
 
-void err_print(t_error_type type, const char *ctx)
+void err_print(t_exit_status type, const char *where)
 {
-	if (type == ERR_SYS)
-		printf("minishell: %s: %s\n", ctx, strerror(errno));
-	else if (type == ERR_SYNTAX)
-		printf("minishell: syntax_error: %s\n", ctx);
-	else if (type == ERR_GENERAL)
-        fprintf(stderr, "minishell: %s\n", ctx);
+	if (type == ES_GENERAL)
+		printf("minishell: %s: \n", where);
+	else if (type == ES_SYNTAX)
+		printf("minishell: syntax_error: %s\n", where);
+	else
+        printf( "minishell: %s\n", where);
+}
+
+void err_malloc_print(const char *where)
+{
+	printf("minishell: %s: cannot allocate memory\n", where);
 }
