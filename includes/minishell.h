@@ -15,7 +15,6 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <fcntl.h>   // open
-#include <unistd.h>  // write, close
 
 #include <sys/types.h>	// opendir
 #include <dirent.h>		// opendir
@@ -29,12 +28,19 @@ void setup_signals(void);
 
 #endif
 
-typedef enum e_error_type
+typedef enum e_exit_status
 {
-	ERR_SYS,
-	ERR_SYNTAX,
-	ERR_GENERAL
-} t_error_type;
+	ES_SUCCESS         = 0,   // success
+	ES_GENERAL         = 1,   // any “generic” error (including malloc failures, open/dup2 errors in redirections, etc.)
+	ES_BUILTIN_MISUSE  = 2,   // incorrect usage of a builtin / invalid builtin arguments
+	ES_NOT_EXECUTABLE  = 126, // command or file found, but cannot be executed (EACCES, is a directory, not executable)
+	ES_NOT_FOUND       = 127, // command not found (PATH lookup failed / file does not exist)
+	ES_SIGINT          = 130, // 128 + SIGINT (2)
+	ES_SIGQUIT         = 131, // 128 + SIGQUIT (3)
+	ES_SYNTAX          = 258, // parser syntax error
+}	t_exit_status;
+
+
 
 typedef enum e_token_type
 {
@@ -68,7 +74,6 @@ typedef struct s_lexer_context
 	bool in_dq;
 	t_qmark quote_mark;
 	t_buf buf;
-	bool malloc_error;
 } t_lexer_context;
 
 typedef struct s_token
@@ -144,12 +149,12 @@ typedef struct s_parser_context
 
 typedef struct s_shell
 {
-	int				exit_status;
 	char			**command_array;		// To delete TBC
 	t_temp_command	all_commands;			// To delete after code matching
 	t_env			**env_variables;		// To be removed: link list is more convinient for handling
 
-	t_env_var_list env_vars;				// envp vars saved in linked list 
+	t_exit_status	exit_status;
+	t_env_var_list	env_vars;				// envp vars saved in linked list 
 	t_token_list	tokens;					// The one to consider ? TBC
 	t_pipeline		*pipeline;				// array of commands ready to be executed 
     
@@ -177,11 +182,8 @@ char  **build_envp(t_env_var_list *list);                                     //
 void free_envp_partial(char **envp, size_t used);
 
 // expand.c
-int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars, int exit_status);
-char *get_last_status_string(int exit_status);
-
-// parser.c
-int build_pipeline_from_tokens(t_shell *shell);
+t_exit_status expand_tokens(t_token_list *tokens, t_env_var_list *env_vars, t_exit_status exit_status);
+char *get_last_status_string(t_exit_status exit_status);
 
 // parcer_init.c
 t_pipeline *init_pipeline();
@@ -189,30 +191,30 @@ void init_parser_context(t_parser_context *ctx);
 void init_command(t_command *cmd);
 
 // parcer_tokens.c
-int process_tokens(t_pipeline *pl, t_token_list *list, t_parser_context *ctx, int *exit_status);
+t_exit_status process_tokens(t_pipeline *pl, t_token_list *list, t_parser_context *ctx);
 
 // parcer_utils.c
 void free_cmd(t_command *cmd);
 
 // parser.c
-int build_pipeline_from_tokens(t_shell *shell);
+t_exit_status  build_pipeline_from_tokens(t_shell *shell);
 int append_cmd(t_pipeline *pl, t_command cmd);
 
-// lexer.c
-bool tokenize_with_qmap(const char *str, t_token_list *tokens);
+// tokenizer.c
+t_exit_status  tokenize_with_qmap(const char *str, t_token_list *tokens);
 t_token *make_word_token(t_buf *buf);
 
-// lexer_words.c
+// tokenizer_words.c
 int process_word(t_token_list *tokens, t_lexer_context *ctx);
 
-// lexer_operators.c
+// tokenizer_operators.c
 int check_operators(const char *str, t_token_list *tokens, t_lexer_context *context);
 
-// lexer_chars.c
+// tokenizer_chars.c
 int append_char(char c, t_buf *buf, t_qmark quote_mark);
 int boost_buf(t_buf *buf, size_t needed_length);
 
-// lexer_utils.c
+// tokenizer_utils.c
 bool is_empty(const char *str);
 bool is_space(unsigned char c);
 bool is_operator(unsigned char c);
@@ -230,7 +232,8 @@ void shell_destroy(t_shell *shell);
 void free_tokens(t_token_list *list);
 void free_pipeline(t_pipeline *pl);
 void free_env_var_list(t_env_var_list *vars);
-void err_print(t_error_type type, const char *ctx);
+void err_print(t_exit_status exit_status, const char *ctx);
+void err_malloc_print(const char *where);
 
 // signals.c
 void setup_signals(void);

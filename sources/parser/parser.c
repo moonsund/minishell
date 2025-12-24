@@ -2,28 +2,27 @@
 
 int append_cmd(t_pipeline *pl, t_command cmd);
 
-int build_pipeline_from_tokens(t_shell *shell)
+t_exit_status  build_pipeline_from_tokens(t_shell *shell)
 {
     t_parser_context ctx;
     t_pipeline *pl;
+    t_exit_status exit_status;
 
     if (!shell)
-        return (0);
+        return (ES_GENERAL);
 
     init_parser_context(&ctx);
 
     pl = init_pipeline();
     if (!pl)
-    {
-        shell->exit_status = 2;
-        return (0);
-    }
+        return (ES_GENERAL);
 
-    if (!process_tokens(pl, &shell->tokens, &ctx, &shell->exit_status))
+    exit_status = process_tokens(pl, &shell->tokens, &ctx);
+    if (exit_status != ES_SUCCESS)
     {
         free_cmd(&ctx.current_cmd);
         free_pipeline(pl);
-        return (0);
+        return (exit_status);
     }
 
     if (pl->count == 0)
@@ -35,7 +34,7 @@ int build_pipeline_from_tokens(t_shell *shell)
     }
 
     shell->pipeline = pl;
-    return (1);
+    return (ES_SUCCESS);
 }
 
 int append_cmd(t_pipeline *pl, t_command cmd)
@@ -46,7 +45,7 @@ int append_cmd(t_pipeline *pl, t_command cmd)
     new_cmds = malloc(sizeof(* new_cmds) * (pl->count + 1));
     if (!new_cmds)
     {
-        err_print(ERR_SYS, "append command");
+        err_malloc_print("append command");
         return (0);
     }
 

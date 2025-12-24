@@ -7,6 +7,7 @@ static int debug_print_heredoc_files(t_pipeline *pipeline);
 int main(int argc, char **argv, char **envp)
 {
 	char *line;
+	t_exit_status exit_status;
 	t_shell	shell;
 
 	(void)argc;
@@ -14,7 +15,7 @@ int main(int argc, char **argv, char **envp)
 
 	if (!init_shell(&shell, envp))
 	{
-		err_print(ERR_SYS, "init_shell");
+		err_print(ES_GENERAL, "init_shell");
 		return (EXIT_FAILURE);
 	}
 	setup_signals();
@@ -32,7 +33,7 @@ int main(int argc, char **argv, char **envp)
 		if (g_sigint) // Ctrl+C
 		{
 			g_sigint = 0;              
-			shell.exit_status = 130;  
+			shell.exit_status = ES_SIGINT;  
 			free(line);
 			// rl_on_new_line();
 			// rl_replace_line("", 0);
@@ -47,30 +48,41 @@ int main(int argc, char **argv, char **envp)
 		}
 		add_history(line);
 
-		if (!tokenize_with_qmap(line, &shell.tokens))
+
+		exit_status = tokenize_with_qmap(line, &shell.tokens);
+		if (exit_status != ES_SUCCESS)
 		{
-			printf("minishell: syntax error: unexpected end of file\n");
-			shell.exit_status = 2;
+			shell.exit_status = exit_status;
 			free(line);
+			reset_iteration(&shell);
 			continue;
 		}
 		printf("\n[tokens_list_debug]:\n");	// for debugging, to be deleted
-		print_token_list(&shell.tokens);
+		print_token_list(&shell.tokens);	// for debugging, to be deleted
 
-		expand_tokens(&shell.tokens, &shell.env_vars, shell.exit_status);
 
-		printf("\n[expanded_tokens_list_debug]:\n"); // for debugging, to be deleted
-		print_token_list(&shell.tokens);
-
-		if (!build_pipeline_from_tokens(&shell))
+		exit_status = expand_tokens(&shell.tokens, &shell.env_vars, shell.exit_status);
+		if (exit_status != ES_SUCCESS)
 		{
-			free_tokens(&shell.tokens);
+			shell.exit_status = exit_status;
 			free(line);
+			reset_iteration(&shell);
 			continue;
 		}
-		
+		printf("\n[expanded_tokens_list_debug]:\n"); // for debugging, to be deleted
+		print_token_list(&shell.tokens);	// for debugging, to be deleted
+
+
+		exit_status = build_pipeline_from_tokens(&shell);
+		if (exit_status != ES_SUCCESS)
+		{
+			shell.exit_status = exit_status;
+			free(line);
+			reset_iteration(&shell);
+			continue;
+		}
 		printf("\n[pipelines_debug]:\n");	// for debugging, to be deleted
-		print_pipe_line(shell.pipeline);
+		print_pipe_line(shell.pipeline);	// for debugging, to be deleted
 
 		g_sigint = 0;
 
@@ -89,7 +101,6 @@ int main(int argc, char **argv, char **envp)
 			free(line);
 			continue;
 		}
-
 		debug_print_heredoc_files(shell.pipeline); // for debugging, to be deleted
 		
 		// check_command_type_and_execute(shell);	// Exec testing starts here
@@ -99,14 +110,6 @@ int main(int argc, char **argv, char **envp)
 	shell_destroy(&shell);
 	return (EXIT_SUCCESS);
 }
-
-
-
-
-
-
-
-
 
 
 
@@ -195,7 +198,7 @@ static int debug_print_heredoc_files(t_pipeline *pipeline) // for debugging, to 
 	{
 		if (pipeline->cmds[i].infile)
 		{
-			fd = open(pipeline[i].cmds->infile, O_RDONLY);
+			fd = open(pipeline->cmds[i].infile, O_RDONLY);
 			if (fd < 0)
 				return (0);
 			
