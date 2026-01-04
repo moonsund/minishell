@@ -5,7 +5,10 @@ int boost_buf(t_buf *buf, size_t needed_length);
 int append_char(char c, t_buf *buf, t_qmark quote_mark)
 {
     if (!boost_buf(buf, buf->used_length + 1))
+    {
+        err_malloc_print("tokenizer: char append");
         return (0);
+    }
 
     buf->characters[buf->used_length] = c;
     buf->quotes_map[buf->used_length] = quote_mark;

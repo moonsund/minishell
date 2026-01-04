@@ -1,13 +1,13 @@
 #include "minishell.h"
 
-int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars);
+int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, int exit_status);
 static char *generate_heredoc_filename(size_t heredoc_index);
-static int expand_heredoc(char **line, t_env_var_list *env_vars);
+static int expand_heredoc(char **line, t_env_var_list *env_vars, int exit_status);
 static int write_heredoc_line(int fd, char *line);
 static int append_charter(char **line, char c);
 static int append_string(char **line, const char *str);
 
-int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars)
+int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, int exit_status)
 {
     size_t  i;
     char    *line;
@@ -28,7 +28,7 @@ int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars)
             heredoc_filename = generate_heredoc_filename(heredoc_index++);
             if (!heredoc_filename)
                 return (0);
-            
+
             fd = open(heredoc_filename, O_WRONLY | O_CREAT | O_TRUNC, 0600);
             if (fd < 0)
             {
@@ -39,13 +39,23 @@ int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars)
             while (true)
             {
                 line = readline("heredoc> ");
+
+                if (g_sigint) // ctrl+c
+                {
+                    close(fd);
+                    unlink(heredoc_filename);
+                    free(heredoc_filename);
+                    return (0);
+                }
+
                 if (!line)
                 {
+                    unlink(heredoc_filename);
                     free(heredoc_filename);
                     close(fd);
                     return (0);
                 }
-                    
+
                 if (pipeline->cmds[i].heredoc_limiter
                     && ft_strcmp(line, pipeline->cmds[i].heredoc_limiter) == 0)
                 {
@@ -58,10 +68,11 @@ int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars)
 
                 if (pipeline->cmds[i].heredoc_expand_needed)
                 {
-                    if (!expand_heredoc(&line, env_vars))
+                    if (!expand_heredoc(&line, env_vars, exit_status))
                     {
                         free(line);
                         close(fd);
+                        unlink(heredoc_filename);
                         free(heredoc_filename);
                         return (0);
                     }
@@ -98,7 +109,7 @@ static char *generate_heredoc_filename(size_t heredoc_index)
     return (file_name);
 }
 
-static int expand_heredoc(char **line, t_env_var_list *env_vars)
+static int expand_heredoc(char **line, t_env_var_list *env_vars, int exit_status)
 {
     size_t  i;
     size_t  j;
@@ -106,12 +117,14 @@ static int expand_heredoc(char **line, t_env_var_list *env_vars)
     char    *new_line;
     char    *var_name;
     size_t  var_length;
-    char    *val;
+    char    *value;
 
     if (!line)
         return (0);
 
-    new_line = NULL;
+    new_line = ft_strdup("");
+    if (!new_line)
+        return (0);
     i = 0;
 
     while ((*line)[i])
@@ -131,7 +144,7 @@ static int expand_heredoc(char **line, t_env_var_list *env_vars)
 
             else if ((*line)[i + 1] == '?')
             {
-                if (!append_string(&new_line, get_last_status_string()))
+                if (!append_string(&new_line, get_last_status_string(exit_status)))
                 {
                     free(new_line);
                     return (0);
@@ -169,12 +182,12 @@ static int expand_heredoc(char **line, t_env_var_list *env_vars)
             ft_memcpy(var_name, *line + start, var_length);
             var_name[var_length] = '\0';
 
-            val = get_var_value(env_vars, var_name);
+            value = get_var_value(env_vars, var_name);
             free(var_name);
 
-            if (val && val[0] != '\0')
+            if (value && value[0] != '\0')
             {
-                if (!append_string(&new_line, val))
+                if (!append_string(&new_line, value))
                 {
                     free(new_line);
                     return (0);
@@ -204,8 +217,14 @@ static int write_heredoc_line(int fd, char *line)
     size_t line_length;
 
     if (!line)
+    {
+        bytes_written = write(fd, "\n", 1);
+        if (bytes_written < 0)
+                return (0);
         return (1);
-    
+    }
+
+
     line_length = ft_strlen(line);
     if (line_length > 0)
     {
@@ -226,9 +245,9 @@ static int append_charter(char **line, char c)
 
     if (!line)
         return (0);
-    
+
     if (!*line)
-    {    
+    {
         new_line = malloc(2);
         if (!new_line)
             return (0);
@@ -264,7 +283,7 @@ static int append_string(char **line, const char *str)
     str_length = ft_strlen(str);
 
     if (!*line)
-    {   
+    {
         new_line = malloc(str_length + 1);
         if (!new_line)
             return (0);
@@ -282,8 +301,8 @@ static int append_string(char **line, const char *str)
         ft_memcpy(new_line, *line, line_length);
         ft_memcpy(new_line + line_length, str, str_length);
         new_line[str_length + line_length] = '\0';
-        
-        free(line);
+
+        free(*line);
         *line = new_line;
         return (1);
     }

@@ -1,17 +1,18 @@
 #include "minishell.h"
 
 static bool token_needs_expansion(t_token *token);
-static int expand_word_token(t_token *token, t_env_var_list *env_vars);
-char *get_last_status_string();
-static int append_str(char *str, t_buf *buf, t_qmark quote_mark);
+static t_exit_status expand_word_token(t_token *token, t_env_var_list *env_vars, t_exit_status exit_status);
+char *get_last_status_string(t_exit_status exit_status);
+static int append_str(t_buf *buf, char *str, t_qmark quote_mark);
 
-int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars)
+t_exit_status expand_tokens(t_token_list *tokens, t_env_var_list *env_vars, t_exit_status exit_status)
 {    
     t_token *prev;
     t_token *cur;
+    t_exit_status new_exit_status;
     
     if (!tokens)
-        return (0);
+        return (ES_GENERAL);
     
     prev = NULL;
     cur = tokens->head;
@@ -20,15 +21,19 @@ int expand_tokens(t_token_list *tokens, t_env_var_list *env_vars)
         if (cur->type == TOK_WORD)
         {
             if (!prev || prev->type != TOK_HEREDOC)
-                expand_word_token(cur, env_vars);
+            {
+                new_exit_status = expand_word_token(cur, env_vars, exit_status);
+                if (new_exit_status != ES_SUCCESS)
+                    return (new_exit_status);
+            }
         }
             prev = cur;
             cur = cur->next;
     }
-    return (1);
+    return (ES_SUCCESS);
 }
 
-static int expand_word_token(t_token *token, t_env_var_list *env_vars)
+static t_exit_status expand_word_token(t_token *token, t_env_var_list *env_vars, t_exit_status exit_status)
 {
     t_buf buf;
     size_t i;
@@ -39,10 +44,10 @@ static int expand_word_token(t_token *token, t_env_var_list *env_vars)
     char *var_name;
 
     if (!token || token->type != TOK_WORD || !token->quotes_map || !token->raw_str)
-        return (0);
+        return (ES_GENERAL);
     
     if (!token_needs_expansion(token))
-        return (1);
+        return (ES_SUCCESS);
 
     init_buffer(&buf);
 
@@ -50,7 +55,6 @@ static int expand_word_token(t_token *token, t_env_var_list *env_vars)
     while (i < token->length)
     {
         start = 0;
-
         if (token->raw_str[i] == '$')
         {
             start = i + 1;
@@ -59,7 +63,7 @@ static int expand_word_token(t_token *token, t_env_var_list *env_vars)
                 if (!append_char(token->raw_str[i], &buf, Q_NONE))
                 {
                     free_buf(&buf);
-                    return (0);
+                    return (ES_GENERAL);
                 }
                 i++;
                 continue;
@@ -67,11 +71,11 @@ static int expand_word_token(t_token *token, t_env_var_list *env_vars)
 
             if (token->raw_str[start] == '?')
             {
-                val = get_last_status_string();
-                if (!val || !append_str(val, &buf, Q_NONE)) // (&buf, val, Q_NONE)
+                val = get_last_status_string(exit_status);
+                if (!val || !append_str(&buf, val, Q_NONE)) // (&buf, val, Q_NONE)
                 {
                     free_buf(&buf);
-                    return (0);
+                    return (ES_GENERAL);
                 }
                 i += 2;
                 continue;
@@ -87,17 +91,16 @@ static int expand_word_token(t_token *token, t_env_var_list *env_vars)
                 if (!append_char(token->raw_str[i], &buf, Q_NONE))
                 {
                     free_buf(&buf);
-                    return (0);
+                    return (ES_GENERAL);
                 }
                 i++;
                 continue;
             }
 
             var_length = j - start;
-
             var_name = (char *)malloc(sizeof(char) * (var_length + 1));
             if (!var_name)
-                return (0);
+                return (ES_GENERAL);
             
             ft_memcpy(var_name, token->raw_str + start, var_length);
             var_name[var_length] = '\0';
@@ -107,22 +110,21 @@ static int expand_word_token(t_token *token, t_env_var_list *env_vars)
 
             if (val && val[0] != '\0')
             {
-                if (!append_str(val, &buf, Q_NONE))
+                if (!append_str(&buf, val, Q_NONE))
                 {
                     free_buf(&buf);
-                    return (0);
+                    return (ES_GENERAL);
                 }                
             }
             i = j;
             continue;
         }
-
         else
         {
             if (!append_char(token->raw_str[i], &buf, Q_NONE))
             {
                 free_buf(&buf);
-                return (0);
+                return (ES_GENERAL);
             }
         }
         i++;
@@ -135,10 +137,10 @@ static int expand_word_token(t_token *token, t_env_var_list *env_vars)
     token->quotes_map = buf.quotes_map;
     token->raw_str = buf.characters;
     token->length = buf.used_length - 1;
-    return (1);
+    return (ES_SUCCESS);
 }
 
-static int append_str(char *str, t_buf *buf, t_qmark quote_mark)
+static int append_str(t_buf *buf, char *str, t_qmark quote_mark)
 {
     size_t i;
     size_t str_length;
@@ -159,10 +161,9 @@ static int append_str(char *str, t_buf *buf, t_qmark quote_mark)
     return (1);
 }
 
-
-char *get_last_status_string()  // using global variable?
+char *get_last_status_string(t_exit_status exit_status)
 {
-    return NULL;
+    return (ft_itoa(exit_status));
 }
 
 static bool token_needs_expansion(t_token *token)

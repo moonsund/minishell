@@ -26,13 +26,17 @@ OBJ_PATH = objects/
 
 SRC_FILES = \
 	main.c \
+	init/init_shell.c \
 	signals.c \
 	utils.c \
-	lexer/lexer.c \
-	lexer/lexer_words.c \
-	lexer/lexer_operators.c \
-	lexer/lexer_chars.c \
-	lexer/lexer_utils.c \
+	tokenizer/tokenizer.c \
+	tokenizer/tokenizer_words.c \
+	tokenizer/tokenizer_operators.c \
+	tokenizer/tokenizer_chars.c \
+	tokenizer/tokenizer_utils.c \
+	parser/parser_init.c \
+	parser/parser_tokens.c \
+	parser/parser_utils.c \
 	parser/parser.c \
 	expand/expand.c \
 	heredoc/heredoc.c \
@@ -40,6 +44,7 @@ SRC_FILES = \
 	exec_command_filter.c \
 	exec_builtin_commands.c \
 	exec_external_commands.c
+	envp/envp_utils.c
 
 SRCS = $(addprefix $(SRC_PATH),$(SRC_FILES))
 OBJS = $(addprefix $(OBJ_PATH),$(SRC_FILES:.c=.o))

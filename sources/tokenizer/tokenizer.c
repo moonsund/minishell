@@ -4,7 +4,7 @@ static void init_lexer_context(t_lexer_context *context);
 static int process_quotes(const char *str, t_lexer_context *ctx);
 static int process_spaces_outside_quotes(const char *str, t_token_list *tokens, t_lexer_context *ctx);
 
-bool tokenize_with_qmap(const char *str, t_token_list *tokens)
+t_exit_status tokenize_with_qmap(const char *str, t_token_list *tokens)
 {
     t_lexer_context ctx;
     int sp_res;
@@ -12,7 +12,6 @@ bool tokenize_with_qmap(const char *str, t_token_list *tokens)
 
     init_lexer_context(&ctx);
  
-
     while (str[ctx.i]) 
     {
         if (process_quotes(str, &ctx))
@@ -21,14 +20,14 @@ bool tokenize_with_qmap(const char *str, t_token_list *tokens)
         // process white spaces outside quotes
         sp_res = process_spaces_outside_quotes(str, tokens, &ctx);
         if (sp_res < 0)
-            return (0);
+            return (ES_GENERAL);
         if (sp_res > 0)
             continue;
 
         // process operators outside quotes
         op_res = check_operators(str, tokens, &ctx);
         if (op_res < 0)
-            return (0);
+            return (ES_GENERAL);
         if (op_res > 0)
             continue;
 
@@ -36,7 +35,7 @@ bool tokenize_with_qmap(const char *str, t_token_list *tokens)
         if (!append_char(str[ctx.i], &ctx.buf, ctx.quote_mark))
         {
             free_buf(&ctx.buf);
-            return (false);
+            return (ES_GENERAL);
         }
         ctx.i++;
     }
@@ -44,17 +43,17 @@ bool tokenize_with_qmap(const char *str, t_token_list *tokens)
     if (ctx.in_sq || ctx.in_dq)
     {
         free_buf(&ctx.buf);
-        return (false);
+        return (ES_SYNTAX);
     }
 
     if (ctx.buf.used_length > 0)
     {
-        if (!process_word_token(tokens, &ctx)) 
-            return (false);
+        if (!process_word(tokens, &ctx)) 
+            return (ES_GENERAL);
     }
     
     free_buf(&ctx.buf);
-    return (true);
+    return (ES_SUCCESS);
 }
 
 static void init_lexer_context(t_lexer_context *context)
@@ -65,13 +64,12 @@ static void init_lexer_context(t_lexer_context *context)
     context->i = 0;
     context->in_dq = false;
     context->in_sq = false;
-    context->malloc_error = false;
 }
 
 int process_quotes(const char *str, t_lexer_context *ctx)
 {
     if (!str || !ctx)
-        return (false);
+        return (0);
 
     char c;
 
@@ -109,7 +107,7 @@ int process_spaces_outside_quotes(const char *str, t_token_list *tokens, t_lexer
 
     if (ctx->buf.used_length > 0)
     {
-        if (!process_word_token(tokens, ctx))
+        if (!process_word(tokens, ctx))
             return (-1);
         return (1);
     }

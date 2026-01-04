@@ -14,6 +14,7 @@ int check_operators(const char *str, t_token_list *tokens, t_lexer_context *cont
             token = make_word_token(&context->buf);
             if (!token)
             {
+                err_malloc_print("tokenizer: word token");
                 free_buf(&context->buf);
                 return (-1);
             }
@@ -50,6 +51,7 @@ static int process_operator_token(t_token_type type, const char *literal, t_toke
     token = make_operator_token(type, literal);
     if (!token)
     {
+        err_malloc_print("tokenizer: operator token");
         free_buf(&context->buf);
         return (-1);
     }
