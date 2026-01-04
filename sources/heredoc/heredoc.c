@@ -28,7 +28,7 @@ int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, int exit_sta
             heredoc_filename = generate_heredoc_filename(heredoc_index++);
             if (!heredoc_filename)
                 return (0);
-            
+
             fd = open(heredoc_filename, O_WRONLY | O_CREAT | O_TRUNC, 0600);
             if (fd < 0)
             {
@@ -39,7 +39,7 @@ int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, int exit_sta
             while (true)
             {
                 line = readline("heredoc> ");
-                
+
                 if (g_sigint) // ctrl+c
                 {
                     close(fd);
@@ -72,8 +72,8 @@ int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, int exit_sta
                     {
                         free(line);
                         close(fd);
-                        free(heredoc_filename);
                         unlink(heredoc_filename);
+                        free(heredoc_filename);
                         return (0);
                     }
                 }
@@ -223,7 +223,7 @@ static int write_heredoc_line(int fd, char *line)
                 return (0);
         return (1);
     }
-        
+
 
     line_length = ft_strlen(line);
     if (line_length > 0)
@@ -245,9 +245,9 @@ static int append_charter(char **line, char c)
 
     if (!line)
         return (0);
-    
+
     if (!*line)
-    {    
+    {
         new_line = malloc(2);
         if (!new_line)
             return (0);
@@ -283,7 +283,7 @@ static int append_string(char **line, const char *str)
     str_length = ft_strlen(str);
 
     if (!*line)
-    {   
+    {
         new_line = malloc(str_length + 1);
         if (!new_line)
             return (0);
@@ -301,7 +301,7 @@ static int append_string(char **line, const char *str)
         ft_memcpy(new_line, *line, line_length);
         ft_memcpy(new_line + line_length, str, str_length);
         new_line[str_length + line_length] = '\0';
-        
+
         free(*line);
         *line = new_line;
         return (1);
