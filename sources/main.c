@@ -104,7 +104,7 @@ int main(int argc, char **argv, char **envp)
 		check_command_type_and_execute(&shell);	// Exec testing starts here
 		shell.pipeline = NULL;
 		free_tokens(&shell.tokens);
-		debug_print_heredoc_files(shell.pipeline); // for debugging, to be deleted
+//		debug_print_heredoc_files(shell.pipeline); // for debugging, to be deleted
 
 		// check_command_type_and_execute(shell);	// Exec testing starts here
 		free(line);
@@ -189,7 +189,7 @@ static void print_pipe_line(t_pipeline *pipeline) // for debugging, to be delete
     }
 }
 
-static int debug_print_heredoc_files(t_pipeline *pipeline) // for debugging, to be deleted
+/* static int debug_print_heredoc_files(t_pipeline *pipeline) // for debugging, to be deleted
 {
 	size_t i;
 	int fd;
@@ -223,4 +223,4 @@ static int debug_print_heredoc_files(t_pipeline *pipeline) // for debugging, to 
 		i++;
 	}
 	return (1);
-}
+} */

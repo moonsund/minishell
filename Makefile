@@ -43,7 +43,7 @@ SRC_FILES = \
 	envp/envp.c \
 	exec_command_filter.c \
 	exec_builtin_commands.c \
-	exec_external_commands.c
+	exec_external_commands.c \
 	envp/envp_utils.c
 
 SRCS = $(addprefix $(SRC_PATH),$(SRC_FILES))

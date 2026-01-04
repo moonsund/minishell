@@ -1,11 +1,6 @@
 #include "minishell.h"
 #include "libft.h"
 
-// Fetch cmd 1
-// Put output in pipe
-// Fetch md2
-// Read input from pipe
-
 void	execute_external_commands(t_shell *minishell)
 {
 	t_command	*all_commands = minishell->pipeline->cmds;
@@ -13,6 +8,9 @@ void	execute_external_commands(t_shell *minishell)
 	size_t	i = 0;
 	int		fd[2] = {0, 1};			// fd[0] = in --- fd[1] = out
 	int		pipe_fd[2] = {0};		// fd[0] = read - fd[1] = write
+
+	// char	*pour_test;
+	// pour_test = ft_calloc(sizeof(char), 101);
 
 	char	**execve_args;						// Tableau de strings (arguments du programme executé par execve)
 	execve_args = ft_calloc(sizeof(char *), 4);	// Room for 4 args
@@ -26,8 +24,9 @@ void	execute_external_commands(t_shell *minishell)
 
 	int	commands_left = minishell->pipeline->count;
 
-	while(commands_left > 0)									// 🟣 |				ls | grep sources		sort < y | > z
+	while(commands_left > 0)								// 🟣 |				ls | grep sources		sort < y | > z
 	{
+		i = 0;												// reset flags/args pour chaque nouvelle commande
 		execve_args_count = 0;
 		current_command = all_commands->argv[0];
 		execve_args[execve_args_count] = ft_strjoin("/bin/", current_command);				// Create binary path for the ext command
@@ -61,24 +60,17 @@ void	execute_external_commands(t_shell *minishell)
 		// 	// shell behavior handled already
 		// }
 
-// Fetch cmd 1
-// Put output in pipe
-// Fetch md2
-// Read input from pipe
-
 		if(minishell->pipeline->count == 1)					// No pipes = keep things easy - at least for now
 			fork_and_exec(minishell, fd, execve_args);
 		else												// command :	ls | grep sources
 		{
-			pipe_fd[0] = fd[1];								// 				pipe_fd read side = stdout de ls
-			// pipe_fd[1] = NO NEED, done automatically;	//				pipe_fd write side = stdin de grep (same as above, nothing to do)
 			if(pipe(pipe_fd) == -1)							// Open pipe w/ fd above
 				perror("----------------- Error");
-			// next step : executer ls dans une fork ?
-			// dans le child : executer ls + faire en sorte que l'output de 'ls' soit ecrit dans pipe_fd[1]
-			// dans le parent : wait + lire l'output de ls dans le pipe_fd[0], et le donner a grep (en replacant stdin by fd_pipe[0] avec dup2() ?)
-			// la prochaine commande 'grep' doit lire depuis pipe_fd en le considerant comme son stdin
-
+			dup2(pipe_fd[1], fd[1]);						// fd[1] (out) pointe maintenant sur pipe_fd[1] (write)
+			fork_and_exec(minishell, fd, execve_args);		// exec
+			// read(pipe_fd[0], pour_test, 100);			// test read from pipe - ALLELUHIA
+			fd[1] = STDOUT_FILENO;							// reset pour afficher next cmd dans le terminal
+			fd[0] = pipe_fd[0];			// update de input fd[0] pour qu'il soit pipe_fd[0] dans la commande suivante (fork?)
 		}
 		commands_left--;
 		all_commands++;
@@ -94,6 +86,7 @@ void	execute_external_commands(t_shell *minishell)
 // Fetch env variables w/ Leo's build_envp function when he's done
 void	fork_and_exec(t_shell *minishell, int *fd, char	**execve_args)
 {
+	(void)minishell;
 	char	*envp[] = {NULL};								// Fetch from struct using build_envp function (Done by Leo TBC)
 	pid_t	fork_pid_return = fork();						// Seulement utile en cas de < << > >> |
 	if(fork_pid_return == -1)
@@ -108,27 +101,27 @@ void	fork_and_exec(t_shell *minishell, int *fd, char	**execve_args)
 			perror("------------------ Error");
 		if(status != 0)
 			printf("status is not 0 (%d) - Check macro in 'man waitpid' to find out what that means\n", status);
-		printf("%sDEBUG * From Parent - PID : %d\n%s", BLUE, getpid(), NC);
+		// printf("%sDEBUG * From Parent - PID : %d\n%s", BLUE, getpid(), NC);
 	}
 	else		// Le child exécute la commande binaire avec execve
 	{
-		printf("%sDEBUG * From Child - PID : %d - Parent PID : %d\n%s", CYAN, getpid(), getppid(), NC);
-		printf("%sDEBUG * Param FD_in : %d - Param FD_out : %d - Command : %s\n%s", CYAN, fd[0], fd[1], execve_args[0], NC);
+		// printf("%sDEBUG * From Child - PID : %d - Parent PID : %d\n%s", CYAN, getpid(), getppid(), NC);
+		// printf("%sDEBUG * Param FD_in : %d - Param FD_out : %d - Command : %s\n%s", CYAN, fd[0], fd[1], execve_args[0], NC);
 		if(fd[0] != STDIN_FILENO)
 		{
-			printf("%sNew infile - FD %d is now FD 0 *** Stdout theorically unchanged : %d\n%s", YELLOW, fd[0], fd[1], NC);
+			// printf("%sNew infile - FD %d is now FD 0 *** Stdout theorically unchanged : %d\n%s", YELLOW, fd[0], fd[1], NC);
 			dup2(fd[0], STDIN_FILENO);
 			close(fd[0]);					// Ok to close because it's been duplicated and it's now 0
 		}
 		if(fd[1] != STDOUT_FILENO)
 		{
-			printf("%sNew outfile - FD %d is now FD 1 *** Stdin theorically unchanged : %d\n%s", YELLOW, fd[1], fd[0], NC);
+			// printf("%sNew outfile - FD %d is now FD 1 *** Stdin theorically unchanged : %d\n%s", YELLOW, fd[1], fd[0], NC);
 			dup2(fd[1], STDOUT_FILENO);
 			// From here, nothing will printed on monitor because FD has changed
 			close(fd[1]);					// Ok to close because it's been duplicated and it's now 1
 		}
-		printf("%s", GREEN);	// So that the official output stands out
-		fflush(0);				// Remove after debug
+		// printf("%s", GREEN);	// So that the official output stands out
+		// fflush(0);				// Remove after debug
 
 		// int	pipe_fd[2] = {0};		// FDs for the pipe only, not related to the other fd
 		// if (minishell->pipeline->count > 1)
@@ -176,7 +169,7 @@ void	fork_and_exec(t_shell *minishell, int *fd, char	**execve_args)
 				perror("------------------ Error");
 			}
 		// }
-		printf("%s", NC);
+		// printf("%s", NC);
 		// No need to revert FD back to normal as everything is happening only within the child
 	}
 }
