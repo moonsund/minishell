@@ -8,7 +8,8 @@ void	execute_external_commands(t_shell *minishell)
 	size_t	i = 0;
 	int		fd[2] = {0, 1};			// fd[0] = in --- fd[1] = out
 	int		pipe_fd[2] = {0};		// fd[0] = read - fd[1] = write
-
+	int		backup_stdin = dup(STDIN_FILENO);			// Penser à les fermer
+	int		backup_stdout = dup(STDOUT_FILENO);			// Penser à les fermer
 	// char	*pour_test;
 	// pour_test = ft_calloc(sizeof(char), 101);
 
@@ -53,7 +54,7 @@ void	execute_external_commands(t_shell *minishell)
 				fd[1] = fetch_fd(all_commands->outfile, false, true);
 			}
 		}
-		// if(all_commands->has_heredoc == 1)					// 🟣 << No need to do anything, same behaviour as < w/ infile
+		// if(all_commands->has_heredoc == 1)				// 🟣 << No need to do anything, same behaviour as < w/ infile
 		// {
 		// 	// delimiter saved in struct
 		// 	// input saved in .heredoc_0 (struct infile)
@@ -69,7 +70,7 @@ void	execute_external_commands(t_shell *minishell)
 			dup2(pipe_fd[1], fd[1]);						// fd[1] (out) pointe maintenant sur pipe_fd[1] (write)
 			fork_and_exec(minishell, fd, execve_args);		// exec
 			// read(pipe_fd[0], pour_test, 100);			// test read from pipe - ALLELUHIA
-			fd[1] = STDOUT_FILENO;							// reset pour afficher next cmd dans le terminal
+			fd[1] = backup_stdout;							// reset pour afficher next cmd dans le terminal
 			fd[0] = pipe_fd[0];			// update de input fd[0] pour qu'il soit pipe_fd[0] dans la commande suivante (fork?)
 		}
 		commands_left--;
