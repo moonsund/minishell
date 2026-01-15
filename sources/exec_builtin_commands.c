@@ -17,11 +17,11 @@ void	execute_built_in_commands(t_shell *minishell)
 	}
 	else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "cd") == 0)
 	{
-		printf("%sDEBUG - Old path :\t%s\n", GREEN, current_working_directory);
+		printf("DEBUG - Old path :\t%s\n", current_working_directory);
 		execute_cd(minishell->pipeline->cmds);
-		current_working_directory = ft_calloc(sizeof(char), PATH_MAX);						// Comment out for debug
-		getcwd(current_working_directory, PATH_MAX);										// Comment out for debug
-		printf("DEBUG - New path :\t%s\n%s", current_working_directory, NC);	// Comment out for debug
+		// current_working_directory = ft_calloc(sizeof(char), PATH_MAX);					// Comment out for debug
+		// getcwd(current_working_directory, PATH_MAX);										// Comment out for debug
+		// printf("DEBUG - New path :\t%s\n", current_working_directory);					// Comment out for debug
 	}
 	else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "pwd") == 0)
 	{

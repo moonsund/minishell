@@ -1,0 +1,15 @@
+.
+..
+.git
+.gitignore
+.heredoc_0
+includes
+libft
+Makefile
+minishell
+objects
+out
+sources
+test_so
+w
+y

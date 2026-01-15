@@ -171,11 +171,11 @@ typedef struct s_shell
 int init_shell(t_shell *shell, char **envp);
 
 // envp.c
-t_var  *find_var(t_env_var_list *list, const char *name);
-int     set_var(t_env_var_list *list, const char *name, const char *value);   // export
-int     unset_var(t_env_var_list *list, const char *name);                    // unset
-char   *get_var_value(t_env_var_list *var_list, const char *var);                // my_getenv
-char  **build_envp(t_env_var_list *list);                                     // for execve
+t_var	*find_var(t_env_var_list *list, const char *name);
+int		set_var(t_env_var_list *list, const char *name, const char *value);   // export
+int		unset_var(t_env_var_list *list, const char *name);                    // unset
+char	*get_var_value(t_env_var_list *var_list, const char *var);            // my_getenv
+char	**build_envp(t_env_var_list *list);                                   // for execve
 
 // envp_utils.c
 void free_envp_partial(char **envp, size_t used);
@@ -242,6 +242,8 @@ void setup_signals(void);
 void	check_command_type_and_execute(t_shell *minishell);
 void	execute_built_in_commands(t_shell *minishell);
 void	execute_external_commands(t_shell *minishell);
+void	replace_cmd_by_binary_path(char *cmd);
+void	fd_update_if_redirections(t_command *all_commands, int *fd);
 
 // exec built in functions
 char	*fetch_current_working_directory(void);
@@ -264,7 +266,7 @@ void	execute_exit(t_shell *minishell);
 // exec external functions
 char	*build_path(char *file_name);
 int		fetch_fd(char *file_name, bool append, bool truncate);
-void	fork_and_exec(t_shell *minishell, int *fd, char	**execve_args);
+void	fork_and_exec(t_shell *minishell, char	**envp, int *fd, char	**execve_args);
 
 // Free functions
 // void	del_string(char *param);
