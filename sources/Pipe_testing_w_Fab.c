@@ -29,7 +29,7 @@ int	main(void)
 	pipe(pipe_fd);
 	pid_ls = fork();
 	if (pid_ls == 0)
-	{													// Entrée/Input de ls inchangé = STDIN = 0 // sa sortie est l'entrée du pipe
+	{													// Entrée/Input de ls inchangé = STDIN = 0 / Son output est l'entrée du pipe
 		close(pipe_fd[0]);
 		dup2(pipe_fd[1], STDOUT_FILENO);				// pipe_fd[1] devient STDOUT_FILENO
 		close(pipe_fd[1]);

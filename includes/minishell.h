@@ -265,10 +265,12 @@ void	execute_exit(t_shell *minishell);
 
 // exec external functions
 char	*build_path(char *file_name);
-int		fetch_fd(char *file_name, bool append, bool truncate);
-void	fork_and_exec(t_shell *minishell, char	**envp, int *fd, char	**execve_args);
+int		open_fd(char *file_name, bool append, bool truncate);
+void	fork_and_exec(t_shell *minishell, int *fd, char **execve_args);
+void	pipes_party(t_shell *minishell, int *fd_in, int *fd_out, char **execve_args);
 
 // Free functions
+void	close_and_set_to_neg(int *fd);
 // void	del_string(char *param);
 // void	free_all_vars(t_env **head);
 #endif

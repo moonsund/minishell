@@ -1,0 +1,3 @@
+ 21:46:24 up  4:58,  1 user,  load average: 0.30, 0.40, 0.42
+USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
+schappuy tty7     :0               16:53    4:58m  2:54   0.17s /usr/sbin/ft-init hooks login-user env GNOME_SHELL_SESSION_MODE=ubuntu /usr/bin/gnome-session --systemd --session=ubuntu
