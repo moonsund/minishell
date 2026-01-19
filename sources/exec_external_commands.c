@@ -35,17 +35,18 @@ void	execute_external_commands(t_shell *minishell)
 	t_command	*all_commands = minishell->pipeline->cmds;
 	char	**envp = build_envp(&minishell->env_vars);
 	int		fd[2] = {STDIN_FILENO, STDOUT_FILENO};		// fd[0] = in --- fd[1] = out
-	int		pipe_fd[2] = {-1, -1};						// fd[0] = read - fd[1] = write
+	int		pipe_fd_in[2] = {STDIN_FILENO, -1};			// fd[0] = read - fd[1] = write
+	int		pipe_fd_out[2] = {-1, -1};					// fd[0] = read - fd[1] = write
 	int		backup_stdout = dup(STDOUT_FILENO);			// Penser à le fermer
-	// char	*pour_test;
-	// pour_test = ft_calloc(sizeof(char), 101);
+	char	*pour_test;
+	pour_test = ft_calloc(sizeof(char), 101);
 
 	char	**execve_args;								// Commande qui sera executée par execve (avec flags, si présents)
 	int	commands_left = minishell->pipeline->count;
 
 	while(commands_left > 0)								// 🟣 |				ls | grep sources		sort < y | > z
 	{
-		execve_args = minishell->pipeline->cmds->argv;
+		execve_args = all_commands->argv;
 		replace_cmd_by_binary_path(execve_args[0]);
 		fd_update_if_redirections(all_commands, fd);
 
@@ -53,17 +54,29 @@ void	execute_external_commands(t_shell *minishell)
 			fork_and_exec(minishell, envp, fd, execve_args);
 		else												// command :	ls | grep sources
 		{
-			// Open new pipe
-			// Join fd[1] (out) and pipe_fd[1] (write)
-			// TO DO - Join pipe_fd[0] (read) and fd[0] of next command (!! Back up fd of previous command do to so ?)
-			// At the end (last node), put back stdout original to print output on screen
-			if(pipe(pipe_fd) == -1)
+			// ouvrir pipe_fd_out
+			if(pipe(pipe_fd_out) == -1)
 				perror("Error");
-			dup2(pipe_fd[1], fd[1]);						// fd[1] (out) pointe maintenant sur pipe_fd[1] (write)
-			fork_and_exec(minishell, envp, fd, execve_args);
-			// read(pipe_fd[0], pour_test, 100);			// test read from pipe - ALLELUHIA
-			fd[1] = backup_stdout;							// reset pour afficher next cmd dans le terminal
-			fd[0] = pipe_fd[0];			// update de input fd[0] pour qu'il soit pipe_fd[0] dans la commande suivante (fork?)
+			if(commands_left == 1)
+				fd[1] = backup_stdout;						// reset fd[1] à sa valeur initiale pour afficher last output dans le terminal
+
+			// dup2(pipe_fd[1], fd[1]);						// fd[1] (out) pointe maintenant sur pipe_fd[1] (write)
+
+			fork_and_exec(minishell, envp, {pipe_fd_in[0], pipe_fd_out[1]}, execve_args);	// solution pour boucle - Manip de pipes a faire avant
+			close(pipe_fd_in[0] + [1]) // a faire a partir du 2eme passage
+			pipe_fd_in = pipe_fd_out
+
+			// conditions
+			// premier passage dans la boucle = pipe_fd_in doit etre STDIN
+			// dernier passage = pipe_fd_out = STDOUT
+
+			fork_and_exec(minishell, envp, {STDIN_FILENO, pipe_fd1[1]}, execve_args);	// ls
+			pipe(pipe_fd2);
+			fork_and_exec(minishell, envp, {pipe_fd1[0], pipe_fd2[1]}, execve_args);		// grep
+
+			fork_and_exec(minishell, envp, {pipe_fd2[0], STDOUT_FILENO}, execve_args);	// cmd3
+			// read(pipe_fd[0], pour_test, 100);				// output de ls - ALLELUHIA
+			// fd[0] = pipe_fd[0];			// update de input fd[0] pour qu'il soit pipe_fd[0] dans la commande suivante (fork?)
 		}
 		commands_left--;
 		all_commands++;
@@ -86,6 +99,7 @@ void	fork_and_exec(t_shell *minishell, char	**envp, int *fd, char	**execve_args)
 
 	if(fork_pid_return != 0)										// Le parent attend le résultat avec waitpid
 	{
+		// close fd_in a tester (refer to pipe_testing file)
 		child_pid = fork_pid_return;
 		if(waitpid(child_pid, &minishell->exit_status, 0) == -1)	// Exit status update if error - Check in 'man waitpid' if issues
 			perror("Error");
