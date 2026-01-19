@@ -42,10 +42,11 @@ SRC_FILES = \
 	expand/expand.c \
 	heredoc/heredoc.c \
 	envp/envp.c \
+	envp/envp_utils.c \
 	exec_command_filter.c \
 	exec_builtin_commands.c \
 	exec_external_commands.c \
-	envp/envp_utils.c
+	exec_utils.c
 
 SRCS = $(addprefix $(SRC_PATH),$(SRC_FILES))
 OBJS = $(addprefix $(OBJ_PATH),$(SRC_FILES:.c=.o))

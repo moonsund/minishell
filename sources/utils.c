@@ -49,7 +49,7 @@ void free_pipeline(t_pipeline *pl)
 
     if (!pl)
         return;
-    
+
     i = 0;
     while (i < pl->count)
     {
@@ -82,17 +82,38 @@ void free_env_var_list(t_env_var_list *vars)
 	vars->count = 0;
 }
 
+// Edited to print on stderr rather than stdout
+// TBC : typo on the printf("minishell: %s: \n", where); ?
 void err_print(t_exit_status type, const char *where)
 {
 	if (type == ES_GENERAL)
-		printf("minishell: %s: \n", where);
+	{
+		// printf("minishell: %s: \n", where);
+		write(2, "minishell: ", 11);
+		write(2, where, ft_strlen(where));
+		write(2, "\n", 1);
+	}
 	else if (type == ES_SYNTAX)
-		printf("minishell: syntax_error: %s\n", where);
+	{
+		// printf("minishell: syntax_error: %s\n", where);
+		write(2, "minishell: syntax_error: ", 25);
+		write(2, where, ft_strlen(where));
+		write(2, "\n", 1);
+	}
 	else
-        printf( "minishell: %s\n", where);
+	{
+        // printf( "minishell: %s\n", where);
+		write(2, "minishell: ", 11);
+		write(2, where, ft_strlen(where));
+		write(2, "\n", 1);
+	}
 }
 
+// Edited to print on stderr rather than stdout
 void err_malloc_print(const char *where)
 {
-	printf("minishell: %s: cannot allocate memory\n", where);
+	// printf("minishell: %s: cannot allocate memory\n", where);
+	write(2, "minishell: ", 11);
+	write(2, where, ft_strlen(where));
+	write(2, ": cannot allocate memory\n", 26);
 }

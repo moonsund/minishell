@@ -39,11 +39,11 @@ t_exit_status process_tokens(t_pipeline *pl, t_token_list *list, t_parser_contex
 
     if (ctx->cmd_started) // the last command after the pipe
     {
-        if (ctx->current_cmd.argv == NULL || ctx->current_cmd.argv[0] == NULL)
-        {
-            err_print(ES_SYNTAX, "near 'newline'");
-            return (ES_SYNTAX);
-        }
+        // if (ctx->current_cmd.argv == NULL || ctx->current_cmd.argv[0] == NULL)			// To remove (blocking commands starting w/ redirections)
+        // {
+        //     err_print(ES_SYNTAX, "near 'newline'");
+        //     return (ES_SYNTAX);
+        // }
         if (!append_cmd(pl, ctx->current_cmd))
             return (ES_GENERAL);
     }
@@ -88,7 +88,7 @@ static int append_arg(t_command *cmd, char *arg)
     new_argv = (char **)malloc(sizeof(* new_argv) * (argc + 2));
     if (!new_argv)
         return (0);
-    
+
     i = 0;
     while (i < argc)
     {
@@ -136,7 +136,7 @@ static t_exit_status process_redir_tokens(t_parser_context *ctx)
 
     if (!ctx->next || ctx->next->type != TOK_WORD)
     {
-        err_print(ES_SYNTAX, "expected filename or limiter"); 
+        err_print(ES_SYNTAX, "expected filename or limiter");
         return (ES_SYNTAX);
     }
 
@@ -195,7 +195,7 @@ static int process_heredoc_token(t_parser_context *ctx)
 static int token_has_any_quotes(t_token *token)
 {
     size_t i;
-    
+
     i = 0;
     if (!token || !token->quotes_map)
         return (0);

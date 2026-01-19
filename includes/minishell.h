@@ -27,6 +27,7 @@
 # define RED "\e[31m"
 # define GREEN "\e[32m"
 # define CYAN "\e[36m"
+
 #ifndef SIGNALS_H
 #define SIGNALS_H
 
@@ -46,9 +47,7 @@ typedef enum e_exit_status
 	ES_SIGINT          = 130, // 128 + SIGINT (2)
 	ES_SIGQUIT         = 131, // 128 + SIGQUIT (3)
 	ES_SYNTAX          = 258, // parser syntax error
-}	t_exit_status;
-
-
+} t_exit_status;
 
 typedef enum e_token_type
 {
@@ -65,7 +64,7 @@ typedef enum e_qmark
 	Q_NONE,	// outside quotes
 	Q_SQ,	// inside single quotes '...'
 	Q_DQ,	// inside double quotes "..."
-}   t_qmark;
+} t_qmark;
 
 typedef struct s_buf
 {
@@ -105,14 +104,14 @@ typedef struct s_env
 	char			*variable_name;
 	char			*variable_data;
 	struct s_env	*next;
-}	t_env;
+} t_env;
 
 typedef struct s_var
 {
 	char			*name;
 	char			*value;
 	struct s_var	*next;
-}	t_var;
+} t_var;
 
 typedef struct s_env_var_list
 {
@@ -157,10 +156,7 @@ typedef struct s_shell
 
 	// t_ast ast;
 
-}	t_shell;
-
-
-
+} t_shell;
 
 
 // ------------------------------------------------------------------------------------------ From Leo
@@ -250,10 +246,10 @@ char	*fetch_current_working_directory(void);
 void	execute_echo(t_command *cmds);
 void	execute_cd(t_command *cmds);
 void	execute_pwd(char *current_working_directory);
-// void	execute_export(t_shell *minishell);			// Leo handles
-// void	execute_unset(t_shell *minishell);			// Leo handles
-// void	execute_env(t_shell *minishell);			// Leo handles
-void	execute_exit(t_shell *minishell);
+void	execute_export(t_shell *minishell);			// Leo handles
+void	execute_unset(t_shell *minishell);			// Leo handles
+void	execute_env(t_shell *minishell);			// Leo handles
+// void	execute_exit(t_shell *minishell);
 
 // env related functions -- TO DELETE
 // t_env	**build_environment(void);
