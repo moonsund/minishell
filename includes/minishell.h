@@ -242,6 +242,7 @@ void	execute_external_commands(t_shell *minishell);
 // exec built in functions
 char	*fetch_current_working_directory(void);
 void	execute_echo(t_command *cmds);
+bool	is_line_return(char **cmd, int *i);
 void	execute_cd(t_command *cmds);
 void	execute_pwd(char *current_working_directory);
 void	execute_export(t_shell *minishell);

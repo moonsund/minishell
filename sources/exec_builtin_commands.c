@@ -4,6 +4,7 @@
 void	execute_built_in_commands(t_shell *minishell);
 char	*fetch_current_working_directory(void);
 void	execute_echo(t_command *cmds);
+bool	is_line_return(char **cmd, int *i);
 void	execute_cd(t_command *cmds);
 void	execute_pwd(char *current_working_directory);
 void	execute_export(t_shell *minishell);
@@ -17,44 +18,24 @@ void	execute_built_in_commands(t_shell *minishell)
 	current_working_directory = fetch_current_working_directory();												// Ⓜ️
 
 	if(ft_strcmp(minishell->pipeline->cmds->argv[0], "echo") == 0)
-	{
 		execute_echo(minishell->pipeline->cmds);
-	}
 	else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "cd") == 0)
-	{
-		printf("DEBUG - Old path :\t%s\n", current_working_directory);
 		execute_cd(minishell->pipeline->cmds);
-		// current_working_directory = ft_calloc(sizeof(char), PATH_MAX);					// Comment out for debug
-		// getcwd(current_working_directory, PATH_MAX);										// Comment out for debug
-		// printf("DEBUG - New path :\t%s\n", current_working_directory);					// Comment out for debug
-	}
 	else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "pwd") == 0)
-	{
 		execute_pwd(current_working_directory);
-	}
 	else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "export") == 0)
-	{
 		execute_export(minishell);
-	}
 	else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "unset") == 0)
-	{
 		execute_unset(minishell);
-	}
 	else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "env") == 0)
-	{
 		execute_env(minishell);
-	}
-	// else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "exit") == 0)
-	// {
-	// 	free(current_working_directory);
-	// 	execute_exit(minishell);
-	// }
 	free(current_working_directory);
 }
 
 char	*fetch_current_working_directory(void)
 {
 	char	*current_working_directory;
+
 	current_working_directory = ft_calloc(sizeof(char), PATH_MAX);						// Ⓜ️
 	if (!current_working_directory)
 	{
@@ -68,19 +49,13 @@ char	*fetch_current_working_directory(void)
 // Subject : "echo with option -n"
 void	execute_echo(t_command *cmds)
 {
-	bool	line_return;
 	int		i;
 	int		fd;
+	bool	line_return;
 	char	**separate_words;
 
-	line_return = true;
-	i = 1;
 	fd = 1;
-	if (cmds->argv[1] && (ft_strcmp(cmds->argv[1], "-n")) == 0)
-	{
-		line_return = false;
-		i++;
-	}
+	line_return = is_line_return(cmds->argv, &i);
 	if (cmds->outfile)
 	{
 		if (cmds->append == 1)
@@ -99,6 +74,20 @@ void	execute_echo(t_command *cmds)
 	}
 	if(line_return == true)
 		write(fd, "\n", 1);
+}
+
+bool	is_line_return(char **cmd, int *i)
+{
+	if (cmd[1] && (ft_strcmp(cmd[1], "-n") == 0))
+	{
+		*i = 2;
+		return (false);
+	}
+	else
+	{
+		*i = 1;
+		return (true);
+	}
 }
 
 // Subject : "cd with only a relative or absolute path"
