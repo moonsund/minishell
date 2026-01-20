@@ -1,11 +1,31 @@
 #include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
 #include "libft.h"
 
+void	execute_external_commands(t_shell *minishell);
+void	pipes_party(t_shell *minishell, int *fd_in, int *fd_out, char **execve_args);
+void	fork_and_exec(t_shell *minishell, int *fd, char **execve_args);
+void	add_user_input_to_fd(t_shell *minishell, int fd);
+
+void	add_user_input_to_fd(t_shell *minishell, int fd)
+{
+	while (true)
+	{
+		char *line = readline(NULL);
+		if (g_sigint)					// ctrl+c - Not functional yet
+		{
+			close(fd);
+			return;
+		}
+		write_line_in_fd(fd, line);
+		free(line);
+	}
+}
+
 void	execute_external_commands(t_shell *minishell)
 {
 	t_command	*all_commands = minishell->pipeline->cmds;
-	int			backup_stdout = dup(STDOUT_FILENO);
-	int			backup_stdin = dup(STDIN_FILENO);
+	int			backup_stdout;
+	int			backup_stdin;
 	int			fd[2] = {STDIN_FILENO, STDOUT_FILENO};		// fd[0] = in --- fd[1] = out
 	int			pipe_fd_in[2] = {STDIN_FILENO, -1};			// Ssi appel de pipe : fd[0] = read - fd[1] = write
 	int			pipe_fd_out[2] = {-1, -1};					// Ssi appel de pipe : fd[0] = read - fd[1] = write
@@ -18,40 +38,42 @@ void	execute_external_commands(t_shell *minishell)
 	while(commands_left > 0)
 	{
 		execve_args = all_commands->argv;
-		// if (execve_args[0][0] != '>' || execve_args[0][0] != '<')		// Switch to this after Leo's fix
+		// attention, si la redirection est apres un pipe, on ne doit pas lire depuis stdin
+		// if (execve_args[0][0] != '>' && execve_args[0][0] != '<')		// Switch to this after Leo's fix
 		if (minishell->tokens.head->raw_str[0] != '>' && minishell->tokens.head->raw_str[0] != '<')
 		{
 			replace_cmd_by_binary_path(execve_args[0]);
 		}
 		fd_update_if_redirections(all_commands, fd);
-		// Fail fails - Signal not handled, leaves shell, same for heredoc
-		if ((ft_strcmp(minishell->tokens.head->raw_str, ">") == 0) ||
-				(ft_strcmp(minishell->tokens.head->raw_str, ">>") == 0))
+
+		if (minishell->pipeline->count == 1)
 		{
-			while (true)
-			{
-				char *line = readline(NULL);
-				if (g_sigint) // ctrl+c - Not functional
-				{
-					close(fd[1]);
-					return;
-				}
-				write_heredoc_line(fd[1], line);
-				free(line);
-			}
+			if((ft_strcmp(minishell->tokens.head->raw_str, ">") == 0) || (ft_strcmp(minishell->tokens.head->raw_str, ">>") == 0))
+				add_user_input_to_fd(minishell, fd[1]);
+			else
+				fork_and_exec(minishell, fd, execve_args);		// No pipes = keep things easy - at least for now
+			return;
 		}
-		if(minishell->pipeline->count == 1)					// No pipes = keep things easy - at least for now
-			fork_and_exec(minishell, fd, execve_args);
-		else												// command :	ls | grep sources
+		/* Pipes - Test commands :
+		ls | grep sources | wc
+		cat ok | wc -l | >> w
+		cat w | cat -e | > w
+		*/
+		else
 		{
+			if (minishell->pipeline->count == commands_left)	// To pass here only once
+			{
+				backup_stdout = dup(STDOUT_FILENO);
+				backup_stdin = dup(STDIN_FILENO);
+			}
 			if (commands_left > 1)
 			{
-				if(pipe(pipe_fd_out) == -1)						// Attribue des nouveaux fd dispos au 2eme passage
+				if(pipe(pipe_fd_out) == -1)						// Attribue des nouveaux fd DISPOS au 2eme passage (can be a prev used one if closed)
 					perror("Error");
 			}
 			else if (commands_left == 1)
 			{
-				pipe_fd_out[1] = backup_stdout;						// Pour afficher last output dans le terminal
+				pipe_fd_out[1] = backup_stdout;					// Pour afficher last output dans le terminal
 			}
 			// ATTENTION !!!!! Ne jamais fermer un fd qui n'a pas ete ouvert
 			// fermer pipe_fd_in[0] ici pour que grep sache ou s'arreter, mais pas ici
@@ -156,4 +178,9 @@ void	fork_and_exec(t_shell *minishell, int *fd, char **execve_args)
 		perror("Error");
 	if(minishell->exit_status != 0)
 		perror("Exit status updated");
+	// Close fd that have been open - If necessary TBC
+	if(fd[0] != STDIN_FILENO)
+		close_and_set_to_neg(&fd[0]);
+	if(fd[1] != STDOUT_FILENO)
+		close_and_set_to_neg(&fd[1]);
 }

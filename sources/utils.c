@@ -88,7 +88,7 @@ void err_print(t_exit_status type, const char *where)
 {
 	if (type == ES_GENERAL)
 	{
-		// printf("minishell: %s: \n", where);
+		// printf("minishell: %s\n", where);
 		write(2, "minishell: ", 11);
 		write(2, where, ft_strlen(where));
 		write(2, "\n", 1);

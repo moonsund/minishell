@@ -4,6 +4,12 @@
 void	execute_built_in_commands(t_shell *minishell);
 char	*fetch_current_working_directory(void);
 void	execute_echo(t_command *cmds);
+void	execute_cd(t_command *cmds);
+void	execute_pwd(char *current_working_directory);
+void	execute_export(t_shell *minishell);
+void	execute_unset(t_shell *minishell);
+void	execute_env(t_shell *minishell);
+
 
 void	execute_built_in_commands(t_shell *minishell)
 {
@@ -62,27 +68,37 @@ char	*fetch_current_working_directory(void)
 // Subject : "echo with option -n"
 void	execute_echo(t_command *cmds)
 {
-	bool	line_return = true;
-	int		i = 1;
+	bool	line_return;
+	int		i;
+	int		fd;
+	char	**separate_words;
 
+	line_return = true;
+	i = 1;
+	fd = 1;
 	if (cmds->argv[1] && (ft_strcmp(cmds->argv[1], "-n")) == 0)
 	{
 		line_return = false;
 		i++;
 	}
-	while(cmds->argv[i])
+	if (cmds->outfile)
 	{
-		printf("%s", cmds->argv[i]);
-		fflush(0);									// Only for debug
-		if(cmds->argv[i+1])
-		{
-			write(1, " ", 1);
-		}
+		if (cmds->append == 1)
+			fd = open_fd(cmds->outfile, true, false);
+		else
+			fd = open_fd(cmds->outfile, false, true);
+	}
+	separate_words = ft_split(cmds->argv[i], ' ');
+	i = 0;
+	while(separate_words[i])
+	{
+		write(fd, separate_words[i], ft_strlen(separate_words[i]));
+		if(separate_words[i+1])
+			write(fd, " ", 1);
 		i++;
 	}
 	if(line_return == true)
-		write(1, "\n", 1);
-	line_return = true;
+		write(fd, "\n", 1);
 }
 
 // Subject : "cd with only a relative or absolute path"

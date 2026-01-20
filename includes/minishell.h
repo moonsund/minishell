@@ -219,6 +219,7 @@ void init_buffer(t_buf *buf);
 
 // heredoc
 int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, int exit_status);
+int write_line_in_fd(int fd, char *line);
 
 // utils.c
 void reset_iteration(t_shell *shell);
@@ -237,36 +238,28 @@ void setup_signals(void);
 void	check_command_type_and_execute(t_shell *minishell);
 void	execute_built_in_commands(t_shell *minishell);
 void	execute_external_commands(t_shell *minishell);
-void	replace_cmd_by_binary_path(char *cmd);
-void	fd_update_if_redirections(t_command *all_commands, int *fd);
 
 // exec built in functions
 char	*fetch_current_working_directory(void);
 void	execute_echo(t_command *cmds);
 void	execute_cd(t_command *cmds);
 void	execute_pwd(char *current_working_directory);
-void	execute_export(t_shell *minishell);			// Leo handles
-void	execute_unset(t_shell *minishell);			// Leo handles
-void	execute_env(t_shell *minishell);			// Leo handles
-// void	execute_exit(t_shell *minishell);
-
-// env related functions -- TO DELETE
-// t_env	**build_environment(void);
-// t_env	*create_new_environment_variable(char *key, char *value);
-// char	*fetch_value_from_key(t_env **head, char *key);
-// t_env	*search_last_var(t_env *env_var);
-// void	add_env_var_to_list(t_env **head, t_env *new);
-// void	delete_env_var(t_env **head, char *var_to_delete);
+void	execute_export(t_shell *minishell);
+void	execute_unset(t_shell *minishell);
+void	execute_env(t_shell *minishell);
 
 // exec external functions
-char	*build_path(char *file_name);
-int		open_fd(char *file_name, bool append, bool truncate);
 void	fork_and_exec(t_shell *minishell, int *fd, char **execve_args);
 void	pipes_party(t_shell *minishell, int *fd_in, int *fd_out, char **execve_args);
 
+// exec utils functions
+char	*build_path(char *file_name);
+int		open_fd(char *file_name, bool append, bool truncate);
+void	replace_cmd_by_binary_path(char *cmd);
+void	fd_update_if_redirections(t_command *all_commands, int *fd);
+void	add_user_input_to_fd(t_shell *minishell, int fd);
+
 // Free functions
 void	close_and_set_to_neg(int *fd);
-// void	del_string(char *param);
-// void	free_all_vars(t_env **head);
 
 #endif

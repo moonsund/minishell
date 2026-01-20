@@ -3,7 +3,7 @@
 int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, int exit_status);
 static char *generate_heredoc_filename(size_t heredoc_index);
 static int expand_heredoc(char **line, t_env_var_list *env_vars, int exit_status);
-int write_heredoc_line(int fd, char *line);
+int write_line_in_fd(int fd, char *line);
 static int append_charter(char **line, char c);
 static int append_string(char **line, const char *str);
 
@@ -78,7 +78,7 @@ int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, int exit_sta
                     }
                 }
 
-                if (!write_heredoc_line(fd, line))
+                if (!write_line_in_fd(fd, line))
                 {
                     free(line);
                     close(fd);
@@ -211,7 +211,7 @@ static int expand_heredoc(char **line, t_env_var_list *env_vars, int exit_status
     return (1);
 }
 
-int write_heredoc_line(int fd, char *line)
+int write_line_in_fd(int fd, char *line)
 {
     ssize_t bytes_written;
     size_t line_length;
