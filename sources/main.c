@@ -1,7 +1,7 @@
 #include "minishell.h"
 
-// static void print_token_list(t_token_list *list);
-// static void print_pipe_line(t_pipeline *pipeline);
+static void print_token_list(t_token_list *list);
+static void print_pipe_line(t_pipeline *pipeline);
 
 int main(int argc, char **argv, char **envp)
 {
@@ -56,8 +56,8 @@ int main(int argc, char **argv, char **envp)
 			reset_iteration(&shell);
 			continue;
 		}
-//		printf("\n[tokens_list_debug]:\n");	// for debugging, to be deleted
-//		print_token_list(&shell.tokens);	// for debugging, to be deleted
+		// printf("\n[tokens_list_debug]:\n");	// for debugging, to be deleted
+		// print_token_list(&shell.tokens);	// for debugging, to be deleted
 
 
 		exit_status = expand_tokens(&shell.tokens, &shell.env_vars, shell.exit_status);
@@ -117,77 +117,77 @@ int main(int argc, char **argv, char **envp)
 
 
 
-// static void print_token_list(t_token_list *tokens) // for debugging, to be deleted
-// {
-// 	static const char *g_token_type_str[] =
-// 	{
-// 		[TOK_WORD] = "WORD",
-// 		[TOK_PIPE] = "PIPE",
-// 		[TOK_REDIR_IN] = "REDIR_IN",
-// 		[TOK_HEREDOC] = "HEREDOC",
-// 		[TOK_REDIR_OUT] = "REDIR_OUT",
-// 		[TOK_APPEND] = "APPEND",
-// 	};
+static void print_token_list(t_token_list *tokens) // for debugging, to be deleted
+{
+	static const char *g_token_type_str[] =
+	{
+		[TOK_WORD] = "WORD",
+		[TOK_PIPE] = "PIPE",
+		[TOK_REDIR_IN] = "REDIR_IN",
+		[TOK_HEREDOC] = "HEREDOC",
+		[TOK_REDIR_OUT] = "REDIR_OUT",
+		[TOK_APPEND] = "APPEND",
+	};
 
-// 	static const char qmark_char[] =
-// 	{
-// 		[Q_NONE] = 'N',
-// 		[Q_SQ] = 'S',
-// 		[Q_DQ] = 'D',
-// 	};
+	static const char qmark_char[] =
+	{
+		[Q_NONE] = 'N',
+		[Q_SQ] = 'S',
+		[Q_DQ] = 'D',
+	};
 
-// 	const t_token *token = tokens->head;
-// 	size_t idx = 0;
-// 	while (token)
-// 	{
-// 		const char *type_str = g_token_type_str[token->type];
-// 		printf("[%zu] %-4s : \"%s\"", idx, type_str, token->raw_str ? token->raw_str : "");
-// 		if (token->type == TOK_WORD) {
-// 			printf("  qmap: ");
-// 			for (size_t i = 0; i < token->length; ++i)
-// 				putchar(qmark_char[token->quotes_map[i]]);
-// 		}
-// 		putchar('\n');
-// 		token = token->next;
-// 		idx++;
-// 	}
-// }
+	const t_token *token = tokens->head;
+	size_t idx = 0;
+	while (token)
+	{
+		const char *type_str = g_token_type_str[token->type];
+		printf("[%zu] %-4s : \"%s\"", idx, type_str, token->raw_str ? token->raw_str : "");
+		if (token->type == TOK_WORD) {
+			printf("  qmap: ");
+			for (size_t i = 0; i < token->length; ++i)
+				putchar(qmark_char[token->quotes_map[i]]);
+		}
+		putchar('\n');
+		token = token->next;
+		idx++;
+	}
+}
 
-// static void print_pipe_line(t_pipeline *pipeline) // for debugging, to be deleted
-// {
-//     size_t i;
-//     size_t j;
+static void print_pipe_line(t_pipeline *pipeline) // for debugging, to be deleted
+{
+    size_t i;
+    size_t j;
 
-//     if (!pipeline || !pipeline->cmds)
-//         return;
+    if (!pipeline || !pipeline->cmds)
+        return;
 
-//     for (i = 0; i < pipeline->count; i++)
-//     {
-//         printf("Command %zu:\n", i);
+    for (i = 0; i < pipeline->count; i++)
+    {
+        printf("Command %zu:\n", i);
 
-//         if (!pipeline->cmds[i].argv)
-//             printf("  (no args)\n");
-// 		else
-// 		{
-// 			j = 0;
-// 			while (pipeline->cmds[i].argv[j])
-// 			{
-// 				printf("  arg[%zu]: %s\n", j, pipeline->cmds[i].argv[j]);
-// 				j++;
-// 			}
-// 		}
+        if (!pipeline->cmds[i].argv)
+            printf("  (no args)\n");
+		else
+		{
+			j = 0;
+			while (pipeline->cmds[i].argv[j])
+			{
+				printf("  arg[%zu]: %s\n", j, pipeline->cmds[i].argv[j]);
+				j++;
+			}
+		}
 
-// 		if (pipeline->cmds[i].infile)
-// 			printf("infile: %s\n", pipeline->cmds[i].infile);
-// 		if (pipeline->cmds[i].outfile)
-// 			printf("outfile: %s\n", pipeline->cmds[i].outfile);
-// 		printf("append: %i\n", pipeline->cmds[i].append);
-// 		if (pipeline->cmds[i].heredoc_limiter)
-// 			printf("heredoc_limiter: %s\n", pipeline->cmds[i].heredoc_limiter);
-// 		printf("has_heredoc: %i\n", pipeline->cmds[i].has_heredoc);
-// 		printf("heredoc_expand_needed: %i\n", pipeline->cmds[i].heredoc_expand_needed);
-//     }
-// }
+		if (pipeline->cmds[i].infile)
+			printf("infile: %s\n", pipeline->cmds[i].infile);
+		if (pipeline->cmds[i].outfile)
+			printf("outfile: %s\n", pipeline->cmds[i].outfile);
+		printf("append: %i\n", pipeline->cmds[i].append);
+		if (pipeline->cmds[i].heredoc_limiter)
+			printf("heredoc_limiter: %s\n", pipeline->cmds[i].heredoc_limiter);
+		printf("has_heredoc: %i\n", pipeline->cmds[i].has_heredoc);
+		printf("heredoc_expand_needed: %i\n", pipeline->cmds[i].heredoc_expand_needed);
+    }
+}
 
 /* static int debug_print_heredoc_files(t_pipeline *pipeline) // for debugging, to be deleted
 {
