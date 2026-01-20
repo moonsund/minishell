@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
 
 static void init_lexer_context(t_lexer_context *context);
 static int process_quotes(const char *str, t_lexer_context *ctx);
@@ -11,8 +11,8 @@ t_exit_status tokenize_with_qmap(const char *str, t_token_list *tokens)
     int op_res;
 
     init_lexer_context(&ctx);
- 
-    while (str[ctx.i]) 
+
+    while (str[ctx.i])
     {
         if (process_quotes(str, &ctx))
             continue;
@@ -48,10 +48,10 @@ t_exit_status tokenize_with_qmap(const char *str, t_token_list *tokens)
 
     if (ctx.buf.used_length > 0)
     {
-        if (!process_word(tokens, &ctx)) 
+        if (!process_word(tokens, &ctx))
             return (ES_GENERAL);
     }
-    
+
     free_buf(&ctx.buf);
     return (ES_SUCCESS);
 }
@@ -111,7 +111,7 @@ int process_spaces_outside_quotes(const char *str, t_token_list *tokens, t_lexer
             return (-1);
         return (1);
     }
-        
+
     while (is_space((unsigned char)str[ctx->i]))
         ctx->i++;
     return (1);

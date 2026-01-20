@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
 
 int boost_buf(t_buf *buf, size_t needed_length);
 

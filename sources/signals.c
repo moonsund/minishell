@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
 
 volatile sig_atomic_t g_sigint = 0;
 static void ctrl_c_handler(int signum);

@@ -39,14 +39,14 @@ void setup_signals(void);
 
 typedef enum e_exit_status
 {
-	ES_SUCCESS         = 0,   // success
-	ES_GENERAL         = 1,   // any “generic” error (including malloc failures, open/dup2 errors in redirections, etc.)
-	ES_BUILTIN_MISUSE  = 2,   // incorrect usage of a builtin / invalid builtin arguments
-	ES_NOT_EXECUTABLE  = 126, // command or file found, but cannot be executed (EACCES, is a directory, not executable)
-	ES_NOT_FOUND       = 127, // command not found (PATH lookup failed / file does not exist)
-	ES_SIGINT          = 130, // 128 + SIGINT (2)
-	ES_SIGQUIT         = 131, // 128 + SIGQUIT (3)
-	ES_SYNTAX          = 258, // parser syntax error
+	ES_SUCCESS			= 0,   // success
+	ES_GENERAL			= 1,   // any “generic” error (including malloc failures, open/dup2 errors in redirections, etc.)
+	ES_BUILTIN_MISUSE	= 2,   // incorrect usage of a builtin / invalid builtin arguments
+	ES_NOT_EXECUTABLE	= 126, // command or file found, but cannot be executed (EACCES, is a directory, not executable)
+	ES_NOT_FOUND		= 127, // command not found (PATH lookup failed / file does not exist)
+	ES_SIGINT			= 130, // 128 + SIGINT (2)
+	ES_SIGQUIT			= 131, // 128 + SIGQUIT (3)
+	ES_SYNTAX			= 258, // parser syntax error
 } t_exit_status;
 
 typedef enum e_token_type
@@ -145,7 +145,6 @@ typedef struct s_parser_context
     int cmd_started;
     char *tmp;
 } t_parser_context;
-
 
 typedef struct s_shell
 {
@@ -269,4 +268,5 @@ void	pipes_party(t_shell *minishell, int *fd_in, int *fd_out, char **execve_args
 void	close_and_set_to_neg(int *fd);
 // void	del_string(char *param);
 // void	free_all_vars(t_env **head);
+
 #endif

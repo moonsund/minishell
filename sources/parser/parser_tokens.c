@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
 
 static int process_word_token(t_parser_context *ctx);
 static int append_arg(t_command *cmd, char *arg);

@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
 
 static bool token_needs_expansion(t_token *token);
 static t_exit_status expand_word_token(t_token *token, t_env_var_list *env_vars, t_exit_status exit_status);
@@ -6,14 +6,14 @@ char *get_last_status_string(t_exit_status exit_status);
 static int append_str(t_buf *buf, char *str, t_qmark quote_mark);
 
 t_exit_status expand_tokens(t_token_list *tokens, t_env_var_list *env_vars, t_exit_status exit_status)
-{    
+{
     t_token *prev;
     t_token *cur;
     t_exit_status new_exit_status;
-    
+
     if (!tokens)
         return (ES_GENERAL);
-    
+
     prev = NULL;
     cur = tokens->head;
     while (cur)
@@ -45,7 +45,7 @@ static t_exit_status expand_word_token(t_token *token, t_env_var_list *env_vars,
 
     if (!token || token->type != TOK_WORD || !token->quotes_map || !token->raw_str)
         return (ES_GENERAL);
-    
+
     if (!token_needs_expansion(token))
         return (ES_SUCCESS);
 
@@ -82,7 +82,7 @@ static t_exit_status expand_word_token(t_token *token, t_env_var_list *env_vars,
             }
 
             j = start;
-            while (j < token->length && (ft_isalnum((unsigned char)token->raw_str[j]) 
+            while (j < token->length && (ft_isalnum((unsigned char)token->raw_str[j])
                     || token->raw_str[j] == '_'))
                 j++;
 
@@ -101,7 +101,7 @@ static t_exit_status expand_word_token(t_token *token, t_env_var_list *env_vars,
             var_name = (char *)malloc(sizeof(char) * (var_length + 1));
             if (!var_name)
                 return (ES_GENERAL);
-            
+
             ft_memcpy(var_name, token->raw_str + start, var_length);
             var_name[var_length] = '\0';
 
@@ -114,7 +114,7 @@ static t_exit_status expand_word_token(t_token *token, t_env_var_list *env_vars,
                 {
                     free_buf(&buf);
                     return (ES_GENERAL);
-                }                
+                }
             }
             i = j;
             continue;

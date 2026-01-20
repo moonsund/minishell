@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
 #include "libft.h"
 
 void	check_command_type_and_execute(t_shell *minishell);

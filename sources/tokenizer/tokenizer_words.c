@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
 
 t_token *make_word_token(t_buf *buf);
 
@@ -36,7 +36,7 @@ t_token *make_word_token(t_buf *buf)
         return (NULL);
     }
 
-    if (buf->capacity) 
+    if (buf->capacity)
     {
         ft_memcpy(token->raw_str, buf->characters, buf->used_length);
         ft_memcpy(token->quotes_map, buf->quotes_map,

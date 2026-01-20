@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
 
 static void print_token_list(t_token_list *list);
 static void print_pipe_line(t_pipeline *pipeline);
