@@ -114,14 +114,15 @@ void	execute_pwd(char *current_working_directory)
 // Loop through variables. If name not found, create note and add node to list. If found, edit the value
 void	execute_export(t_shell *minishell)
 {
-	char	**split = ft_split(minishell->pipeline->cmds->argv[1], '=');
+	char	**env_var_data = ft_split(minishell->pipeline->cmds->argv[1], '=');
 
-	char	*key = split[0];														// Ⓜ️
-	char	*value = split[1];														// Ⓜ️
+	char	*key = env_var_data[0];
+	char	*value = env_var_data[1];
 	if (!set_var(&minishell->env_vars, key, value))
 	{
 		err_print(1, "failed to create environment variable");
 	}
+	free(env_var_data);
 }
 
 // Subject : "unset with no options"

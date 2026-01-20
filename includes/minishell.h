@@ -233,13 +233,11 @@ void err_malloc_print(const char *where);
 // signals.c
 void setup_signals(void);
 
-// ------------------------------------------------------------------------------------------ Exec functions
-// pre exec functions
+// exec_command_filter.c
 void	check_command_type_and_execute(t_shell *minishell);
-void	execute_built_in_commands(t_shell *minishell);
-void	execute_external_commands(t_shell *minishell);
 
-// exec built in functions
+// exec_builtin_commands.c
+void	execute_built_in_commands(t_shell *minishell);
 char	*fetch_current_working_directory(void);
 void	execute_echo(t_command *cmds);
 bool	is_line_return(char **cmd, int *i);
@@ -249,18 +247,19 @@ void	execute_export(t_shell *minishell);
 void	execute_unset(t_shell *minishell);
 void	execute_env(t_shell *minishell);
 
-// exec external functions
-void	fork_and_exec(t_shell *minishell, int *fd, char **execve_args);
+// exec_external_commands.c
+void	execute_external_commands(t_shell *minishell);
 void	pipes_party(t_shell *minishell, int *fd_in, int *fd_out, char **execve_args);
+void	fork_and_exec(t_shell *minishell, int *fd, char **execve_args);
 
-// exec utils functions
+// exec_utils_fd.c
 char	*build_path(char *file_name);
 int		open_fd(char *file_name, bool append, bool truncate);
-void	replace_cmd_by_binary_path(char *cmd);
 void	fd_update_if_redirections(t_command *all_commands, int *fd);
 void	add_user_input_to_fd(t_shell *minishell, int fd);
-
-// Free functions
 void	close_and_set_to_neg(int *fd);
+
+// exec_utils.c
+void	replace_cmd_by_binary_path(char *cmd);
 
 #endif

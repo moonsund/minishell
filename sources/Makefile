@@ -26,27 +26,28 @@ SRC_PATH = sources/
 OBJ_PATH = objects/
 
 SRC_FILES = \
-    main.c \
-    init/init_shell.c \
-    signals.c \
-    utils.c \
-    tokenizer/tokenizer.c \
-    tokenizer/tokenizer_words.c \
-    tokenizer/tokenizer_operators.c \
-    tokenizer/tokenizer_chars.c \
-    tokenizer/tokenizer_utils.c \
-    parser/parser_init.c \
-    parser/parser_tokens.c \
-    parser/parser_utils.c \
-    parser/parser.c \
-    expand/expand.c \
-    heredoc/heredoc.c \
-    envp/envp.c \
-    envp/envp_utils.c \
-    exec_command_filter.c \
-    exec_builtin_commands.c \
-    exec_external_commands.c \
-    exec_utils.c
+	main.c \
+	init/init_shell.c \
+	signals.c \
+	utils.c \
+	tokenizer/tokenizer.c \
+	tokenizer/tokenizer_words.c \
+	tokenizer/tokenizer_operators.c \
+	tokenizer/tokenizer_chars.c \
+	tokenizer/tokenizer_utils.c \
+	parser/parser_init.c \
+	parser/parser_tokens.c \
+	parser/parser_utils.c \
+	parser/parser.c \
+	expand/expand.c \
+	heredoc/heredoc.c \
+	envp/envp.c \
+	envp/envp_utils.c \
+	exec_command_filter.c \
+	exec_builtin_commands.c \
+	exec_external_commands.c \
+	exec_utils_fd.c \
+	exec_utils.c
 
 SRCS = $(addprefix $(SRC_PATH),$(SRC_FILES))
 OBJS = $(addprefix $(OBJ_PATH),$(SRC_FILES:.c=.o))

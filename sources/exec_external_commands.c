@@ -4,22 +4,6 @@
 void	execute_external_commands(t_shell *minishell);
 void	pipes_party(t_shell *minishell, int *fd_in, int *fd_out, char **execve_args);
 void	fork_and_exec(t_shell *minishell, int *fd, char **execve_args);
-void	add_user_input_to_fd(t_shell *minishell, int fd);
-
-void	add_user_input_to_fd(t_shell *minishell, int fd)
-{
-	while (true)
-	{
-		char *line = readline(NULL);
-		if (g_sigint)					// ctrl+c - Not functional yet
-		{
-			close(fd);
-			return;
-		}
-		write_line_in_fd(fd, line);
-		free(line);
-	}
-}
 
 void	execute_external_commands(t_shell *minishell)
 {
