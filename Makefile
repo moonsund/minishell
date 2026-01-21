@@ -3,7 +3,8 @@ NAME       = minishell
 CC         = cc
 UNAME := $(shell uname)
 
-CFLAGS     = -g -Wall -Wextra -Werror -Iincludes -I$(LIBFT_DIR)
+# Add -Wall -Wextra -Werror when testing done and almost ready to submit
+CFLAGS     = -g -Iincludes -I$(LIBFT_DIR)
 
 LIBFT_DIR  = libft
 LIBFT_A    = $(LIBFT_DIR)/libft.a
@@ -41,7 +42,13 @@ SRC_FILES = \
 	expand/expand.c \
 	heredoc/heredoc.c \
 	envp/envp.c \
-	envp/envp_utils.c
+	envp/envp_utils.c \
+	execution/exec_command_filter.c \
+	execution/exec_builtin_commands.c \
+	execution/exec_builtin_commands_env.c \
+	execution/exec_external_commands.c \
+	execution/exec_fd_related_utils.c \
+	execution/exec_utils.c
 
 SRCS = $(addprefix $(SRC_PATH),$(SRC_FILES))
 OBJS = $(addprefix $(OBJ_PATH),$(SRC_FILES:.c=.o))

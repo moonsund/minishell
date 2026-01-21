@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
 
 static void print_token_list(t_token_list *list);
 static void print_pipeline(t_pipeline *pipeline);
@@ -19,7 +19,7 @@ int main(int argc, char **argv, char **envp)
 		return (EXIT_FAILURE);
 	}
 	setup_signals();
-	
+
 	while(true)
 	{
 		line = readline("minishell> ");
@@ -32,8 +32,8 @@ int main(int argc, char **argv, char **envp)
 
 		if (g_sigint) // Ctrl+C
 		{
-			g_sigint = 0;              
-			shell.exit_status = ES_SIGINT;  
+			g_sigint = 0;
+			shell.exit_status = ES_SIGINT;
 			free(line);
 			// rl_on_new_line();
 			// rl_replace_line("", 0);
@@ -57,8 +57,8 @@ int main(int argc, char **argv, char **envp)
 			reset_iteration(&shell);
 			continue;
 		}
-		printf("\n[tokens_list_debug]:\n");	// for debugging, to be deleted
-		print_token_list(&shell.tokens);	// for debugging, to be deleted
+		// printf("\n[tokens_list_debug]:\n");	// for debugging, to be deleted
+		// print_token_list(&shell.tokens);	// for debugging, to be deleted
 
 
 		exit_status = expand_tokens(&shell.tokens, &shell.env_vars, shell.exit_status);
@@ -69,8 +69,8 @@ int main(int argc, char **argv, char **envp)
 			reset_iteration(&shell);
 			continue;
 		}
-		printf("\n[expanded_tokens_list_debug]:\n"); // for debugging, to be deleted
-		print_token_list(&shell.tokens);	// for debugging, to be deleted
+//		printf("\n[expanded_tokens_list_debug]:\n"); // for debugging, to be deleted
+//		print_token_list(&shell.tokens);	// for debugging, to be deleted
 
 
 		exit_status = build_pipeline_from_tokens(&shell);
@@ -101,8 +101,12 @@ int main(int argc, char **argv, char **envp)
 			free(line);
 			continue;
 		}
-		//debug_print_heredoc_files(shell.pipeline); // for debugging, to be deleted
-		
+
+		check_command_type_and_execute(&shell);	// Exec testing starts here
+		shell.pipeline = NULL;
+		free_tokens(&shell.tokens);
+//		debug_print_heredoc_files(shell.pipeline); // for debugging, to be deleted
+
 		// check_command_type_and_execute(shell);	// Exec testing starts here
 		free(line);
 		reset_iteration(&shell);
@@ -229,7 +233,7 @@ static int debug_print_heredoc_files(t_pipeline *pipeline) // for debugging, to 
 			fd = open(pipeline->cmds[i].infile, O_RDONLY);
 			if (fd < 0)
 				return (0);
-			
+
 			while (true)
 			{
 				bytes = read(fd, buffer, sizeof(buffer));

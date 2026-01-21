@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
 
 int init_shell(t_shell *shell, char **envp);
 static int init_env_var_list(t_env_var_list *list, char **envp);
@@ -28,7 +28,7 @@ static int init_env_var_list(t_env_var_list *list, char **envp)
 
     if (!envp)
         return (1);
-	
+
     i = 0;
     while (envp[i])
     {
@@ -56,7 +56,7 @@ static int init_env_var_list(t_env_var_list *list, char **envp)
             free_env_var_list(list);
             return (0);
         }
-        
+
         var->next = NULL;
 
         if (list->head == NULL)

@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
 
 int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, t_exit_status exit_status);
 static char *generate_heredoc_filename(size_t heredoc_index);
@@ -224,7 +224,7 @@ static int expand_heredoc(char **line, t_env_var_list *env_vars, t_exit_status e
     return (1);
 }
 
-static int write_heredoc_line(int fd, char *line)
+int write_line_in_fd(int fd, char *line)
 {
     ssize_t bytes_written;
     size_t line_length;
@@ -236,7 +236,7 @@ static int write_heredoc_line(int fd, char *line)
                 return (0);
         return (1);
     }
-        
+
 
     line_length = ft_strlen(line);
     if (line_length > 0)
@@ -258,9 +258,9 @@ static int append_charter(char **line, char c)
 
     if (!line)
         return (0);
-    
+
     if (!*line)
-    {    
+    {
         new_line = malloc(2);
         if (!new_line)
             return (0);
@@ -296,7 +296,7 @@ static int append_string(char **line, const char *str)
     str_length = ft_strlen(str);
 
     if (!*line)
-    {   
+    {
         new_line = malloc(str_length + 1);
         if (!new_line)
             return (0);
@@ -314,7 +314,7 @@ static int append_string(char **line, const char *str)
         ft_memcpy(new_line, *line, line_length);
         ft_memcpy(new_line + line_length, str, str_length);
         new_line[str_length + line_length] = '\0';
-        
+
         free(*line);
         *line = new_line;
         return (1);

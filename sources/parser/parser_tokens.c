@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
 
 static int process_word_token(t_parser_context *ctx);
 static int append_arg(t_command *cmd, char *arg);
@@ -97,7 +97,7 @@ static int append_arg(t_command *cmd, char *arg)
     new_argv = (char **)malloc(sizeof(* new_argv) * (argc + 2));
     if (!new_argv)
         return (0);
-    
+
     i = 0;
     while (i < argc)
     {
@@ -147,7 +147,7 @@ static t_exit_status process_redir_tokens(t_parser_context *ctx)
 
     if (!ctx->next || ctx->next->type != TOK_WORD)
     {
-        err_print(ES_SYNTAX, "expected filename or limiter"); 
+        err_print(ES_SYNTAX, "expected filename or limiter");
         return (ES_SYNTAX);
     }
 
@@ -217,7 +217,7 @@ static t_redir *init_redirect(t_parser_context *ctx)
 static int token_has_any_quotes(t_token *token)
 {
     size_t i;
-    
+
     i = 0;
     if (!token || !token->quotes_map)
         return (0);

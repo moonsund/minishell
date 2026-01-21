@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
 
 static int process_operator_token(t_token_type type, const char *literal, t_token_list *tokens, t_lexer_context *context);
 static t_token *make_operator_token(t_token_type type, const char *literal);
@@ -22,7 +22,7 @@ int check_operators(const char *str, t_token_list *tokens, t_lexer_context *cont
             reset_buf(&context->buf);
         }
 
-        if (str[context->i] == '|') 
+        if (str[context->i] == '|')
             return (process_operator_token(TOK_PIPE, "|", tokens, context));
 
         else if (str[context->i] == '<')
@@ -39,7 +39,7 @@ int check_operators(const char *str, t_token_list *tokens, t_lexer_context *cont
                 return (process_operator_token(TOK_APPEND, ">>", tokens, context));
             else
                 return (process_operator_token(TOK_REDIR_OUT, ">", tokens, context));
-        } 
+        }
     }
     return (0);
 }

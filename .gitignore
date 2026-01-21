@@ -27,7 +27,7 @@ minishell
 .DS_Store
 
 # Sophie's test / unfinished files
-execution
-sources/exec_external_commands.c
-sources/exec_external_commands_test.c
-sources/temp_exec
+Pipe_testing_w_Fab.c
+w
+y
+z

@@ -14,10 +14,19 @@
 #include <signal.h>
 #include <readline/readline.h>
 #include <readline/history.h>
-#include <fcntl.h>   // open
-
+#include <fcntl.h>		// open
 #include <sys/types.h>	// opendir
 #include <dirent.h>		// opendir
+#include <sys/stat.h>	// open
+
+// Easier Debug
+# define NC "\e[0m"
+# define BLUE "\e[34m"
+# define MAGENTA "\e[35m"
+# define YELLOW "\e[33m"
+# define RED "\e[31m"
+# define GREEN "\e[32m"
+# define CYAN "\e[36m"
 
 #ifndef SIGNALS_H
 #define SIGNALS_H
@@ -30,17 +39,15 @@ void setup_signals(void);
 
 typedef enum e_exit_status
 {
-	ES_SUCCESS         = 0,   // success
-	ES_GENERAL         = 1,   // any “generic” error (including malloc failures, open/dup2 errors in redirections, etc.)
-	ES_BUILTIN_MISUSE  = 2,   // incorrect usage of a builtin / invalid builtin arguments
-	ES_NOT_EXECUTABLE  = 126, // command or file found, but cannot be executed (EACCES, is a directory, not executable)
-	ES_NOT_FOUND       = 127, // command not found (PATH lookup failed / file does not exist)
-	ES_SIGINT          = 130, // 128 + SIGINT (2)
-	ES_SIGQUIT         = 131, // 128 + SIGQUIT (3)
-	ES_SYNTAX          = 258, // parser syntax error
-}	t_exit_status;
-
-
+	ES_SUCCESS			= 0,   // success
+	ES_GENERAL			= 1,   // any “generic” error (including malloc failures, open/dup2 errors in redirections, etc.)
+	ES_BUILTIN_MISUSE	= 2,   // incorrect usage of a builtin / invalid builtin arguments
+	ES_NOT_EXECUTABLE	= 126, // command or file found, but cannot be executed (EACCES, is a directory, not executable)
+	ES_NOT_FOUND		= 127, // command not found (PATH lookup failed / file does not exist)
+	ES_SIGINT			= 130, // 128 + SIGINT (2)
+	ES_SIGQUIT			= 131, // 128 + SIGQUIT (3)
+	ES_SYNTAX			= 258, // parser syntax error
+} t_exit_status;
 
 typedef enum e_token_type
 {
@@ -57,7 +64,7 @@ typedef enum e_qmark
 	Q_NONE,	// outside quotes
 	Q_SQ,	// inside single quotes '...'
 	Q_DQ,	// inside double quotes "..."
-}   t_qmark;
+} t_qmark;
 
 typedef enum e_redir_type
 {
@@ -100,26 +107,19 @@ typedef struct s_token_list
 	size_t count;
 } t_token_list;
 
-typedef struct s_temp_command				// To delete after code matching
-{
-	char					**full_command;	// Exec requirement
-	struct s_temp_command	*next;
-	// demander a Leo pour infiles/outfiles - Qu'est ce qu'il va me donner du parsing pour que je bosse avec une redirection par exemple
-}	t_temp_command;
-
 typedef struct s_env
 {
 	char			*variable_name;
 	char			*variable_data;
 	struct s_env	*next;
-}	t_env;
+} t_env;
 
 typedef struct s_var
 {
 	char			*name;
 	char			*value;
 	struct s_var	*next;
-}	t_var;
+} t_var;
 
 typedef struct s_env_var_list
 {
@@ -159,22 +159,16 @@ typedef struct s_parser_context
     char *tmp;
 } t_parser_context;
 
-
 typedef struct s_shell
 {
-	char			**command_array;		// To delete TBC
-	t_temp_command	all_commands;			// To delete after code matching
-	t_env			**env_variables;		// To be removed: link list is more convinient for handling
+	int				exit_status;
+	t_env_var_list	env_vars;				// envp vars saved in linked list
+	t_token_list	tokens;
+	t_pipeline		*pipeline;				// Only base to consider for exec
 
-	t_exit_status	exit_status;
-	t_env_var_list	env_vars;				// envp vars saved in linked list 
-	t_token_list	tokens;					// The one to consider ? TBC
-	t_pipeline		*pipeline;				// array of commands ready to be executed 
-    
-}	t_shell;
+	// t_ast ast;
 
-
-
+} t_shell;
 
 
 // ------------------------------------------------------------------------------------------ From Leo
@@ -185,11 +179,11 @@ typedef struct s_shell
 int init_shell(t_shell *shell, char **envp);
 
 // envp.c
-t_var  *find_var(t_env_var_list *list, const char *name);
-int     set_var(t_env_var_list *list, const char *name, const char *value);   // export
-int     unset_var(t_env_var_list *list, const char *name);                    // unset
-char   *get_var_value(t_env_var_list *var_list, const char *var);                // my_getenv
-char  **build_envp(t_env_var_list *list);                                     // for execve
+t_var	*find_var(t_env_var_list *list, const char *name);
+int		set_var(t_env_var_list *list, const char *name, const char *value);   // export
+int		unset_var(t_env_var_list *list, const char *name);                    // unset
+char	*get_var_value(t_env_var_list *var_list, const char *var);            // my_getenv
+char	**build_envp(t_env_var_list *list);                                   // for execve
 
 // envp_utils.c
 void free_envp_partial(char **envp, size_t used);
@@ -251,37 +245,33 @@ void err_malloc_print(const char *where);
 // signals.c
 void setup_signals(void);
 
-// ------------------------------------------------------------------------------------------ Exec functions
-// utils
-int		str_comp(char *s1, char *s2);
+// exec_command_filter.c
+void	check_command_type_and_execute(t_shell *minishell);
 
-// pre exec functions
-void	check_command_type_and_execute(t_shell minishell);
-void	execute_built_in_commands(t_shell minishell);
-// void	execute_external_commands(t_shell minishell);
-
-// exec built in functions
-void	execute_echo(t_token *first_command, t_shell minishell);
-void	execute_cd(char *current_working_directory, t_token *first_command);
+// exec_builtin_commands.c
+void	execute_built_in_commands(t_shell *minishell);
+char	*fetch_current_working_directory(void);
+void	execute_echo(t_command *cmds);
+bool	is_line_return(char **cmd, int *i);
+void	execute_cd(t_command *cmds);
 void	execute_pwd(char *current_working_directory);
-void	execute_export(t_shell minishell);
-void	execute_unset(t_shell minishell);
-void	execute_env(t_shell minishell);
-void	execute_exit(t_shell minishell);
+void	execute_export(t_shell *minishell);
+void	execute_unset(t_shell *minishell);
+void	execute_env(t_shell *minishell);
 
-// env related functions
-t_env	**build_environment(void);
-t_env	*create_new_environment_variable(char *key, char *value);
-char	*fetch_value_from_key(t_env **head, char *key);
-// t_env	*search_last_var(t_env *env_var);
-void	add_env_var_to_list(t_env **head, t_env *new);
-void	delete_env_var(t_env **head, char *var_to_delete);
+// exec_external_commands.c
+void	execute_external_commands(t_shell *minishell);
+void	pipes_party(t_shell *minishell, int *fd_in, int *fd_out, char **execve_args);
+void	fork_and_exec(t_shell *minishell, int *fd, char **execve_args);
 
-// exec external functions
-// char	**execute_ls(t_shell minishell, char *path);
+// exec_utils_fd.c
+char	*build_path(char *file_name);
+int		open_fd(char *file_name, bool append, bool truncate);
+void	fd_update_if_redirections(t_command *all_commands, int *fd);
+void	add_user_input_to_fd(t_shell *minishell, int fd);
+void	close_and_set_to_neg(int *fd);
 
-// Free functions
-void	del_string(char *param);
-void	free_all_vars(t_env **head);
-void	free_everything(t_shell minishell);
+// exec_utils.c
+void	replace_cmd_by_binary_path(char *cmd);
+
 #endif
