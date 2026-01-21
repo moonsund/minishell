@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
 
 void reset_iteration(t_shell *shell);
 void shell_destroy(t_shell *shell);
@@ -88,7 +88,7 @@ void err_print(t_exit_status type, const char *where)
 {
 	if (type == ES_GENERAL)
 	{
-		// printf("minishell: %s: \n", where);
+		// printf("minishell: %s\n", where);
 		write(2, "minishell: ", 11);
 		write(2, where, ft_strlen(where));
 		write(2, "\n", 1);

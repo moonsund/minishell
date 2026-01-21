@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
 
 t_var  *find_var(t_env_var_list *list, const char *name);
 int     set_var(t_env_var_list *list, const char *name, const char *value);   // export
@@ -29,7 +29,7 @@ int set_var(t_env_var_list *list, const char *name, const char *value)
     t_var *new_variable;
     char *new_value;
     char *new_name;
-    
+
     if (!list || !name)
         return (0);
 
@@ -162,7 +162,7 @@ char  **build_envp(t_env_var_list *list)
 
     if (!list)
         return (NULL);
-    
+
     cur = list->head;
     i = 0;
     envp = malloc(sizeof(*envp) * (list->count + 1));

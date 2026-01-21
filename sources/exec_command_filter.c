@@ -1,7 +1,8 @@
-#include "minishell.h"
+#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
 #include "libft.h"
 
 void	check_command_type_and_execute(t_shell *minishell);
+void	execute_built_in_commands(t_shell *minishell);
 
 void	check_command_type_and_execute(t_shell *minishell)
 {
@@ -31,4 +32,24 @@ void	check_command_type_and_execute(t_shell *minishell)
 	{
 		execute_external_commands(minishell);
 	}
+}
+
+void	execute_built_in_commands(t_shell *minishell)
+{
+	char	*current_working_directory;
+	current_working_directory = fetch_current_working_directory();												// Ⓜ️
+
+	if(ft_strcmp(minishell->pipeline->cmds->argv[0], "echo") == 0)
+		execute_echo(minishell->pipeline->cmds);
+	else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "cd") == 0)
+		execute_cd(minishell->pipeline->cmds);
+	else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "pwd") == 0)
+		execute_pwd(current_working_directory);
+	else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "export") == 0)
+		execute_export(minishell);
+	else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "unset") == 0)
+		execute_unset(minishell);
+	else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "env") == 0)
+		execute_env(minishell);
+	free(current_working_directory);
 }

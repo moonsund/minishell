@@ -39,14 +39,14 @@ void setup_signals(void);
 
 typedef enum e_exit_status
 {
-	ES_SUCCESS         = 0,   // success
-	ES_GENERAL         = 1,   // any “generic” error (including malloc failures, open/dup2 errors in redirections, etc.)
-	ES_BUILTIN_MISUSE  = 2,   // incorrect usage of a builtin / invalid builtin arguments
-	ES_NOT_EXECUTABLE  = 126, // command or file found, but cannot be executed (EACCES, is a directory, not executable)
-	ES_NOT_FOUND       = 127, // command not found (PATH lookup failed / file does not exist)
-	ES_SIGINT          = 130, // 128 + SIGINT (2)
-	ES_SIGQUIT         = 131, // 128 + SIGQUIT (3)
-	ES_SYNTAX          = 258, // parser syntax error
+	ES_SUCCESS			= 0,   // success
+	ES_GENERAL			= 1,   // any “generic” error (including malloc failures, open/dup2 errors in redirections, etc.)
+	ES_BUILTIN_MISUSE	= 2,   // incorrect usage of a builtin / invalid builtin arguments
+	ES_NOT_EXECUTABLE	= 126, // command or file found, but cannot be executed (EACCES, is a directory, not executable)
+	ES_NOT_FOUND		= 127, // command not found (PATH lookup failed / file does not exist)
+	ES_SIGINT			= 130, // 128 + SIGINT (2)
+	ES_SIGQUIT			= 131, // 128 + SIGQUIT (3)
+	ES_SYNTAX			= 258, // parser syntax error
 } t_exit_status;
 
 typedef enum e_token_type
@@ -146,7 +146,6 @@ typedef struct s_parser_context
     char *tmp;
 } t_parser_context;
 
-
 typedef struct s_shell
 {
 	int				exit_status;
@@ -220,6 +219,7 @@ void init_buffer(t_buf *buf);
 
 // heredoc
 int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, int exit_status);
+int write_line_in_fd(int fd, char *line);
 
 // utils.c
 void reset_iteration(t_shell *shell);
@@ -233,40 +233,33 @@ void err_malloc_print(const char *where);
 // signals.c
 void setup_signals(void);
 
-// ------------------------------------------------------------------------------------------ Exec functions
-// pre exec functions
+// exec_command_filter.c
 void	check_command_type_and_execute(t_shell *minishell);
-void	execute_built_in_commands(t_shell *minishell);
-void	execute_external_commands(t_shell *minishell);
-void	replace_cmd_by_binary_path(char *cmd);
-void	fd_update_if_redirections(t_command *all_commands, int *fd);
 
-// exec built in functions
+// exec_builtin_commands.c
+void	execute_built_in_commands(t_shell *minishell);
 char	*fetch_current_working_directory(void);
 void	execute_echo(t_command *cmds);
+bool	is_line_return(char **cmd, int *i);
 void	execute_cd(t_command *cmds);
 void	execute_pwd(char *current_working_directory);
-void	execute_export(t_shell *minishell);			// Leo handles
-void	execute_unset(t_shell *minishell);			// Leo handles
-void	execute_env(t_shell *minishell);			// Leo handles
-// void	execute_exit(t_shell *minishell);
+void	execute_export(t_shell *minishell);
+void	execute_unset(t_shell *minishell);
+void	execute_env(t_shell *minishell);
 
-// env related functions -- TO DELETE
-// t_env	**build_environment(void);
-// t_env	*create_new_environment_variable(char *key, char *value);
-// char	*fetch_value_from_key(t_env **head, char *key);
-// t_env	*search_last_var(t_env *env_var);
-// void	add_env_var_to_list(t_env **head, t_env *new);
-// void	delete_env_var(t_env **head, char *var_to_delete);
+// exec_external_commands.c
+void	execute_external_commands(t_shell *minishell);
+void	pipes_party(t_shell *minishell, int *fd_in, int *fd_out, char **execve_args);
+void	fork_and_exec(t_shell *minishell, int *fd, char **execve_args);
 
-// exec external functions
+// exec_utils_fd.c
 char	*build_path(char *file_name);
 int		open_fd(char *file_name, bool append, bool truncate);
-void	fork_and_exec(t_shell *minishell, int *fd, char **execve_args);
-void	pipes_party(t_shell *minishell, int *fd_in, int *fd_out, char **execve_args);
-
-// Free functions
+void	fd_update_if_redirections(t_command *all_commands, int *fd);
+void	add_user_input_to_fd(t_shell *minishell, int fd);
 void	close_and_set_to_neg(int *fd);
-// void	del_string(char *param);
-// void	free_all_vars(t_env **head);
+
+// exec_utils.c
+void	replace_cmd_by_binary_path(char *cmd);
+
 #endif

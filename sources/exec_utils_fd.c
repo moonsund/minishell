@@ -1,0 +1,94 @@
+#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
+#include "libft.h"
+
+char	*build_path(char *file_name);
+int		open_fd(char *file_name, bool append, bool truncate);
+void	fd_update_if_redirections(t_command *all_commands, int *fd);
+void	add_user_input_to_fd(t_shell *minishell, int fd);
+void	close_and_set_to_neg(int *fd);
+
+char	*build_path(char *file_name)
+{
+	char	*current_working_directory;
+	char	*cwd_with_slash;
+	char	*file_path;
+
+	current_working_directory = fetch_current_working_directory();
+	cwd_with_slash = ft_strjoin(current_working_directory, "/");
+	file_path = ft_strjoin(cwd_with_slash, file_name);
+	free(current_working_directory);
+	free(cwd_with_slash);
+	return (file_path);
+}
+
+int	open_fd(char *file_name, bool append, bool truncate)
+{
+	int		fd;
+	char	*file_path;
+
+	file_path = build_path(file_name);
+	// HYPER IMPORTANT - Tout se joue dans les flags - 0666 = permissions
+	if (append)
+	{
+		fd = open(file_path, O_CREAT | O_APPEND | O_RDWR, 0666);
+	}
+	else if (truncate)
+	{
+		fd = open(file_path, O_CREAT | O_TRUNC | O_RDWR, 0666);
+	}
+	else
+	{
+		fd = open(file_path, O_CREAT | O_RDWR, 0666);
+	}
+	free(file_path);
+	if (fd == -1)
+	{
+		perror("Error");
+	}
+	return (fd);
+}
+
+// Examples for testing
+// wc -l < doc
+// sort < doc
+// grep ok << fin
+// ls > doc
+// ls >> doc
+void	fd_update_if_redirections(t_command *all_commands, int *fd)
+{
+	if (all_commands->infile)
+		fd[0] = open_fd(all_commands->infile, false, false);
+	if (all_commands->outfile)
+	{
+		if (all_commands->append == 1)
+			fd[1] = open_fd(all_commands->outfile, true, false);
+		else
+			fd[1] = open_fd(all_commands->outfile, false, true);
+	}
+}
+
+void	add_user_input_to_fd(t_shell *minishell, int fd)
+{
+	char	*line;
+
+	while (true)
+	{
+		line = readline(NULL);
+		if (g_sigint) // ctrl+c - Not functional yet
+		{
+			close(fd);
+			return ;
+		}
+		write_line_in_fd(fd, line);
+		free(line);
+	}
+}
+
+void	close_and_set_to_neg(int *fd)
+{
+	if (*fd && *fd != -1)
+	{
+		close(*fd);
+		*fd = -1;
+	}
+}
