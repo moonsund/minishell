@@ -59,6 +59,14 @@ typedef enum e_qmark
 	Q_DQ,	// inside double quotes "..."
 }   t_qmark;
 
+typedef enum e_redir_type
+{
+	R_IN,
+	R_OUT,
+	R_APPEND,
+	R_HEREDOC
+}	t_redir_type;
+
 typedef struct s_buf
 {
 	char *characters;		// array of accumulated characters
@@ -120,15 +128,20 @@ typedef struct s_env_var_list
 	size_t count;
 } t_env_var_list;
 
+typedef struct s_redir
+{
+	t_redir_type		type;		// R_IN / R_OUT / R_APPEND / R_HEREDOC
+	int					fd;			// 0 or 1
+	char				*target;	// filename or limiter
+	int					expand;		// only for heredoc: 0 or 1
+	struct s_redir		*next;
+}	t_redir;
+
 typedef struct s_command
 {
 	char **argv; // null-terminated array of arguments
-	char *infile; // < 
-	char *outfile; // > or >>
-	int append; // 0 for > and 1 for >>
-	char *heredoc_limiter;
-	int has_heredoc; // 0 or 1
-	int heredoc_expand_needed; // 0 or 1
+	int argc;
+	t_redir	*redirs;
 } t_command;
 
 typedef struct s_pipeline
@@ -224,7 +237,7 @@ void free_buf(t_buf *buf);
 void init_buffer(t_buf *buf);
 
 // heredoc
-int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, int exit_status);
+int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, t_exit_status exit_status);;
 
 // utils.c
 void reset_iteration(t_shell *shell);
