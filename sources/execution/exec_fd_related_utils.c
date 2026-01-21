@@ -3,7 +3,7 @@
 
 char	*build_path(char *file_name);
 int		open_fd(char *file_name, bool append, bool truncate);
-void	fd_update_if_redirections(t_command *all_commands, int *fd);
+void	fd_update_if_redirections(t_command *all_commands, int *fd_in, int *fd_out);
 void	add_user_input_to_fd(t_shell *minishell, int fd);
 void	close_and_set_to_neg(int *fd);
 
@@ -54,16 +54,16 @@ int	open_fd(char *file_name, bool append, bool truncate)
 // grep ok << fin
 // ls > doc
 // ls >> doc
-void	fd_update_if_redirections(t_command *all_commands, int *fd)
+void	fd_update_if_redirections(t_command *all_commands, int *fd_in, int *fd_out)
 {
 	if (all_commands->infile)
-		fd[0] = open_fd(all_commands->infile, false, false);
+		fd_in[0] = open_fd(all_commands->infile, false, false);
 	if (all_commands->outfile)
 	{
 		if (all_commands->append == 1)
-			fd[1] = open_fd(all_commands->outfile, true, false);
+			fd_out[0] = open_fd(all_commands->outfile, true, false);
 		else
-			fd[1] = open_fd(all_commands->outfile, false, true);
+			fd_out[0] = open_fd(all_commands->outfile, false, true);
 	}
 }
 

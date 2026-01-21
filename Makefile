@@ -21,7 +21,6 @@ ifeq ($(UNAME), Linux)
   LDLIBS  += -lncurses
 endif
 
-
 SRC_PATH = sources/
 OBJ_PATH = objects/
 
@@ -66,14 +65,12 @@ $(OBJ_PATH)%.o: $(SRC_PATH)%.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-
 # libft fetch/build
 $(LIBFT_DIR):
 	git clone https://github.com/moonsund/libft.git $(LIBFT_DIR)
 
 $(LIBFT_A): | $(LIBFT_DIR)
 	$(MAKE) -C $(LIBFT_DIR)
-
 
 clean:
 	rm -rf $(OBJ_PATH)
