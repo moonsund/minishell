@@ -1,4 +1,4 @@
-#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
+#include "minishell.h"
 
 t_pipeline *init_pipeline();
 void init_parser_context(t_parser_context *ctx);
@@ -33,10 +33,6 @@ void init_parser_context(t_parser_context *ctx)
 void init_command(t_command *cmd)
 {
     cmd->argv = NULL;
-    cmd->infile = NULL;
-    cmd->outfile = NULL;
-    cmd->heredoc_limiter = NULL;
-    cmd->append = 0;
-    cmd->has_heredoc = 0;
-    cmd->heredoc_expand_needed = 0;
+    cmd->argc = 0;
+    cmd->redirs = NULL;
 }

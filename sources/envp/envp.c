@@ -1,4 +1,4 @@
-#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
+#include "minishell.h"
 
 t_var  *find_var(t_env_var_list *list, const char *name);
 int     set_var(t_env_var_list *list, const char *name, const char *value);   // export

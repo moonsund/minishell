@@ -1,4 +1,4 @@
-#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
+#include "minishell.h"
 
 static void init_lexer_context(t_lexer_context *context);
 static int process_quotes(const char *str, t_lexer_context *ctx);

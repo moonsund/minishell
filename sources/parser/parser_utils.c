@@ -1,4 +1,4 @@
-#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
+#include "minishell.h"
 
 void free_cmd(t_command *cmd);
 
@@ -16,8 +16,5 @@ void free_cmd(t_command *cmd)
         }
     }
     free(cmd->argv);
-    free(cmd->infile);
-    free(cmd->outfile);
-    free(cmd->heredoc_limiter);
     init_command(cmd);
 }

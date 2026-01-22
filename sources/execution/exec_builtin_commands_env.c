@@ -1,4 +1,4 @@
-#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
+#include "minishell.h"
 #include "libft.h"
 
 void	execute_export(t_shell *minishell);

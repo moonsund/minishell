@@ -1,13 +1,12 @@
-#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
+#include "minishell.h"
 
 static int process_word_token(t_parser_context *ctx);
 static int append_arg(t_command *cmd, char *arg);
 static t_exit_status process_pipe_token(t_pipeline *pl, t_parser_context *ctx);
 static t_exit_status process_redir_tokens(t_parser_context *ctx);
-static int process_redir_in_token(char **tmp, char *raw_str, char **infile);
-static int process_redir_out_append_tokens(t_parser_context *ctx);
 static int token_has_any_quotes(t_token *token);
-static int process_heredoc_token(t_parser_context *ctx);
+static int redir_push_back(t_redir **lst, t_redir *node);
+static t_redir *init_redirect(t_parser_context *ctx);
 
 t_exit_status process_tokens(t_pipeline *pl, t_token_list *list, t_parser_context *ctx)
 {
@@ -37,16 +36,26 @@ t_exit_status process_tokens(t_pipeline *pl, t_token_list *list, t_parser_contex
         ctx->current = ctx->current->next;
     }
 
-    if (ctx->cmd_started) // the last command after the pipe
+    if (ctx->cmd_started) // last command (after loop)
     {
-        // if (ctx->current_cmd.argv == NULL || ctx->current_cmd.argv[0] == NULL)			// To remove (blocking commands starting w/ redirections)
-        // {
-        //     err_print(ES_SYNTAX, "near 'newline'");
-        //     return (ES_SYNTAX);
-        // }
+        int has_argv;
+        int has_redirs;
+
+        has_argv = (ctx->current_cmd.argv && ctx->current_cmd.argv[0]);
+        has_redirs = (ctx->current_cmd.redirs != NULL);
+
+        /* real "empty command" => syntax error */
+        if (!has_argv && !has_redirs)
+        {
+            err_print(ES_SYNTAX, "near 'newline'");
+            return (ES_SYNTAX);
+        }
+
+        /* allow commands like: >out  or  <in >out */
         if (!append_cmd(pl, ctx->current_cmd))
             return (ES_GENERAL);
     }
+    
     return (ES_SUCCESS);
 }
 
@@ -128,6 +137,8 @@ static t_exit_status process_pipe_token(t_pipeline *pl, t_parser_context *ctx)
 
 static t_exit_status process_redir_tokens(t_parser_context *ctx)
 {
+    t_redir *redir_node;
+
     if (!ctx->cmd_started)
     {
         init_command(&ctx->current_cmd);
@@ -140,56 +151,67 @@ static t_exit_status process_redir_tokens(t_parser_context *ctx)
         return (ES_SYNTAX);
     }
 
-    if (ctx->current->type == TOK_REDIR_IN) // <
+    redir_node = init_redirect(ctx);
+    if (!redir_node)
     {
-        if (!process_redir_in_token(&ctx->tmp, ctx->next->raw_str, &ctx->current_cmd.infile))
-            return (ES_GENERAL);
-    }
-    else if (ctx->current->type == TOK_HEREDOC) // <<
+		err_malloc_print("parser: redir node");
+		return (ES_GENERAL);
+	}
+
+    if (!redir_push_back(&ctx->current_cmd.redirs, redir_node))
     {
-        if (!process_heredoc_token(ctx))
-            return (ES_GENERAL);
+        free(redir_node->target);
+        free(redir_node);
+        return (ES_GENERAL);
     }
-    else
-    {
-        if (!process_redir_out_append_tokens(ctx))
-            return (ES_GENERAL);
-    }
+
     ctx->current = ctx->next;
     return (ES_SUCCESS);
 }
 
-static int process_redir_in_token(char **tmp, char *raw_str, char **infile)
+static t_redir *init_redirect(t_parser_context *ctx)
 {
-    *tmp = ft_strdup(raw_str);
-    if (!*tmp)
-    {
-        err_malloc_print("parser: redir in token");
-        return (0);
-    }
-    free(*infile);
-    *infile = *tmp;
-    *tmp = NULL;
-    return (1);
-}
+    t_redir *redir;
+    t_token_type token_type = ctx->current->type;
 
-static int process_heredoc_token(t_parser_context *ctx)
-{
-    ctx->tmp = ft_strdup(ctx->next->raw_str);
-    if (!ctx->tmp)
+    redir = malloc(sizeof(* redir));
+    if (!redir)
+        return NULL;
+    
+    redir->fd = 0;
+    redir->expand = 0;
+    redir->next = NULL;
+
+    if (token_type == TOK_REDIR_IN)     // <
     {
-        err_malloc_print("parser: heredoc token");
-        return (0);
+        redir->type = R_IN;
+        redir->fd = 0;
     }
-    free(ctx->current_cmd.heredoc_limiter);
-    ctx->current_cmd.heredoc_limiter = ctx->tmp;
-    ctx->tmp = NULL;
-    ctx->current_cmd.has_heredoc = 1;
-    if (token_has_any_quotes(ctx->next))
-        ctx->current_cmd.heredoc_expand_needed = 0;
-    else
-        ctx->current_cmd.heredoc_expand_needed = 1;
-    return (1);
+
+    else if (token_type == TOK_HEREDOC)     // <<
+    {
+        redir->type = R_HEREDOC;
+        if (!token_has_any_quotes(ctx->next))
+            redir->expand = 1;
+    }
+    else if (token_type == TOK_REDIR_OUT)	// >
+    {
+        redir->type = R_OUT;
+		redir->fd = 1;
+    }
+    else 	// >>
+    {
+        redir->type = R_APPEND;
+		redir->fd = 1;
+    }
+
+    redir->target = ft_strdup(ctx->next->raw_str);
+    if (!redir->target)
+    {
+        free(redir);
+        return (NULL);
+    }
+    return redir;
 }
 
 static int token_has_any_quotes(t_token *token)
@@ -208,21 +230,20 @@ static int token_has_any_quotes(t_token *token)
     return (0);
 }
 
-static int process_redir_out_append_tokens(t_parser_context *ctx)
+static int redir_push_back(t_redir **lst, t_redir *node)
 {
-    ctx->tmp = ft_strdup(ctx->next->raw_str);
-    if (!ctx->tmp)
-    {
-        err_malloc_print("parser: redir out token");
-        return (0);
-    }
-    free(ctx->current_cmd.outfile);
-    ctx->current_cmd.outfile = ctx->tmp;
-    ctx->tmp = NULL;
+	t_redir	*cur;
 
-    if (ctx->current->type == TOK_REDIR_OUT) // >
-        ctx->current_cmd.append = 0;
-    else if (ctx->current->type == TOK_APPEND) // >>
-        ctx->current_cmd.append = 1;
-    return (1);
+	if (!node)
+		return (0);
+	if (!*lst)
+	{
+		*lst = node;
+		return (1);
+	}
+	cur = *lst;
+	while (cur->next)
+		cur = cur->next;
+	cur->next = node;
+	return (1);
 }

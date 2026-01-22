@@ -1,98 +1,111 @@
-#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
+#include "minishell.h"
 
-int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, int exit_status);
+int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, t_exit_status exit_status);
 static char *generate_heredoc_filename(size_t heredoc_index);
-static int expand_heredoc(char **line, t_env_var_list *env_vars, int exit_status);
-int write_line_in_fd(int fd, char *line);
+static int expand_heredoc(char **line, t_env_var_list *env_vars, t_exit_status exit_status);
+static int write_heredoc_line(int fd, char *line);
 static int append_charter(char **line, char c);
 static int append_string(char **line, const char *str);
+static void redir_replace_with_infile(t_redir *r, char *filename);
+static int get_heredoc(t_redir *redir, t_env_var_list *env_vars, t_exit_status exit_status, size_t *heredoc_index);
 
-int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, int exit_status)
+int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, t_exit_status exit_status)
 {
     size_t  i;
-    char    *line;
-    int  fd;
-    char *heredoc_filename;
-    size_t heredoc_index;
+    t_redir *redir;
+    size_t  heredoc_index;
 
     heredoc_index = 0;
-
     if (!pipeline || !env_vars)
         return (0);
 
     i = 0;
     while (i < pipeline->count)
     {
-        if (pipeline->cmds[i].has_heredoc)
+        redir = pipeline->cmds[i].redirs;
+        while (redir)
         {
-            heredoc_filename = generate_heredoc_filename(heredoc_index++);
-            if (!heredoc_filename)
-                return (0);
-
-            fd = open(heredoc_filename, O_WRONLY | O_CREAT | O_TRUNC, 0600);
-            if (fd < 0)
+            if (redir->type == R_HEREDOC)
             {
-                free(heredoc_filename);
-                return (0);
+                if (!get_heredoc(redir, env_vars, exit_status, &heredoc_index))
+                    return (0);
             }
-
-            while (true)
-            {
-                line = readline("heredoc> ");
-
-                if (g_sigint) // ctrl+c
-                {
-                    close(fd);
-                    unlink(heredoc_filename);
-                    free(heredoc_filename);
-                    return (0);
-                }
-
-                if (!line)
-                {
-                    unlink(heredoc_filename);
-                    free(heredoc_filename);
-                    close(fd);
-                    return (0);
-                }
-
-                if (pipeline->cmds[i].heredoc_limiter
-                    && ft_strcmp(line, pipeline->cmds[i].heredoc_limiter) == 0)
-                {
-                    free(line);
-                    break;
-                }
-
-                if (!is_empty(line))
-                    add_history(line);
-
-                if (pipeline->cmds[i].heredoc_expand_needed)
-                {
-                    if (!expand_heredoc(&line, env_vars, exit_status))
-                    {
-                        free(line);
-                        close(fd);
-                        unlink(heredoc_filename);
-                        free(heredoc_filename);
-                        return (0);
-                    }
-                }
-
-                if (!write_line_in_fd(fd, line))
-                {
-                    free(line);
-                    close(fd);
-                    free(heredoc_filename);
-                    return (0);
-                }
-
-                free(line);
-            }
-            close(fd);
-            pipeline->cmds[i].infile = heredoc_filename;
+            redir = redir->next;
         }
         i++;
     }
+    return (1);
+}
+    
+static int get_heredoc(t_redir *redir, t_env_var_list *env_vars, t_exit_status exit_status, size_t *heredoc_index)
+{
+    char *heredoc_filename;
+    int fd;
+    char *line; 
+
+    heredoc_filename = generate_heredoc_filename((*heredoc_index)++);
+    if (!heredoc_filename)
+        return (0);
+
+    fd = open(heredoc_filename, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+    if (fd < 0)
+    {
+        free(heredoc_filename);
+        return (0);
+    }
+
+    while (true)
+    {
+        line = readline("heredoc> ");
+        
+        if (g_sigint) // ctrl+c
+        {
+            close(fd);
+            unlink(heredoc_filename);
+            free(heredoc_filename);
+            return (0);
+        }
+
+        if (!line)
+            break;
+
+        if (redir->target && ft_strcmp(line, redir->target) == 0)
+        {
+            free(line);
+            break;
+        }
+
+        if (!is_empty(line))
+            add_history(line);
+
+        if (redir->expand)
+        {
+            if (!expand_heredoc(&line, env_vars, exit_status))
+            {
+                free(line);
+                close(fd);
+                unlink(heredoc_filename);
+                free(heredoc_filename);
+                return (0);
+            }
+        }
+
+        if (!write_heredoc_line(fd, line))
+        {
+            free(line);
+            close(fd);
+            unlink(heredoc_filename);
+            free(heredoc_filename);
+            return (0);
+        }
+        free(line);
+    }
+
+    close(fd);
+
+    /* converting << limiter in < .heredoc_N */
+    redir_replace_with_infile(redir, heredoc_filename);
+
     return (1);
 }
 
@@ -109,7 +122,7 @@ static char *generate_heredoc_filename(size_t heredoc_index)
     return (file_name);
 }
 
-static int expand_heredoc(char **line, t_env_var_list *env_vars, int exit_status)
+static int expand_heredoc(char **line, t_env_var_list *env_vars, t_exit_status exit_status)
 {
     size_t  i;
     size_t  j;
@@ -306,4 +319,15 @@ static int append_string(char **line, const char *str)
         *line = new_line;
         return (1);
     }
+}
+
+static void redir_replace_with_infile(t_redir *r, char *filename)
+{
+    /* r->target содержал limiter, его надо освободить */
+    free(r->target);
+    r->target = filename;
+
+    r->type = R_IN;
+    r->fd = 0;
+    r->expand = 0;
 }

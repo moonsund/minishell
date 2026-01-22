@@ -1,7 +1,8 @@
-#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
+#include "minishell.h"
 
 static void print_token_list(t_token_list *list);
-static void print_pipe_line(t_pipeline *pipeline);
+static void print_pipeline(t_pipeline *pipeline);
+// static int debug_print_heredoc_files(t_pipeline *pipeline);
 
 int main(int argc, char **argv, char **envp)
 {
@@ -80,8 +81,8 @@ int main(int argc, char **argv, char **envp)
 			reset_iteration(&shell);
 			continue;
 		}
-		// printf("\n[pipelines_debug]:\n");	// for debugging, to be deleted
-		// print_pipe_line(shell.pipeline);	// for debugging, to be deleted
+		printf("\n[pipelines_debug]:\n");	// for debugging, to be deleted
+		print_pipeline(shell.pipeline);	// for debugging, to be deleted
 
 		g_sigint = 0;
 
@@ -104,7 +105,7 @@ int main(int argc, char **argv, char **envp)
 		check_command_type_and_execute(&shell);	// Exec testing starts here
 		shell.pipeline = NULL;
 		free_tokens(&shell.tokens);
-//		debug_print_heredoc_files(shell.pipeline); // for debugging, to be deleted
+		// debug_print_heredoc_files(shell.pipeline); // for debugging, to be deleted
 
 		// check_command_type_and_execute(shell);	// Exec testing starts here
 		free(line);
@@ -153,20 +154,35 @@ static void print_token_list(t_token_list *tokens) // for debugging, to be delet
 	}
 }
 
-static void print_pipe_line(t_pipeline *pipeline) // for debugging, to be deleted
+static const char *redir_type_to_str(t_redir_type type)
 {
-    size_t i;
-    size_t j;
+	if (type == R_IN)
+		return ("<");
+	if (type == R_OUT)
+		return (">");
+	if (type == R_APPEND)
+		return (">>");
+	if (type == R_HEREDOC)
+		return ("<<");
+	return ("?");
+}
 
-    if (!pipeline || !pipeline->cmds)
-        return;
+static void	print_pipeline(t_pipeline *pipeline) /* for debugging, to be deleted */
+{
+	size_t	i;
+	size_t	j;
+	t_redir	*r;
 
-    for (i = 0; i < pipeline->count; i++)
-    {
-        printf("Command %zu:\n", i);
+	if (!pipeline || !pipeline->cmds)
+		return ;
 
-        if (!pipeline->cmds[i].argv)
-            printf("  (no args)\n");
+	printf("[pipelines_debug]: count=%zu\n", pipeline->count);
+	for (i = 0; i < pipeline->count; i++)
+	{
+		printf("Command %zu:\n", i);
+
+		if (!pipeline->cmds[i].argv || !pipeline->cmds[i].argv[0])
+			printf("  (no args)\n");
 		else
 		{
 			j = 0;
@@ -177,19 +193,32 @@ static void print_pipe_line(t_pipeline *pipeline) // for debugging, to be delete
 			}
 		}
 
-		if (pipeline->cmds[i].infile)
-			printf("infile: %s\n", pipeline->cmds[i].infile);
-		if (pipeline->cmds[i].outfile)
-			printf("outfile: %s\n", pipeline->cmds[i].outfile);
-		printf("append: %i\n", pipeline->cmds[i].append);
-		if (pipeline->cmds[i].heredoc_limiter)
-			printf("heredoc_limiter: %s\n", pipeline->cmds[i].heredoc_limiter);
-		printf("has_heredoc: %i\n", pipeline->cmds[i].has_heredoc);
-		printf("heredoc_expand_needed: %i\n", pipeline->cmds[i].heredoc_expand_needed);
-    }
+		r = pipeline->cmds[i].redirs;
+		if (!r)
+			printf("  (no redirs)\n");
+		else
+		{
+			j = 0;
+			while (r)
+			{
+				printf("  redir[%zu]: type = %s fd = %d target = %s",
+					j,
+					redir_type_to_str(r->type),
+					r->fd,
+					(r->target ? r->target : "(null)"));
+				if (r->type == R_HEREDOC)
+					printf(" expand = %d", r->expand);
+				printf("\n");
+				r = r->next;
+				j++;
+			}
+		}
+	}
 }
 
-/* static int debug_print_heredoc_files(t_pipeline *pipeline) // for debugging, to be deleted
+
+/*
+static int debug_print_heredoc_files(t_pipeline *pipeline) // for debugging, to be deleted
 {
 	size_t i;
 	int fd;
@@ -223,4 +252,5 @@ static void print_pipe_line(t_pipeline *pipeline) // for debugging, to be delete
 		i++;
 	}
 	return (1);
-} */
+}
+*/
