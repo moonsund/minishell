@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
 
 static void print_token_list(t_token_list *list);
 static void print_pipeline(t_pipeline *pipeline);
@@ -81,8 +81,8 @@ int main(int argc, char **argv, char **envp)
 			reset_iteration(&shell);
 			continue;
 		}
-		printf("\n[pipelines_debug]:\n");	// for debugging, to be deleted
-		print_pipeline(shell.pipeline);	// for debugging, to be deleted
+		// printf("\n[pipelines_debug]:\n");	// for debugging, to be deleted
+		// print_pipeline(shell.pipeline);	// for debugging, to be deleted
 
 		g_sigint = 0;
 
@@ -102,21 +102,21 @@ int main(int argc, char **argv, char **envp)
 			continue;
 		}
 
-		check_command_type_and_execute(&shell);	// Exec testing starts here
+		// 22/01 Update below
+		char	**envp = build_envp(&shell.env_vars);
+		int last_status = process_pipeline(&shell, shell.pipeline, **envp);	// Exec testing now starts here - check_command_type_and_execute in process_pipeline ft
+
 		shell.pipeline = NULL;
 		free_tokens(&shell.tokens);
 		// debug_print_heredoc_files(shell.pipeline); // for debugging, to be deleted
 
-		// check_command_type_and_execute(shell);	// Exec testing starts here
+		// check_command_type_and_execute(&shell);	// Exec testing used to start here
 		free(line);
 		reset_iteration(&shell);
 	}
 	shell_destroy(&shell);
 	return (EXIT_SUCCESS);
 }
-
-
-
 
 static void print_token_list(t_token_list *tokens) // for debugging, to be deleted
 {
@@ -215,7 +215,6 @@ static void	print_pipeline(t_pipeline *pipeline) /* for debugging, to be deleted
 		}
 	}
 }
-
 
 /*
 static int debug_print_heredoc_files(t_pipeline *pipeline) // for debugging, to be deleted

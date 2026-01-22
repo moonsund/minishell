@@ -56,15 +56,13 @@ int	open_fd(char *file_name, bool append, bool truncate)
 // ls >> doc
 void	fd_update_if_redirections(t_command *all_commands, int *fd_in, int *fd_out)
 {
-	if (all_commands->infile)
-		fd_in[0] = open_fd(all_commands->infile, false, false);
-	if (all_commands->outfile)
-	{
-		if (all_commands->append == 1)
-			fd_out[0] = open_fd(all_commands->outfile, true, false);
-		else
-			fd_out[0] = open_fd(all_commands->outfile, false, true);
-	}
+	// R_IN / R_OUT / R_APPEND / R_HEREDOC
+	if (all_commands->redirs->type == R_IN)
+		fd_in[0] = open_fd(all_commands->redirs->target, false, false);
+	else if (all_commands->redirs->type == R_OUT)
+		fd_out[0] = open_fd(all_commands->redirs->target, false, true);
+	else if (all_commands->redirs->type == R_APPEND)
+		fd_out[0] = open_fd(all_commands->redirs->target, true, false);
 }
 
 void	add_user_input_to_fd(t_shell *minishell, int fd)

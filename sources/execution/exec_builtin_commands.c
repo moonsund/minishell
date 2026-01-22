@@ -31,13 +31,12 @@ void	execute_echo(t_command *cmds)
 
 	fd = 1;
 	line_return = is_line_return(cmds->argv, &i);
-	if (cmds->outfile)
-	{
-		if (cmds->append == 1)
-			fd = open_fd(cmds->outfile, true, false);
-		else
-			fd = open_fd(cmds->outfile, false, true);
-	}
+
+	if (cmds->redirs->type == R_OUT)				// R_IN / R_OUT / R_APPEND / R_HEREDOC
+		fd = open_fd(cmds->redirs->target, false, true);
+	else if (cmds->redirs->type == R_APPEND)
+		fd = open_fd(cmds->redirs->target, true, false);
+
 	separate_words = ft_split(cmds->argv[i], ' ');
 	i = 0;
 	while(separate_words[i])

@@ -5,7 +5,7 @@ static void	apply_redirs_or_die(const t_command *cmd);
 static int	wait_all_and_get_last(pid_t *pids, size_t count);
 static void	close_if_valid(int fd);
 
-int	process_pipeline(const t_pipeline *pl, char **envp)
+int	process_pipeline(t_shell *minishell, const t_pipeline *pl, char **envp)
 {
 	size_t	i;
 	int		prev_read;
@@ -49,7 +49,7 @@ int	process_pipeline(const t_pipeline *pl, char **envp)
 		}
 
 		if (pid == 0) // child
-		{	
+		{
 			if (prev_read != -1) // if not the 1st pipe
 			{
 				if (dup2(prev_read, STDIN_FILENO) < 0)
@@ -79,13 +79,12 @@ int	process_pipeline(const t_pipeline *pl, char **envp)
 			if (!pl->cmds[i].argv || !pl->cmds[i].argv[0])
 				exit(0);
 
-			// void execute(); NB 
+			// void execute(); NB						// Note Sophie 22/01 : Doesn't work if placed here, won't reach here if there are no pipes
 			// Determine whether it is a builtin;
 			// get the PATH;
 			// check the rights;
 
-
-			perror(pl->cmds[i].argv[0]);
+			// perror(pl->cmds[i].argv[0]);				// Was printing "cmd : Success" message for every command
 			exit(127);
 		}
 
@@ -98,6 +97,7 @@ int	process_pipeline(const t_pipeline *pl, char **envp)
 		i++;
 	}
 
+	check_command_type_and_execute(minishell);		// Placed here instead and everything is functional
 	close_if_valid(prev_read);
 	last_status = wait_all_and_get_last(pids, pl->count);
 	free(pids);

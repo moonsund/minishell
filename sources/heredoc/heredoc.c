@@ -3,7 +3,7 @@
 int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, t_exit_status exit_status);
 static char *generate_heredoc_filename(size_t heredoc_index);
 static int expand_heredoc(char **line, t_env_var_list *env_vars, t_exit_status exit_status);
-static int write_heredoc_line(int fd, char *line);
+int write_line_in_fd(int fd, char *line);
 static int append_charter(char **line, char c);
 static int append_string(char **line, const char *str);
 static void redir_replace_with_infile(t_redir *r, char *filename);
@@ -36,12 +36,12 @@ int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, t_exit_statu
     }
     return (1);
 }
-    
+
 static int get_heredoc(t_redir *redir, t_env_var_list *env_vars, t_exit_status exit_status, size_t *heredoc_index)
 {
     char *heredoc_filename;
     int fd;
-    char *line; 
+    char *line;
 
     heredoc_filename = generate_heredoc_filename((*heredoc_index)++);
     if (!heredoc_filename)
@@ -57,7 +57,7 @@ static int get_heredoc(t_redir *redir, t_env_var_list *env_vars, t_exit_status e
     while (true)
     {
         line = readline("heredoc> ");
-        
+
         if (g_sigint) // ctrl+c
         {
             close(fd);
@@ -90,7 +90,7 @@ static int get_heredoc(t_redir *redir, t_env_var_list *env_vars, t_exit_status e
             }
         }
 
-        if (!write_heredoc_line(fd, line))
+        if (!write_line_in_fd(fd, line))
         {
             free(line);
             close(fd);

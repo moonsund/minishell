@@ -21,19 +21,27 @@ void	execute_external_commands(t_shell *minishell)
 
 	while(commands_left > 0)
 	{
-		execve_args = all_commands->argv;
-		// attention, si la redirection est apres un pipe, on ne doit pas lire depuis stdin
-		// if (execve_args[0][0] != '>' && execve_args[0][0] != '<')		// Switch to this after Leo's fix
-		if (minishell->tokens.head->raw_str[0] != '>' && minishell->tokens.head->raw_str[0] != '<')
+		if (all_commands->argv)
 		{
+			execve_args = all_commands->argv;
 			replace_cmd_by_binary_path(execve_args[0]);
 		}
-		fd_update_if_redirections(all_commands, fd_in, fd_out);
+		else
+		{
+			if((minishell->pipeline->count == 1) &&
+					minishell->pipeline->cmds->redirs &&
+						(minishell->pipeline->cmds->redirs->type == R_OUT ||
+							minishell->pipeline->cmds->redirs->type == R_APPEND))
+				add_user_input_to_fd(minishell, fd_out[0]);
+		}
+		// attention, si la redirection est apres un pipe, on ne doit pas lire depuis stdin
+		if (minishell->pipeline->cmds->redirs)
+			fd_update_if_redirections(all_commands, fd_in, fd_out);
 
 		if (minishell->pipeline->count == 1)
 		{
-			if((ft_strcmp(minishell->tokens.head->raw_str, ">") == 0) || (ft_strcmp(minishell->tokens.head->raw_str, ">>") == 0))
-				add_user_input_to_fd(minishell, fd_out[0]);
+			// Tous les else/if sont a revoir - Trouver une logique qui marche
+
 			else
 				fork_and_exec(minishell, fd_in, fd_out, execve_args);		// No pipes = keep things easy - at least for now
 			return;
@@ -144,7 +152,7 @@ void	parent_process_actions(t_shell *minishell, int child_pid, int *fd_in, int *
 	if(waitpid(child_pid, &minishell->exit_status, 0) == -1)		// Exit status update if error - Check in 'man waitpid' if issues
 		perror("Error");
 	if(minishell->exit_status != 0)
-		printf("Exit status updated to %d\n", &minishell->exit_status);
+		printf("Exit status has just been updated to %d\n", minishell->exit_status);
 
 	if (minishell->pipeline->count == 1)
 	{
