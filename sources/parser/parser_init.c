@@ -1,4 +1,4 @@
-#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
+#include "minishell.h"
 
 t_pipeline *init_pipeline();
 void init_parser_context(t_parser_context *ctx);

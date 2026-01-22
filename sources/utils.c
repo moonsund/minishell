@@ -1,4 +1,4 @@
-#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
+#include "minishell.h"
 
 void reset_iteration(t_shell *shell);
 void shell_destroy(t_shell *shell);

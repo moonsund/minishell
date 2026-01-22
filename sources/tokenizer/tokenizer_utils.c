@@ -1,4 +1,4 @@
-#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
+#include "minishell.h"
 
 bool is_empty(const char *str);
 bool is_space(unsigned char c);

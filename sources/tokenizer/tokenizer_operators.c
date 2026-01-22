@@ -1,4 +1,4 @@
-#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
+#include "minishell.h"
 
 static int process_operator_token(t_token_type type, const char *literal, t_token_list *tokens, t_lexer_context *context);
 static t_token *make_operator_token(t_token_type type, const char *literal);

@@ -1,4 +1,4 @@
-#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
+#include "minishell.h"
 
 int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, t_exit_status exit_status);
 static char *generate_heredoc_filename(size_t heredoc_index);
