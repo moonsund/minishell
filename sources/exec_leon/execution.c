@@ -5,7 +5,44 @@ static void	apply_redirs_or_die(const t_command *cmd);
 static int	wait_all_and_get_last(pid_t *pids, size_t count);
 static void	close_if_valid(int fd);
 
-int	process_pipeline(const t_pipeline *pl, char **envp)
+int execute_pipeline(t_shell *shell)
+{
+	t_pipeline *pl;
+	t_command	*cmd;
+	
+	pl = shell->pipeline;
+
+	if (pl->count == 0 || !pl->cmds)
+		return (ES_GENERAL);
+
+	cmd = &pl->cmds[0];
+
+	// cd/export/unset/exit with and w/o redirections
+	if (pl->count == 1 && cmd->argv && cmd->argv[0] && is_parent_only_builtin(cmd->argv[0]))
+		return (run_built_in_parent(shell, cmd));
+	
+	// only redirections, builtins and external commands both with and w/o redirections
+	return (exec_pipeline_forking(shell, cmd));
+}
+
+
+int is_parent_only_builtin(char *cmd_name)
+{
+	return (0);
+}
+
+
+int run_built_in_parent(t_shell *shell, t_command *cmd)
+{
+// examples: cd /tmp > out.txt or unset PATH
+// save backup of stdin/stdout (dup)
+// apply redirections (dup2 to the required fds)
+// execute the builtin
+// restore stdin/stdout (dup2 back)
+// close backup fds
+}
+
+int	exec_pipeline_forking(const t_pipeline *pl, char **envp)
 {
 	size_t	i;
 	int		prev_read;
@@ -75,14 +112,11 @@ int	process_pipeline(const t_pipeline *pl, char **envp)
 			// apply redirs
 			apply_redirs_or_die(&pl->cmds[i]);
 
-			// command line with only redirections, e.g. "< in > out"
+			// command line with only redirections, e.g. "< in > out". Couid it be mooved in to execute_pipeline? 
 			if (!pl->cmds[i].argv || !pl->cmds[i].argv[0])
 				exit(0);
 
-			// void execute(); NB 
-			// Determine whether it is a builtin;
-			// get the PATH;
-			// check the rights;
+			// execute();
 
 
 			perror(pl->cmds[i].argv[0]);

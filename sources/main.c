@@ -102,14 +102,19 @@ int main(int argc, char **argv, char **envp)
 			continue;
 		}
 
-		check_command_type_and_execute(&shell);	// Exec testing starts here
-		shell.pipeline = NULL;
-		free_tokens(&shell.tokens);
+		// check_command_type_and_execute(&shell);	// Exec testing starts here
+		shell.exit_status = execute_pipeline(&shell);
+		free(line);
+		reset_iteration(&shell);
+		continue;
+
+		shell.pipeline = NULL; // to be deleted
+		free_tokens(&shell.tokens); // to be deleted
+
 		// debug_print_heredoc_files(shell.pipeline); // for debugging, to be deleted
 
 		// check_command_type_and_execute(shell);	// Exec testing starts here
-		free(line);
-		reset_iteration(&shell);
+		
 	}
 	shell_destroy(&shell);
 	return (EXIT_SUCCESS);

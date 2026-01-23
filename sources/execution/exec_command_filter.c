@@ -37,7 +37,7 @@ void	check_command_type_and_execute(t_shell *minishell)
 void	execute_built_in_commands(t_shell *minishell)
 {
 	char	*current_working_directory;
-	current_working_directory = fetch_current_working_directory();												// Ⓜ️
+	current_working_directory = fetch_current_working_directory();
 
 	if(ft_strcmp(minishell->pipeline->cmds->argv[0], "echo") == 0)
 		execute_echo(minishell->pipeline->cmds);
