@@ -116,14 +116,36 @@ int	exec_pipeline_forking(const t_pipeline *pl, char **envp)
 			if (!pl->cmds[i].argv || !pl->cmds[i].argv[0])
 				exit(0);
 
-			// execute();
+			/* execute();
+            if (builtin)
+            {
+                status = run_builtin(cmd);
+                exit(status);
+            }
+            else
+            {
+                execve(path, argv, envp);
+                perror("execve");
+                if (errno == ENOENT)     // No such file or directory
+                    exit(127);
+                else
+                    exit(126);  // EACCES, EISDIR, ENOEXEC, etc.
+            }
+            NB: the child MUST ALWAYS terminate with exit(status)
+            */
+        }
 
-
-			perror(pl->cmds[i].argv[0]);
-			exit(127);
-		}
-
-		// parent
+        /* parent
+        exit status of the WHOLE pipeline = exit status of the LAST command in the pipeline: ls | grep x | wc -l
+        When we fork a pipeline:
+            we know the pid of each segment
+            we know the pid of the last command
+            we wait for ALL pids
+            but we take the exit status only from last_pid
+        Hence, the parent:
+            - waits for all
+            - returns the status of the last command in the pipeline
+        */
 		pids[i] = pid;
 		close_if_valid(prev_read);
 		close_if_valid(pipefd[1]);
