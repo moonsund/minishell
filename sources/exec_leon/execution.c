@@ -135,17 +135,7 @@ int	exec_pipeline_forking(const t_pipeline *pl, char **envp)
             */
         }
 
-        /* parent
-        exit status of the WHOLE pipeline = exit status of the LAST command in the pipeline: ls | grep x | wc -l
-        When we fork a pipeline:
-            we know the pid of each segment
-            we know the pid of the last command
-            we wait for ALL pids
-            but we take the exit status only from last_pid
-        Hence, the parent:
-            - waits for all
-            - returns the status of the last command in the pipeline
-        */
+        // parent
 		pids[i] = pid;
 		close_if_valid(prev_read);
 		close_if_valid(pipefd[1]);
@@ -153,7 +143,17 @@ int	exec_pipeline_forking(const t_pipeline *pl, char **envp)
 
 		i++;
 	}
-
+	/*
+	exit status of the WHOLE pipeline = exit status of the LAST command in the pipeline: ls | grep x | wc -l
+	When we fork a pipeline:
+		we know the pid of each segment
+		we know the pid of the last command
+		we wait for ALL pids
+		but we take the exit status only from last_pid
+    Hence, the parent:
+        - waits for all
+        - returns the status of the last command in the pipeline
+    */
 	close_if_valid(prev_read);
 	last_status = wait_all_and_get_last(pids, pl->count);
 	free(pids);
