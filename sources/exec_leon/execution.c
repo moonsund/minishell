@@ -79,7 +79,7 @@ int	process_pipeline(t_shell *minishell, const t_pipeline *pl, char **envp)
 			if (!pl->cmds[i].argv || !pl->cmds[i].argv[0])
 				exit(0);
 
-			// void execute(); NB						// Note Sophie 22/01 : Doesn't work if placed here, won't reach here if there are no pipes
+			void execute();
 			// Determine whether it is a builtin;
 			// get the PATH;
 			// check the rights;

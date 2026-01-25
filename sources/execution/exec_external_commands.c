@@ -38,14 +38,14 @@ void	execute_external_commands(t_shell *minishell)
 		if (minishell->pipeline->cmds->redirs)
 			fd_update_if_redirections(all_commands, fd_in, fd_out);
 
-		if (minishell->pipeline->count == 1)
-		{
-			// Tous les else/if sont a revoir - Trouver une logique qui marche
+		// if (minishell->pipeline->count == 1)
+		// {
+		// 	// Tous les else/if sont a revoir - Trouver une logique qui marche
 
-			else
-				fork_and_exec(minishell, fd_in, fd_out, execve_args);		// No pipes = keep things easy - at least for now
-			return;
-		}
+		// 	else
+		// 		fork_and_exec(minishell, fd_in, fd_out, execve_args);		// No pipes = keep things easy - at least for now
+		// 	return;
+		// }
 /* Pipes - Test commands :
 ls | grep sources | wc
 ls -la | grep ob | wc -l
