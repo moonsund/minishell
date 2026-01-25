@@ -102,17 +102,19 @@ int main(int argc, char **argv, char **envp)
 			continue;
 		}
 
-		// 22/01 Update below
-		char	**envp = build_envp(&shell.env_vars);
-		int last_status = process_pipeline(&shell, shell.pipeline, **envp);	// Exec testing now starts here - check_command_type_and_execute in process_pipeline ft
-
-		shell.pipeline = NULL;
-		free_tokens(&shell.tokens);
-		// debug_print_heredoc_files(shell.pipeline); // for debugging, to be deleted
-
-		// check_command_type_and_execute(&shell);	// Exec testing used to start here
+		// check_command_type_and_execute(&shell);	// Exec testing starts here
+		shell.exit_status = execute_pipeline(&shell);
 		free(line);
 		reset_iteration(&shell);
+		continue;
+
+		shell.pipeline = NULL; // to be deleted
+		free_tokens(&shell.tokens); // to be deleted
+
+		// debug_print_heredoc_files(shell.pipeline); // for debugging, to be deleted
+
+		// check_command_type_and_execute(shell);	// Exec testing starts here
+
 	}
 	shell_destroy(&shell);
 	return (EXIT_SUCCESS);

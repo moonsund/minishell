@@ -5,7 +5,44 @@ static void	apply_redirs_or_die(const t_command *cmd);
 static int	wait_all_and_get_last(pid_t *pids, size_t count);
 static void	close_if_valid(int fd);
 
-int	process_pipeline(t_shell *minishell, const t_pipeline *pl, char **envp)
+int execute_pipeline(t_shell *shell)
+{
+	t_pipeline *pl;
+	t_command	*cmd;
+
+	pl = shell->pipeline;
+
+	if (pl->count == 0 || !pl->cmds)
+		return (ES_GENERAL);
+
+	cmd = &pl->cmds[0];
+
+	// cd/export/unset/exit with and w/o redirections
+	if (pl->count == 1 && cmd->argv && cmd->argv[0] && is_parent_only_builtin(cmd->argv[0]))
+		return (run_built_in_parent(shell, cmd));
+
+	// only redirections, builtins and external commands both with and w/o redirections
+	return (exec_pipeline_forking(shell, cmd));
+}
+
+
+int is_parent_only_builtin(char *cmd_name)
+{
+	return (0);
+}
+
+
+int run_built_in_parent(t_shell *shell, t_command *cmd)
+{
+// examples: cd /tmp > out.txt or unset PATH
+// save backup of stdin/stdout (dup)
+// apply redirections (dup2 to the required fds)
+// execute the builtin
+// restore stdin/stdout (dup2 back)
+// close backup fds
+}
+
+int	exec_pipeline_forking(const t_pipeline *pl, char **envp)
 {
 	size_t	i;
 	int		prev_read;
@@ -75,20 +112,30 @@ int	process_pipeline(t_shell *minishell, const t_pipeline *pl, char **envp)
 			// apply redirs
 			apply_redirs_or_die(&pl->cmds[i]);
 
-			// command line with only redirections, e.g. "< in > out"
+			// command line with only redirections, e.g. "< in > out". Couid it be mooved in to execute_pipeline?
 			if (!pl->cmds[i].argv || !pl->cmds[i].argv[0])
 				exit(0);
 
-			void execute();
-			// Determine whether it is a builtin;
-			// get the PATH;
-			// check the rights;
+			/* execute();
+            if (builtin)
+            {
+                status = run_builtin(cmd);
+                exit(status);
+            }
+            else
+            {
+                execve(path, argv, envp);
+                perror("execve");
+                if (errno == ENOENT)     // No such file or directory
+                    exit(127);
+                else
+                    exit(126);  // EACCES, EISDIR, ENOEXEC, etc.
+            }
+            NB: the child MUST ALWAYS terminate with exit(status)
+            */
+        }
 
-			// perror(pl->cmds[i].argv[0]);				// Was printing "cmd : Success" message for every command
-			exit(127);
-		}
-
-		// parent
+        // parent
 		pids[i] = pid;
 		close_if_valid(prev_read);
 		close_if_valid(pipefd[1]);
@@ -96,8 +143,17 @@ int	process_pipeline(t_shell *minishell, const t_pipeline *pl, char **envp)
 
 		i++;
 	}
-
-	check_command_type_and_execute(minishell);		// Placed here instead and everything is functional
+	/*
+	exit status of the WHOLE pipeline = exit status of the LAST command in the pipeline: ls | grep x | wc -l
+	When we fork a pipeline:
+		we know the pid of each segment
+		we know the pid of the last command
+		we wait for ALL pids
+		but we take the exit status only from last_pid
+    Hence, the parent:
+        - waits for all
+        - returns the status of the last command in the pipeline
+    */
 	close_if_valid(prev_read);
 	last_status = wait_all_and_get_last(pids, pl->count);
 	free(pids);
