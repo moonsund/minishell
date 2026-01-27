@@ -22,12 +22,12 @@ void	execute_external_commands(t_shell *minishell)
 	while(commands_left > 0)
 	{
 		execve_args = all_commands->argv;
+
 		// attention, si la redirection est apres un pipe, on ne doit pas lire depuis stdin
 		// if (execve_args[0][0] != '>' && execve_args[0][0] != '<')		// Switch to this after Leo's fix
-		if (minishell->tokens.head->raw_str[0] != '>' && minishell->tokens.head->raw_str[0] != '<')
-		{
+		
 			replace_cmd_by_binary_path(execve_args[0]);
-		}
+	
 		fd_update_if_redirections(all_commands, fd);
 
 		if (minishell->pipeline->count == 1)
@@ -95,7 +95,7 @@ void	pipes_party(t_shell *minishell, int *fd_in, int *fd_out, char **execve_args
 		perror("Error");
 	pid_t child_pid;
 
-	if(fork_pid_return != 0)										// Le parent attend le résultat avec waitpid
+	if(fork_pi d_return != 0)										// Le parent attend le résultat avec waitpid
 	{
 		close_and_set_to_neg(&fd_in[0]);							// fermer fd input pour que grep sache ou s'arreter
 		close(fd_out[1]);

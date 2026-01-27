@@ -19,7 +19,7 @@ int execute_pipeline(t_shell *shell)
 
 	// cd/export/unset/exit with and w/o redirections
 	if (pl->count == 1 && cmd->argv && cmd->argv[0] && is_parent_only_builtin(cmd->argv[0]))
-		return (run_built_in_parent(shell, cmd));
+		return (run_builtin_in_parent(shell, cmd));
 	
 	// only redirections, builtins and external commands both with and w/o redirections
 	return (exec_pipeline_forking(shell, cmd));
@@ -32,7 +32,7 @@ int is_parent_only_builtin(char *cmd_name)
 }
 
 
-int run_built_in_parent(t_shell *shell, t_command *cmd)
+int run_builtin_in_parent(t_shell *shell, t_command *cmd)
 {
 // examples: cd /tmp > out.txt or unset PATH
 // save backup of stdin/stdout (dup)
@@ -46,7 +46,7 @@ int	exec_pipeline_forking(const t_pipeline *pl, char **envp)
 {
 	size_t	i;
 	int		prev_read;
-	int		pipefd[2];
+	int		pipefds[2];
 	pid_t	*pids;
 	pid_t	pid;
 	int		last_status;
@@ -60,13 +60,13 @@ int	exec_pipeline_forking(const t_pipeline *pl, char **envp)
 
 	i = 0;
 	prev_read = -1;
-	while (i < pl->count)  // true while we have commands for the execution
+	while (pl->count > i)  // true while we have commands for the execution
 	{
-		pipefd[0] = -1;
-		pipefd[1] = -1;
+		pipefds[0] = -1; // read end
+		pipefds[1] = -1;	// write end
 		if (i + 1 < pl->count) // checks if we need a pipe for the current command
 		{
-			if (pipe(pipefd) < 0)
+			if (pipe(pipefds) < 0)
 			{
 				perror("pipe");
 				free(pids);
@@ -78,8 +78,8 @@ int	exec_pipeline_forking(const t_pipeline *pl, char **envp)
 		if (pid < 0)
 		{
 			perror("fork");
-			close_if_valid(pipefd[0]);
-			close_if_valid(pipefd[1]);
+			close_if_valid(pipefds[0]);
+			close_if_valid(pipefds[1]);
 			close_if_valid(prev_read);
 			free(pids);
 			return (1);
@@ -89,16 +89,16 @@ int	exec_pipeline_forking(const t_pipeline *pl, char **envp)
 		{	
 			if (prev_read != -1) // if not the 1st pipe
 			{
-				if (dup2(prev_read, STDIN_FILENO) < 0)
+				if (dup2(prev_read, STDIN_FILENO) < 0) // dup2(old, new)
 				{
 					perror("dup2 stdin");
 					exit(1);
 				}
 			}
 			// if not the last command
-			if (pipefd[1] != -1)
+			if (pipefds[1] != -1)
 			{
-				if (dup2(pipefd[1], STDOUT_FILENO) < 0)
+				if (dup2(pipefds[1], STDOUT_FILENO) < 0)
 				{
 					perror("dup2 stdout");
 					exit(1);
@@ -106,8 +106,8 @@ int	exec_pipeline_forking(const t_pipeline *pl, char **envp)
 			}
 
 			close_if_valid(prev_read);
-			close_if_valid(pipefd[0]);
-			close_if_valid(pipefd[1]);
+			close_if_valid(pipefds[0]);
+			close_if_valid(pipefds[1]);
 
 			// apply redirs
 			apply_redirs_or_die(&pl->cmds[i]);
@@ -138,8 +138,8 @@ int	exec_pipeline_forking(const t_pipeline *pl, char **envp)
         // parent
 		pids[i] = pid;
 		close_if_valid(prev_read);
-		close_if_valid(pipefd[1]);
-		prev_read = pipefd[0];
+		close_if_valid(pipefds[1]);
+		prev_read = pipefds[0];
 
 		i++;
 	}
