@@ -1,4 +1,4 @@
-#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
+#include "minishell.h"
 
 int init_shell(t_shell *shell, char **envp);
 static int init_env_var_list(t_env_var_list *list, char **envp);

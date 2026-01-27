@@ -41,12 +41,11 @@ typedef enum e_exit_status
 {
 	ES_SUCCESS			= 0,   // success
 	ES_GENERAL			= 1,   // any “generic” error (including malloc failures, open/dup2 errors in redirections, etc.)
-	ES_BUILTIN_MISUSE	= 2,   // incorrect usage of a builtin / invalid builtin arguments
+	ES_INVALID_USAGE	= 2,   // syntax error and incorrect usage of a builtin
 	ES_NOT_EXECUTABLE	= 126, // command or file found, but cannot be executed (EACCES, is a directory, not executable)
 	ES_NOT_FOUND		= 127, // command not found (PATH lookup failed / file does not exist)
 	ES_SIGINT			= 130, // 128 + SIGINT (2)
 	ES_SIGQUIT			= 131, // 128 + SIGQUIT (3)
-	ES_SYNTAX			= 258, // parser syntax error
 } t_exit_status;
 
 typedef enum e_token_type
@@ -140,7 +139,7 @@ typedef struct s_redir
 typedef struct s_command
 {
 	char **argv; // null-terminated array of arguments
-	int argc;
+	// int argc; 
 	t_redir	*redirs;
 } t_command;
 

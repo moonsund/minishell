@@ -1,4 +1,4 @@
-#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
+#include "minishell.h"
 #include "libft.h"
 
 char	*fetch_current_working_directory(void);

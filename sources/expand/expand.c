@@ -1,4 +1,4 @@
-#include "/home/schappuy/00_Root/08_Minishell/includes/minishell.h"
+#include "minishell.h"
 
 static bool token_needs_expansion(t_token *token);
 static t_exit_status expand_word_token(t_token *token, t_env_var_list *env_vars, t_exit_status exit_status);
