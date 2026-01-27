@@ -93,7 +93,7 @@ void err_print(t_exit_status type, const char *where)
 		write(2, where, ft_strlen(where));
 		write(2, "\n", 1);
 	}
-	else if (type == ES_SYNTAX)
+	else if (type == ES_INVALID_USAGE)
 	{
 		// printf("minishell: syntax_error: %s\n", where);
 		write(2, "minishell: syntax_error: ", 25);

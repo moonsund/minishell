@@ -47,15 +47,15 @@ t_exit_status process_tokens(t_pipeline *pl, t_token_list *list, t_parser_contex
         /* real "empty command" => syntax error */
         if (!has_argv && !has_redirs)
         {
-            err_print(ES_SYNTAX, "near 'newline'");
-            return (ES_SYNTAX);
+            err_print(ES_INVALID_USAGE, "near 'newline'");
+            return (ES_INVALID_USAGE);
         }
 
         /* allow commands like: >out  or  <in >out */
         if (!append_cmd(pl, ctx->current_cmd))
             return (ES_GENERAL);
     }
-    
+
     return (ES_SUCCESS);
 }
 
@@ -124,8 +124,8 @@ static t_exit_status process_pipe_token(t_pipeline *pl, t_parser_context *ctx)
 {
     if (!ctx->cmd_started || !ctx->next || ctx->current_cmd.argv == NULL || ctx->current_cmd.argv[0] == NULL)
     {
-        err_print(ES_SYNTAX, "parse error near '|'");
-        return (ES_SYNTAX);
+        err_print(ES_INVALID_USAGE, "parse error near '|'");
+        return (ES_INVALID_USAGE);
     }
     if (!append_cmd(pl, ctx->current_cmd))
         return (ES_GENERAL);
@@ -147,8 +147,8 @@ static t_exit_status process_redir_tokens(t_parser_context *ctx)
 
     if (!ctx->next || ctx->next->type != TOK_WORD)
     {
-        err_print(ES_SYNTAX, "expected filename or limiter");
-        return (ES_SYNTAX);
+        err_print(ES_INVALID_USAGE, "expected filename or limiter");
+        return (ES_INVALID_USAGE);
     }
 
     redir_node = init_redirect(ctx);
@@ -177,7 +177,7 @@ static t_redir *init_redirect(t_parser_context *ctx)
     redir = malloc(sizeof(* redir));
     if (!redir)
         return NULL;
-    
+
     redir->fd = 0;
     redir->expand = 0;
     redir->next = NULL;

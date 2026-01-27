@@ -252,6 +252,7 @@ void err_malloc_print(const char *where);
 void setup_signals(void);
 
 // execution.c (by Leon)
+int		execute_pipeline(t_shell *shell);
 int		process_pipeline(t_shell *minishell, const t_pipeline *pl, char **envp);	// Need to add minishell arg
 
 // exec_command_filter.c

@@ -1,9 +1,13 @@
 #include "minishell.h"
 
-static int	open_redir_file(const t_redir *redir);
+int			execute_pipeline(t_shell *shell);
+int			is_parent_only_builtin(char *cmd_name);
+int			run_built_in_parent(t_shell *shell, t_command *cmd);
+int			exec_pipeline_forking(const t_pipeline *pl, char **envp);
 static void	apply_redirs_or_die(const t_command *cmd);
-static int	wait_all_and_get_last(pid_t *pids, size_t count);
+static int	open_redir_file(const t_redir *redir);
 static void	close_if_valid(int fd);
+static int	wait_all_and_get_last(pid_t *pids, size_t count);
 
 int execute_pipeline(t_shell *shell)
 {
@@ -25,12 +29,10 @@ int execute_pipeline(t_shell *shell)
 	return (exec_pipeline_forking(shell, cmd));
 }
 
-
 int is_parent_only_builtin(char *cmd_name)
 {
 	return (0);
 }
-
 
 int run_built_in_parent(t_shell *shell, t_command *cmd)
 {
