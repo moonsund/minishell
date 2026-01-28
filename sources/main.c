@@ -25,7 +25,7 @@ int main(int argc, char **argv, char **envp)
 
 		if (!line || ft_strcmp(line, "exit") == 0) // Ctrl+D (EOF) or exit command
 		{
-			printf("exit\n");
+			// printf("exit\n");					// Doesn't need to be printed
 			break;
 		}
 
@@ -47,7 +47,7 @@ int main(int argc, char **argv, char **envp)
 		}
 		add_history(line);
 
-		
+
 		shell.exit_status = tokenize_with_qmap(line, &shell.tokens);
 		if (shell.exit_status != ES_SUCCESS)
 		{
@@ -77,8 +77,8 @@ int main(int argc, char **argv, char **envp)
 			reset_iteration(&shell);
 			continue;
 		}
-		printf("\n[pipelines_debug]:\n");	// for debugging, to be deleted
-		print_pipeline(shell.pipeline);	// for debugging, to be deleted
+		// printf("\n[pipelines_debug]:\n");	// for debugging, to be deleted
+		// print_pipeline(shell.pipeline);	// for debugging, to be deleted
 
 		g_sigint = 0;
 
@@ -109,15 +109,20 @@ int main(int argc, char **argv, char **envp)
 
 		// debug_print_heredoc_files(shell.pipeline); // for debugging, to be deleted
 
-		// check_command_type_and_execute(shell);	// Exec testing starts here
-		
+		execute_pipeline(&shell);	// Exec testing starts here
+
 	}
+
+	// if(ft_strcmp(minishell->pipeline->cmds->infile, ".heredoc_0") == 0)			// Free the heredoc file ? - TBC w/ Leon
+	// {
+	// 	char	*heredoc_file = build_path(".heredoc_0");
+	// 	unlink(heredoc_file);
+	// 	free(heredoc_file);
+	// }
+
 	shell_destroy(&shell);
 	return (EXIT_SUCCESS);
 }
-
-
-
 
 static void print_token_list(t_token_list *tokens) // for debugging, to be deleted
 {
@@ -216,7 +221,6 @@ static void	print_pipeline(t_pipeline *pipeline) /* for debugging, to be deleted
 		}
 	}
 }
-
 
 /*
 static int debug_print_heredoc_files(t_pipeline *pipeline) // for debugging, to be deleted

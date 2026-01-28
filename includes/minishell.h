@@ -139,7 +139,7 @@ typedef struct s_redir
 typedef struct s_command
 {
 	char **argv; // null-terminated array of arguments
-	// int argc; 
+	// int argc;
 	t_redir	*redirs;
 } t_command;
 
@@ -230,7 +230,14 @@ void free_buf(t_buf *buf);
 void init_buffer(t_buf *buf);
 
 // heredoc
-int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, t_exit_status exit_status);;
+int	process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, t_exit_status exit_status);
+static char *generate_heredoc_filename(size_t heredoc_index);
+static int expand_heredoc(char **line, t_env_var_list *env_vars, t_exit_status exit_status);
+int			write_line_in_fd(int fd, char *line);
+static int append_charter(char **line, char c);
+static int append_string(char **line, const char *str);
+static void redir_replace_with_infile(t_redir *r, char *filename);
+static int get_heredoc(t_redir *redir, t_env_var_list *env_vars, t_exit_status exit_status, size_t *heredoc_index);
 
 // utils.c
 void reset_iteration(t_shell *shell);
@@ -243,6 +250,10 @@ void err_malloc_print(const char *where);
 
 // signals.c
 void setup_signals(void);
+
+// execution.c (by Leon)
+int		execute_pipeline(t_shell *shell);
+int		process_pipeline(t_shell *minishell, const t_pipeline *pl, char **envp);	// Need to add minishell arg
 
 // exec_command_filter.c
 void	check_command_type_and_execute(t_shell *minishell);
@@ -257,17 +268,19 @@ void	execute_pwd(char *current_working_directory);
 void	execute_export(t_shell *minishell);
 void	execute_unset(t_shell *minishell);
 void	execute_env(t_shell *minishell);
+void	execute_exit(t_shell *minishell);
 
 // exec_external_commands.c
-void	execute_external_commands(t_shell *minishell);
-void	pipes_party(t_shell *minishell, int *fd_in, int *fd_out, char **execve_args);
-void	fork_and_exec(t_shell *minishell, int *fd, char **execve_args);
+int		execute_external_commands(t_shell *minishell, t_command *cmd);
+void	fork_and_exec(t_shell *minishell, int *fd_in, int *fd_out, char **execve_args);
+void	parent_process_actions(t_shell *minishell, int fork_pid_return, int *fd_in, int *fd_out);
+void	child_process_actions(char **execve_args, char **envp, int *fd_in, int *fd_out);
 
 // exec_utils_fd.c
 char	*build_path(char *file_name);
 int		open_fd(char *file_name, bool append, bool truncate);
-void	fd_update_if_redirections(t_command *all_commands, int *fd);
-void	add_user_input_to_fd(t_shell *minishell, int fd);
+void	fd_update_if_redirections(t_command *all_commands, int *fd_in, int *fd_out);
+void	add_user_input_to_fd(t_shell *minishell);
 void	close_and_set_to_neg(int *fd);
 
 // exec_utils.c

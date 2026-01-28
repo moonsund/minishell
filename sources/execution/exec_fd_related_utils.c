@@ -3,8 +3,8 @@
 
 char	*build_path(char *file_name);
 int		open_fd(char *file_name, bool append, bool truncate);
-void	fd_update_if_redirections(t_command *all_commands, int *fd);
-void	add_user_input_to_fd(t_shell *minishell, int fd);
+void	fd_update_if_redirections(t_command *all_commands, int *fd_in, int *fd_out);
+void	add_user_input_to_fd(t_shell *minishell);
 void	close_and_set_to_neg(int *fd);
 
 char	*build_path(char *file_name)
@@ -27,18 +27,18 @@ int	open_fd(char *file_name, bool append, bool truncate)
 	char	*file_path;
 
 	file_path = build_path(file_name);
-	// HYPER IMPORTANT - Tout se joue dans les flags - 0666 = permissions
+	// HYPER IMPORTANT - Tout se joue dans les flags - 0644 = permissions
 	if (append)
 	{
-		fd = open(file_path, O_CREAT | O_APPEND | O_RDWR, 0666);
+		fd = open(file_path, O_CREAT | O_APPEND | O_RDWR, 0644);
 	}
 	else if (truncate)
 	{
-		fd = open(file_path, O_CREAT | O_TRUNC | O_RDWR, 0666);
+		fd = open(file_path, O_CREAT | O_TRUNC | O_RDWR, 0644);
 	}
 	else
 	{
-		fd = open(file_path, O_CREAT | O_RDWR, 0666);
+		fd = open(file_path, O_CREAT | O_RDWR, 0644);
 	}
 	free(file_path);
 	if (fd == -1)
@@ -48,28 +48,28 @@ int	open_fd(char *file_name, bool append, bool truncate)
 	return (fd);
 }
 
-// Examples for testing
-// wc -l < doc
-// sort < doc
-// grep ok << fin
-// ls > doc
-// ls >> doc
-void	fd_update_if_redirections(t_command *all_commands, int *fd)
+void	fd_update_if_redirections(t_command *all_commands, int *fd_in, int *fd_out)
 {
-	if (all_commands->infile)
-		fd[0] = open_fd(all_commands->infile, false, false);
-	if (all_commands->outfile)
-	{
-		if (all_commands->append == 1)
-			fd[1] = open_fd(all_commands->outfile, true, false);
-		else
-			fd[1] = open_fd(all_commands->outfile, false, true);
-	}
+	// R_IN / R_OUT / R_APPEND / R_HEREDOC
+	if (all_commands->redirs->type == R_IN)
+		fd_in[0] = open_fd(all_commands->redirs->target, false, false);
+	else if (all_commands->redirs->type == R_OUT)
+		fd_out[0] = open_fd(all_commands->redirs->target, false, true);
+	else if (all_commands->redirs->type == R_APPEND)
+		fd_out[0] = open_fd(all_commands->redirs->target, true, false);
 }
 
-void	add_user_input_to_fd(t_shell *minishell, int fd)
+void	add_user_input_to_fd(t_shell *minishell)
 {
+	int		fd;
 	char	*line;
+
+	if (minishell->pipeline->cmds->redirs->type == R_OUT)						// Bash : Erase content if file exists / Create file if doesn't exist
+		fd = open_fd(minishell->pipeline->cmds->redirs->target, false, true);
+	else if (minishell->pipeline->cmds->redirs->type == R_APPEND)
+		fd = open_fd(minishell->pipeline->cmds->redirs->target, true, false);
+	else
+		return ;
 
 	while (true)
 	{

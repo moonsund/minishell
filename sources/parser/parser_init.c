@@ -33,6 +33,6 @@ void init_parser_context(t_parser_context *ctx)
 void init_command(t_command *cmd)
 {
     cmd->argv = NULL;
-    cmd->argc = 0;
+//    cmd->argc = 0;
     cmd->redirs = NULL;
 }

@@ -43,7 +43,7 @@ t_exit_status tokenize_with_qmap(const char *str, t_token_list *tokens)
     if (ctx.in_sq || ctx.in_dq)
     {
         free_buf(&ctx.buf);
-        return (ES_SYNTAX);
+        return (ES_INVALID_USAGE);
     }
 
     if (ctx.buf.used_length > 0)
