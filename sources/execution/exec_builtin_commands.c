@@ -22,23 +22,26 @@ char	*fetch_current_working_directory(void)
 }
 
 // Subject : "echo with option -n"
-// Try without all my mic mac done before the tsunami
 void	execute_echo(t_command *cmds)
 {
 	int		i;
 	int		fd;
 	bool	line_return;
+	char	*join_all_strings;
 	char	**separate_words;
 
 	fd = 1;
 	line_return = is_line_return(cmds->argv, &i);
+	join_all_strings = calloc(sizeof(char), 1);
+	while (cmds->argv[i])
+	{
+		join_all_strings = ft_strjoin(join_all_strings, cmds->argv[i]);			// Mallocs done here, remember to free
+		join_all_strings = ft_strjoin(join_all_strings, " ");					// Mallocs
+		i++;
+	}
 
-	if (cmds->redirs->type == R_OUT)				// R_IN / R_OUT / R_APPEND / R_HEREDOC
-		fd = open_fd(cmds->redirs->target, false, true);
-	else if (cmds->redirs->type == R_APPEND)
-		fd = open_fd(cmds->redirs->target, true, false);
-
-	separate_words = ft_split(cmds->argv[i], ' ');
+	separate_words = ft_split(join_all_strings, ' ');							// Malloc
+	free(join_all_strings);
 	i = 0;
 	while(separate_words[i])
 	{
@@ -49,6 +52,7 @@ void	execute_echo(t_command *cmds)
 	}
 	if(line_return == true)
 		write(fd, "\n", 1);
+	free(separate_words);
 }
 
 bool	is_line_return(char **cmd, int *i)

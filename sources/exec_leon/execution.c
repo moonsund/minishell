@@ -24,15 +24,10 @@ export FRUIT=apple > new_outile
 Pipes - Test commands :
 ls | grep sources | wc
 ls -la | grep ob | wc -l
-cat main.c | sort | head -5
-
-cat w | wc -l | >> z
-cat w | cat -e | > z
-sort z | wc | > w
-
-Notes
-add exit back if in pipe
-ATTENTION !!!!! Ne jamais fermer un fd qui n'a pas ete ouvert
+cat z | sort | head -5
+ls | exit | grep a
+pwd | grep z | wc -m
+echo "London" | wc -w
 */
 
 int execute_pipeline(t_shell *shell)
@@ -136,24 +131,16 @@ int run_any_builtin_in_child(t_shell *shell, t_command *cmd)
 {
 	int	backup_stdout;
 	int	backup_stdin;
-	// int	new_fd[2];			// [0] = infile [1] = outfile
 
 	backup_stdout = dup(STDOUT_FILENO);
 	backup_stdin = dup(STDIN_FILENO);
-	// new_fd[0] = -1;
-	// new_fd[1] = -1;
 
 	if (is_builtin(cmd->argv, true))
 	{
 		if (shell->pipeline->count > 1)	// Builtin without output : cd / export / unset BUT with pipes involved : 'cd | ls' : command ignored, jump to next
-		{
 			return (0);
-		}
 		else							// One command only = Normal expected exec
-		{
 			execute_built_in_commands(shell);
-		}
-
 	}
 	else										// Builtin with output : process to execution (after FD update TBC ? - if applicable)
 	{
@@ -235,18 +222,12 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl, char **envp)
 			apply_redirs_or_die(&pl->cmds[i]);
 
 			// command line with only redirections, e.g. "< in > out"
-			// Block to delete because it fucks up commands with redirections at the end of a pipe 'ls | > y'
-			// if (!pl->cmds[i].argv || !pl->cmds[i].argv[0])
-			// 	exit(0);
+			if (!pl->cmds[i].argv || !pl->cmds[i].argv[0])
+				exit(0);
 
-			// Deal with in-pipes redirections without command 'ls | > y'
-			if ((!pl->cmds[i].argv) && (pl->cmds[i].redirs))
-			{
-				// No command to execute = no execve
-				// fd already pointing to the right content (updated in apply_redirs_or_die)
-				// write content from pipe in that fd ?
-				break;
-			}
+			// in-pipes redirections without command 'ls | > y' - Nothing to do
+			// if ((!pl->cmds[i].argv) && (pl->cmds[i].redirs))
+			// 	exit (0);
 
 			if (is_builtin(pl->cmds[i].argv[0], false))
 			{
@@ -267,7 +248,6 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl, char **envp)
 			// NB: the child MUST ALWAYS terminate with exit(status)
 		}
 		// parent
-		// waitpid(pid, NULL, 0);
 		pids[i] = pid;
 		close_if_valid(prev_read);
 		close_if_valid(pipefds[1]);
