@@ -9,6 +9,14 @@ static int	open_redir_file(const t_redir *redir);
 static void	close_if_valid(int fd);
 static int	wait_all_and_get_last(pid_t *pids, size_t count);
 
+// Examples for testing - Functional on 28/01
+// wc -l < infile
+// sort < infile
+// grep ok << end
+// pwd > outfile
+// ls >> outfile
+// export FRUIT=apple > new_outile
+
 int execute_pipeline(t_shell *shell)
 {
 	t_pipeline *pl;

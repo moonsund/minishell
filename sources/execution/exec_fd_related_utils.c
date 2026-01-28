@@ -48,12 +48,6 @@ int	open_fd(char *file_name, bool append, bool truncate)
 	return (fd);
 }
 
-// Examples for testing
-// wc -l < doc
-// sort < doc
-// grep ok << fin
-// ls > doc
-// ls >> doc
 void	fd_update_if_redirections(t_command *all_commands, int *fd_in, int *fd_out)
 {
 	// R_IN / R_OUT / R_APPEND / R_HEREDOC
