@@ -25,7 +25,7 @@ int main(int argc, char **argv, char **envp)
 
 		if (!line || ft_strcmp(line, "exit") == 0) // Ctrl+D (EOF) or exit command
 		{
-			printf("exit\n");
+			// printf("exit\n");					// Doesn't need to be printed
 			break;
 		}
 
@@ -47,7 +47,7 @@ int main(int argc, char **argv, char **envp)
 		}
 		add_history(line);
 
-		
+
 		shell.exit_status = tokenize_with_qmap(line, &shell.tokens);
 		if (shell.exit_status != ES_SUCCESS)
 		{
@@ -109,7 +109,7 @@ int main(int argc, char **argv, char **envp)
 
 		// debug_print_heredoc_files(shell.pipeline); // for debugging, to be deleted
 
-		// check_command_type_and_execute(shell);	// Exec testing starts here
+		execute_pipeline(&shell);	// Exec testing starts here
 
 	}
 	shell_destroy(&shell);

@@ -1,9 +1,9 @@
 #include "minishell.h"
 
 int			execute_pipeline(t_shell *shell);
-int			is_parent_only_builtin(char *cmd_name);
+int			is_builtin(char *cmd_name, bool exec_in_parent_only);
 int			run_built_in_parent(t_shell *shell, t_command *cmd);
-int			exec_pipeline_forking(const t_pipeline *pl, char **envp);
+int			exec_pipeline_forking(t_shell *shell, const t_pipeline *pl, char **envp);
 static void	apply_redirs_or_die(const t_command *cmd);
 static int	open_redir_file(const t_redir *redir);
 static void	close_if_valid(int fd);
@@ -21,31 +21,142 @@ int execute_pipeline(t_shell *shell)
 
 	cmd = &pl->cmds[0];
 
-	// cd/export/unset/exit with and w/o redirections
-	if (pl->count == 1 && cmd->argv && cmd->argv[0] && is_parent_only_builtin(cmd->argv[0]))
-		return (run_builtin_in_parent(shell, cmd));
+	// cd/export/unset/exit with and w/o redirections = all commands that don't print anything but modify the shell
+	if (pl->count == 1 && cmd->argv && cmd->argv[0] && is_builtin(cmd->argv[0], true))
+		return (run_builtin_without_output_in_parent(shell, cmd));
+
+	// Command line starting with a redirection, but no pipe, no cmd and no other redirection, e.g. '> outfile'
+	if((shell->pipeline->count == 1) && (!shell->pipeline->cmds->argv) &&
+		shell->pipeline->cmds->redirs &&
+			(shell->pipeline->cmds->redirs->type == R_OUT ||
+				shell->pipeline->cmds->redirs->type == R_APPEND))
+	{
+		add_user_input_to_fd(shell);
+		return (0);
+	}
 
 	// only redirections, builtins and external commands both with and w/o redirections
-	return (exec_pipeline_forking(shell, cmd));
+	return (exec_pipeline_forking(shell, pl, cmd));
 }
 
-int is_parent_only_builtin(char *cmd_name)
+// exec_in_parent_only = only cmds without output
+int is_builtin(char *cmd_name, bool exec_in_parent_only)
 {
+	if (cmd_name && ((ft_strcmp(cmd_name, "cd") == 0) ||
+			(ft_strcmp(cmd_name, "export") == 0) ||
+				(ft_strcmp(cmd_name, "unset") == 0)))
+	{
+		return (true);
+	}
+	if (!exec_in_parent_only)
+	{
+		if (cmd_name && ((ft_strcmp(cmd_name, "echo") == 0) ||
+			(ft_strcmp(cmd_name, "pwd") == 0) ||
+				(ft_strcmp(cmd_name, "env") == 0)))
+		{
+			return (true);
+		}
+	}
+	return (false);
+}
+
+// examples: cd /tmp > out.txt or unset PATH
+// save backup of stdin/stdout (dup)				-- No need anymore, as nothing is happening in the fd
+// apply redirections (dup2 to the required fds)	-- No need anymore, as nothing is happening in the fd
+// execute the builtin
+// restore stdin/stdout (dup2 back)					-- No need anymore, as nothing is happening in the fd
+// close backup fds									-- No need anymore, I only need to close the new fd
+int run_builtin_without_output_in_parent(t_shell *shell, t_command *cmd)
+{
+	int	new_fd;
+
+	new_fd = -1;
+
+	if (cmd->redirs)		// FD opened and closed right after because these commands don't print anything
+	{
+		if (cmd->redirs->type == R_IN)								// Bash : Do nothing if file exists / Error if file doesn't exist - Error not handled in Minishell
+			new_fd = open_fd(cmd->redirs->target, true, false);
+		else if (cmd->redirs->type == R_OUT)						// Bash : Erase content if file exists / Create file if doesn't exist
+			new_fd = open_fd(cmd->redirs->target, false, true);
+		else if (cmd->redirs->type == R_APPEND)						// Bash : Do nothing if file exists / Create file if doesn't exist
+			new_fd = open_fd(cmd->redirs->target, true, false);
+		close(new_fd);
+		if (cmd->redirs->type == R_HEREDOC)							// Bash : Starts heredoc process, regardless of the command
+		{
+			process_heredoc(shell->pipeline, &shell->env_vars, shell->exit_status);
+			return (0);
+		}
+	}
+
+	if(ft_strcmp(cmd->argv[0], "cd") == 0)
+		execute_cd(cmd);
+	else if(ft_strcmp(cmd->argv[0], "export") == 0)
+		execute_export(shell);
+	else if(ft_strcmp(cmd->argv[0], "unset") == 0)
+		execute_unset(shell);
 	return (0);
 }
 
-
-int run_builtin_in_parent(t_shell *shell, t_command *cmd)
-{
 // examples: cd /tmp > out.txt or unset PATH
 // save backup of stdin/stdout (dup)
 // apply redirections (dup2 to the required fds)
 // execute the builtin
 // restore stdin/stdout (dup2 back)
 // close backup fds
+int run_any_builtin_in_child(t_shell *shell, t_command *cmd)
+{
+	int	backup_stdout;
+	int	backup_stdin;
+	// int	new_fd[2];			// [0] = infile [1] = outfile
+
+	backup_stdout = dup(STDOUT_FILENO);
+	backup_stdin = dup(STDIN_FILENO);
+	// new_fd[0] = -1;
+	// new_fd[1] = -1;
+
+	if (is_builtin(cmd->argv, true))
+	{
+		if (shell->pipeline->count > 1)	// Builtin without output : cd / export / unset BUT with pipes involved : 'cd | ls' : command ignored, jump to next
+		{
+			return (0);
+		}
+		else							// Normal expected exec
+		{
+			execute_built_in_commands(shell);
+		}
+
+	}
+	else									// Builtin with output : process to execution after FD update - if applicable
+	{
+		// If redirections : Apply them - Check in struct if already there
+		if (cmd->redirs)
+		{
+			int fd = cmd->redirs->fd;		// Check other variables in struct
+/* 			if (cmd->redirs->type == R_IN)
+			{
+				new_fd[0] = open_fd(cmd->redirs->target, true, false);
+				if (dup2(new_fd[0], STDIN_FILENO) == -1)
+				{
+					perror ("Error");
+					return (1);
+				}
+			}
+			else if (cmd->redirs->type == R_OUT)
+				new_fd[1] = open_fd(cmd->redirs->target, false, true);
+			else if (cmd->redirs->type == R_APPEND)
+				new_fd[1] = open_fd(cmd->redirs->target, true, false);
+			close(new_fd);
+			if (cmd->redirs->type == R_HEREDOC)
+			process_heredoc(shell->pipeline, &shell->env_vars, shell->exit_status); */
+		}
+		// Otherwise, exec the builtin and follow notes in comments
+		execute_built_in_commands(shell);		// Only builtins w/ ouputs, because the other ones have been filtered out at the start of this function
+	}
+	return (0);
 }
 
-int	exec_pipeline_forking(const t_pipeline *pl, char **envp)
+// only redirections, builtins and external commands both with and w/o redirections
+int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl, char **envp)
 {
 	size_t	i;
 	int		prev_read;
@@ -115,30 +226,32 @@ int	exec_pipeline_forking(const t_pipeline *pl, char **envp)
 			// apply redirs
 			apply_redirs_or_die(&pl->cmds[i]);
 
-			// command line with only redirections, e.g. "< in > out". Couid it be mooved in to execute_pipeline?
+			// command line with only redirections, e.g. "< in > out"
 			if (!pl->cmds[i].argv || !pl->cmds[i].argv[0])
 				exit(0);
 
-			/* execute();
-            if (builtin)
-            {
-                status = run_builtin(cmd);
-                exit(status);
-            }
-            else
-            {
-                execve(path, argv, envp);
-                perror("execve");
-                if (errno == ENOENT)     // No such file or directory
-                    exit(127);
-                else
-                    exit(126);  // EACCES, EISDIR, ENOEXEC, etc.
-            }
-            NB: the child MUST ALWAYS terminate with exit(status)
-            */
-        }
+			// execute();
+			if (is_builtin(pl->cmds[i].argv[0], false))
+			{
+				last_status = run_any_builtin_in_child(shell, &pl->cmds[i]);
+				exit (last_status);
+			}
+			else
+			{
+				if (execute_external_commands(shell) == -1)
+				{
+					perror("execve");
+					if (errno == ENOENT)     // No such file or directory
+						exit (127);
+					else
+						exit (126);  // EACCES, EISDIR, ENOEXEC, etc.
+				}
+			}
+			// NB: the child MUST ALWAYS terminate with exit(status)
+		}
 
-        // parent
+		// parent
+		waitpid(pid, NULL, 0);
 		pids[i] = pid;
 		close_if_valid(prev_read);
 		close_if_valid(pipefds[1]);
@@ -153,10 +266,10 @@ int	exec_pipeline_forking(const t_pipeline *pl, char **envp)
 		we know the pid of the last command
 		we wait for ALL pids
 		but we take the exit status only from last_pid
-    Hence, the parent:
-        - waits for all
-        - returns the status of the last command in the pipeline
-    */
+	Hence, the parent:
+		- waits for all
+		- returns the status of the last command in the pipeline
+	*/
 	close_if_valid(prev_read);
 	last_status = wait_all_and_get_last(pids, pl->count);
 	free(pids);

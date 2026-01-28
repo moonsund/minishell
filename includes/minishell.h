@@ -270,7 +270,7 @@ void	execute_unset(t_shell *minishell);
 void	execute_env(t_shell *minishell);
 
 // exec_external_commands.c
-void	execute_external_commands(t_shell *minishell);
+int		execute_external_commands(t_shell *minishell);
 void	fork_and_exec(t_shell *minishell, int *fd_in, int *fd_out, char **execve_args);
 void	parent_process_actions(t_shell *minishell, int fork_pid_return, int *fd_in, int *fd_out);
 void	child_process_actions(char **execve_args, char **envp, int *fd_in, int *fd_out);
@@ -279,7 +279,7 @@ void	child_process_actions(char **execve_args, char **envp, int *fd_in, int *fd_
 char	*build_path(char *file_name);
 int		open_fd(char *file_name, bool append, bool truncate);
 void	fd_update_if_redirections(t_command *all_commands, int *fd_in, int *fd_out);
-void	add_user_input_to_fd(t_shell *minishell, int fd);
+void	add_user_input_to_fd(t_shell *minishell);
 void	close_and_set_to_neg(int *fd);
 
 // exec_utils.c

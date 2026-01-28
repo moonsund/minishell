@@ -1,34 +1,10 @@
 #include "minishell.h"
 #include "libft.h"
 
-void	check_command_type_and_execute(t_shell *minishell);
 void	execute_built_in_commands(t_shell *minishell);
 
-void	check_command_type_and_execute(t_shell *minishell)
-{
-//	Is char ** env needed anywhere here ? If so, create it.
-	char	*current_command;
-
-	if (minishell->pipeline->cmds->argv)
-		current_command = minishell->pipeline->cmds->argv[0];
-
-	if (minishell->pipeline->cmds->argv &&
-		((ft_strcmp(current_command, "echo") == 0) ||
-			(ft_strcmp(current_command, "cd") == 0) ||
-				(ft_strcmp(current_command, "pwd") == 0) ||
-					(ft_strcmp(current_command, "export") == 0) ||
-						(ft_strcmp(current_command, "unset") == 0) ||
-							(ft_strcmp(current_command, "env") == 0)))
-	{
-		// No fork needed - Everything is done within the Shell
-		execute_built_in_commands(minishell);
-	}
-	else
-	{
-		execute_external_commands(minishell);
-	}
-}
-
+// We're in a child process.
+// If there are pipes, commands without output have been ignored, the others will execute normally with the correct FDs (if applicable)
 void	execute_built_in_commands(t_shell *minishell)
 {
 	char	*current_working_directory;
