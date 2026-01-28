@@ -16,6 +16,8 @@ static int	wait_all_and_get_last(pid_t *pids, size_t count);
 // pwd > outfile
 // ls >> outfile
 // export FRUIT=apple > new_outile
+// > outfile		(this command invites user to write lines, then puts them in the outfile, heredoc-style)
+// >> outfile		(this command invites user to write lines, then adds them to the outfile, heredoc-style)
 
 int execute_pipeline(t_shell *shell)
 {
