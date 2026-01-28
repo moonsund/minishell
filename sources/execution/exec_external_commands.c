@@ -2,9 +2,6 @@
 #include "libft.h"
 
 int		execute_external_commands(t_shell *minishell, t_command *cmd);
-void	fork_and_exec(t_shell *minishell, int *fd_in, int *fd_out, char **execve_args);
-void	parent_process_actions(t_shell *minishell, int fork_pid_return, int *fd_in, int *fd_out);
-void	child_process_actions(char **execve_args, char **envp, int *fd_in, int *fd_out);
 
 int		execute_external_commands(t_shell *minishell, t_command *cmd)
 {

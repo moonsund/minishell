@@ -251,9 +251,16 @@ void err_malloc_print(const char *where);
 // signals.c
 void setup_signals(void);
 
-// execution.c (by Leon)
-int		execute_pipeline(t_shell *shell);
-int		process_pipeline(t_shell *minishell, const t_pipeline *pl, char **envp);	// Need to add minishell arg
+// execution.c
+int			execute_pipeline(t_shell *shell);
+int			is_builtin(char *cmd_name, bool exec_in_parent_only);
+int 		run_builtin_without_output_in_parent(t_shell *shell, t_command *cmd);
+int			run_any_builtin_in_child(t_shell *shell, t_command *cmd);
+int			exec_pipeline_forking(t_shell *shell, const t_pipeline *pl, char **envp);
+static void	apply_redirs_or_die(const t_command *cmd);
+static int	open_redir_file(const t_redir *redir);
+static void	close_if_valid(int fd);
+static int	wait_all_and_get_last(pid_t *pids, size_t count);
 
 // exec_command_filter.c
 void	check_command_type_and_execute(t_shell *minishell);
@@ -272,9 +279,6 @@ void	execute_exit(t_shell *minishell);
 
 // exec_external_commands.c
 int		execute_external_commands(t_shell *minishell, t_command *cmd);
-void	fork_and_exec(t_shell *minishell, int *fd_in, int *fd_out, char **execve_args);
-void	parent_process_actions(t_shell *minishell, int fork_pid_return, int *fd_in, int *fd_out);
-void	child_process_actions(char **execve_args, char **envp, int *fd_in, int *fd_out);
 
 // exec_utils_fd.c
 char	*build_path(char *file_name);
