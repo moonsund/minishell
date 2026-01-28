@@ -22,5 +22,7 @@ void	execute_built_in_commands(t_shell *minishell)
 		execute_unset(minishell);
 	else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "env") == 0)
 		execute_env(minishell);
+	else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "exit") == 0)
+		execute_exit(minishell);
 	free(current_working_directory);
 }

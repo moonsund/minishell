@@ -22,6 +22,7 @@ char	*fetch_current_working_directory(void)
 }
 
 // Subject : "echo with option -n"
+// Try without all my mic mac done before the tsunami
 void	execute_echo(t_command *cmds)
 {
 	int		i;
@@ -71,7 +72,7 @@ void	execute_cd(t_command *cmds)
 	{
 		if(chdir(cmds->argv[1]) == -1)
 		{
-			perror("Error");											// Errno prints the rest of the message
+			perror("Error");
 		}
 	}
 }
@@ -80,4 +81,11 @@ void	execute_cd(t_command *cmds)
 void	execute_pwd(char *current_working_directory)
 {
 	printf("%s\n", current_working_directory);
+}
+
+// Subject : "exit with no options"
+void	execute_exit(t_shell *minishell)
+{
+	// Free memory
+	exit (minishell->exit_status);
 }

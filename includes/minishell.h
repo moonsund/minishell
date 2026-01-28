@@ -268,9 +268,10 @@ void	execute_pwd(char *current_working_directory);
 void	execute_export(t_shell *minishell);
 void	execute_unset(t_shell *minishell);
 void	execute_env(t_shell *minishell);
+void	execute_exit(t_shell *minishell);
 
 // exec_external_commands.c
-int		execute_external_commands(t_shell *minishell);
+int		execute_external_commands(t_shell *minishell, t_command *cmd);
 void	fork_and_exec(t_shell *minishell, int *fd_in, int *fd_out, char **execve_args);
 void	parent_process_actions(t_shell *minishell, int fork_pid_return, int *fd_in, int *fd_out);
 void	child_process_actions(char **execve_args, char **envp, int *fd_in, int *fd_out);

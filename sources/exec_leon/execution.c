@@ -9,15 +9,30 @@ static int	open_redir_file(const t_redir *redir);
 static void	close_if_valid(int fd);
 static int	wait_all_and_get_last(pid_t *pids, size_t count);
 
-// Examples for testing - Functional on 28/01
-// wc -l < infile
-// sort < infile
-// grep ok << end
-// pwd > outfile
-// ls >> outfile
-// export FRUIT=apple > new_outile
-// > outfile		(this command invites user to write lines, then puts them in the outfile, heredoc-style)
-// >> outfile		(this command invites user to write lines, then adds them to the outfile, heredoc-style)
+/*
+Redirections - Test commands :
+wc -l < infile
+sort < infile
+grep ok << end
+pwd > outfile
+ls >> outfile
+export FRUIT=apple > new_outile
+> outfile		(this command invites user to write lines, then puts them in the outfile, heredoc-style)
+>> outfile		(this command invites user to write lines, then adds them to the outfile, heredoc-style)
+
+Pipes - Test commands :
+ls | grep sources | wc
+ls -la | grep ob | wc -l
+cat main.c | sort | head -5
+
+cat w | wc -l | >> z
+cat w | cat -e | > z
+sort z | wc | > w
+
+Notes
+add exit back if in pipe
+ATTENTION !!!!! Ne jamais fermer un fd qui n'a pas ete ouvert
+*/
 
 int execute_pipeline(t_shell *shell)
 {
@@ -54,7 +69,8 @@ int is_builtin(char *cmd_name, bool exec_in_parent_only)
 {
 	if (cmd_name && ((ft_strcmp(cmd_name, "cd") == 0) ||
 			(ft_strcmp(cmd_name, "export") == 0) ||
-				(ft_strcmp(cmd_name, "unset") == 0)))
+				(ft_strcmp(cmd_name, "unset") == 0) ||
+					(ft_strcmp(cmd_name, "exit") == 0)))
 	{
 		return (true);
 	}
@@ -91,11 +107,11 @@ int run_builtin_without_output_in_parent(t_shell *shell, t_command *cmd)
 		else if (cmd->redirs->type == R_APPEND)						// Bash : Do nothing if file exists / Create file if doesn't exist
 			new_fd = open_fd(cmd->redirs->target, true, false);
 		close(new_fd);
-		if (cmd->redirs->type == R_HEREDOC)							// Bash : Starts heredoc process, regardless of the command
-		{
-			process_heredoc(shell->pipeline, &shell->env_vars, shell->exit_status);
-			return (0);
-		}
+		// if (cmd->redirs->type == R_HEREDOC)							// Bash : Starts heredoc process, regardless of the command
+		// {
+		// 	// process_heredoc(shell->pipeline, &shell->env_vars, shell->exit_status);
+		// 	return (0);
+		// }
 	}
 
 	if(ft_strcmp(cmd->argv[0], "cd") == 0)
@@ -104,6 +120,8 @@ int run_builtin_without_output_in_parent(t_shell *shell, t_command *cmd)
 		execute_export(shell);
 	else if(ft_strcmp(cmd->argv[0], "unset") == 0)
 		execute_unset(shell);
+	else if(ft_strcmp(cmd->argv[0], "exit") == 0)
+		execute_exit(shell);
 	return (0);
 }
 
@@ -130,36 +148,15 @@ int run_any_builtin_in_child(t_shell *shell, t_command *cmd)
 		{
 			return (0);
 		}
-		else							// Normal expected exec
+		else							// One command only = Normal expected exec
 		{
 			execute_built_in_commands(shell);
 		}
 
 	}
-	else									// Builtin with output : process to execution after FD update - if applicable
+	else										// Builtin with output : process to execution (after FD update TBC ? - if applicable)
 	{
-		// If redirections : Apply them - Check in struct if already there
-		if (cmd->redirs)
-		{
-			int fd = cmd->redirs->fd;		// Check other variables in struct
-/* 			if (cmd->redirs->type == R_IN)
-			{
-				new_fd[0] = open_fd(cmd->redirs->target, true, false);
-				if (dup2(new_fd[0], STDIN_FILENO) == -1)
-				{
-					perror ("Error");
-					return (1);
-				}
-			}
-			else if (cmd->redirs->type == R_OUT)
-				new_fd[1] = open_fd(cmd->redirs->target, false, true);
-			else if (cmd->redirs->type == R_APPEND)
-				new_fd[1] = open_fd(cmd->redirs->target, true, false);
-			close(new_fd);
-			if (cmd->redirs->type == R_HEREDOC)
-			process_heredoc(shell->pipeline, &shell->env_vars, shell->exit_status); */
-		}
-		// Otherwise, exec the builtin and follow notes in comments
+		// Check redirections ? TBC
 		execute_built_in_commands(shell);		// Only builtins w/ ouputs, because the other ones have been filtered out at the start of this function
 	}
 	return (0);
@@ -237,10 +234,19 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl, char **envp)
 			apply_redirs_or_die(&pl->cmds[i]);
 
 			// command line with only redirections, e.g. "< in > out"
-			if (!pl->cmds[i].argv || !pl->cmds[i].argv[0])
-				exit(0);
+			// Block to delete because it fucks up commands with redirections at the end of a pipe 'ls | > y'
+			// if (!pl->cmds[i].argv || !pl->cmds[i].argv[0])
+			// 	exit(0);
 
-			// execute();
+			// Deal with in-pipes redirections without command 'ls | > y'
+			if ((!pl->cmds[i].argv) && (pl->cmds[i].redirs))
+			{
+				// No command to execute = no execve
+				// fd already pointing to the right content (updated in apply_redirs_or_die)
+				// write content from pipe in that fd ?
+				break;
+			}
+
 			if (is_builtin(pl->cmds[i].argv[0], false))
 			{
 				last_status = run_any_builtin_in_child(shell, &pl->cmds[i]);
@@ -248,7 +254,7 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl, char **envp)
 			}
 			else
 			{
-				if (execute_external_commands(shell) == -1)
+				if (!execute_external_commands(shell, &pl->cmds[i]))
 				{
 					perror("execve");
 					if (errno == ENOENT)     // No such file or directory
@@ -259,9 +265,8 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl, char **envp)
 			}
 			// NB: the child MUST ALWAYS terminate with exit(status)
 		}
-
 		// parent
-		waitpid(pid, NULL, 0);
+		// waitpid(pid, NULL, 0);
 		pids[i] = pid;
 		close_if_valid(prev_read);
 		close_if_valid(pipefds[1]);

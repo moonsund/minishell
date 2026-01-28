@@ -112,6 +112,14 @@ int main(int argc, char **argv, char **envp)
 		execute_pipeline(&shell);	// Exec testing starts here
 
 	}
+
+	// if(ft_strcmp(minishell->pipeline->cmds->infile, ".heredoc_0") == 0)			// Free the heredoc file ? - TBC w/ Leon
+	// {
+	// 	char	*heredoc_file = build_path(".heredoc_0");
+	// 	unlink(heredoc_file);
+	// 	free(heredoc_file);
+	// }
+
 	shell_destroy(&shell);
 	return (EXIT_SUCCESS);
 }
