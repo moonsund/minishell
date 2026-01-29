@@ -1,7 +1,6 @@
 #include "minishell.h"
 
 int			execute_pipeline(t_shell *shell);
-// int			is_builtin(char *cmd_name, bool exec_in_parent_only);
 int 		run_builtin_without_output_in_parent(t_shell *shell, t_command *cmd);
 int			run_any_builtin_in_child(t_shell *shell, t_command *cmd);
 int			exec_pipeline_forking(t_shell *shell, const t_pipeline *pl);
@@ -22,14 +21,15 @@ ls >> outfile
 export FRUIT=apple > new_outile
 > outfile		(this command invites user to write lines, then puts them in the outfile, heredoc-style)
 >> outfile		(this command invites user to write lines, then adds them to the outfile, heredoc-style)
+cat w y z > new
 
 Pipes - Test commands :
 ls | grep sources | wc
 ls -la | grep git | wc -l
 cat z | sort | head -5
-ls | exit | grep a
+ls | exit | wc
 pwd | grep z | wc -m
-echo London | cat -e			NOPE
+echo London | cat -e > y
 
 */
 
@@ -46,6 +46,7 @@ int execute_pipeline(t_shell *shell)
 	cmd = &pl->cmds[0];
 
 	// cd/export/unset/exit with and w/o redirections = all commands that don't print anything but modify the shell
+	// if (pl->count == 1 && cmd->argv && cmd->argv[0] && is_builtin_test(cmd->argv[0], true))
 	if (pl->count == 1 && cmd->argv && cmd->argv[0] && is_parent_builtin(cmd->argv[0]))
 		return (run_builtin_without_output_in_parent(shell, cmd));
 
@@ -114,11 +115,6 @@ int run_builtin_without_output_in_parent(t_shell *shell, t_command *cmd)
 		else if (cmd->redirs->type == R_APPEND)						// Bash : Do nothing if file exists / Create file if doesn't exist
 			new_fd = open_fd(cmd->redirs->target, true, false);
 		close(new_fd);
-		// if (cmd->redirs->type == R_HEREDOC)							// Bash : Starts heredoc process, regardless of the command
-		// {
-		// 	// process_heredoc(shell->pipeline, &shell->env_vars, shell->exit_status);
-		// 	return (0);
-		// }
 	}
 
 	if(ft_strcmp(cmd->argv[0], "cd") == 0)
@@ -132,21 +128,10 @@ int run_builtin_without_output_in_parent(t_shell *shell, t_command *cmd)
 	return (0);
 }
 
-// examples: cd /tmp > out.txt or unset PATH
-// save backup of stdin/stdout (dup)
-// apply redirections (dup2 to the required fds)
-// execute the builtin
-// restore stdin/stdout (dup2 back)
-// close backup fds
 int run_any_builtin_in_child(t_shell *shell, t_command *cmd)
 {
-	int	backup_stdout;
-	int	backup_stdin;
-
-	backup_stdout = dup(STDOUT_FILENO);
-	backup_stdin = dup(STDIN_FILENO);
-
-	if (is_builtin(cmd->argv[0]))
+	// if (is_builtin_test(cmd->argv[0], true))
+	if (is_parent_builtin(cmd->argv[0]))
 	{
 		if (shell->pipeline->count > 1)	// Builtin without output : cd / export / unset BUT with pipes involved : 'cd | ls' : command ignored, jump to next
 			return (0);
@@ -155,7 +140,6 @@ int run_any_builtin_in_child(t_shell *shell, t_command *cmd)
 	}
 	else										// Builtin with output : process to execution (after FD update TBC ? - if applicable)
 	{
-		// Check redirections ? TBC
 		execute_built_in_commands(shell);		// Only builtins w/ ouputs, because the other ones have been filtered out at the start of this function
 	}
 	return (0);
@@ -207,8 +191,6 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 
 		if (pid == 0) // child
 		{
-			if(i == 1)
-				printf("Debug\n");
 			if (prev_read != -1) // if not the 1st pipe
 			{
 				if (dup2(prev_read, STDIN_FILENO) < 0) // dup2(old, new)
@@ -242,6 +224,7 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 			// if ((!pl->cmds[i].argv) && (pl->cmds[i].redirs))
 			// 	exit (0);
 
+			// if (is_builtin_test(pl->cmds[i].argv[0], false))
 			if (is_builtin(pl->cmds[i].argv[0]))
 			{
 				last_status = run_any_builtin_in_child(shell, &pl->cmds[i]);

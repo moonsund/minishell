@@ -8,11 +8,6 @@ int		execute_external_commands(t_shell *minishell, t_command *cmd)
 	char	**envp;
 	envp = build_envp(&minishell->env_vars);
 
-	t_command	*all_commands = minishell->pipeline->cmds;
-
-	// char		*debug_string;
-	// debug_string = ft_calloc(sizeof(char), 101);
-
 	char	**execve_args;
 
 	if (cmd->argv)
@@ -22,5 +17,6 @@ int		execute_external_commands(t_shell *minishell, t_command *cmd)
 	}
 
 	execve(execve_args[0], execve_args, envp);
+	free (envp);									// How to free if execve doesn't fail ? Put in struct ?
 	return (0);
 }

@@ -31,15 +31,6 @@ void	execute_echo(t_command *cmds)
 
 	line_return = is_line_return(cmds->argv, &i);
 
-/*
-echo bah alors comme ca on test			-	bah alors comme ca on test
-echo c'est la     vie					-	quote>
-echo c'est    la 'vie					-	cest la     vie
-echo cest    la     vie					-	cest la vie
-echo "c'est       la      vie"			-	c'est       la      vie
-echo "c'est"   "la" "vie     hello"		-	c'est la vie     hello
-*/
-
 	while (cmds->argv[i])
 	{
 		write(1, cmds->argv[i], ft_strlen(cmds->argv[i]));
