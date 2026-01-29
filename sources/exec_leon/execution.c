@@ -207,7 +207,7 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 
 		if (pid == 0) // child
 		{
-			if(i = 1)
+			if(i == 1)
 				printf("Debug\n");
 			if (prev_read != -1) // if not the 1st pipe
 			{
