@@ -253,10 +253,11 @@ void setup_signals(void);
 
 // execution.c
 int			execute_pipeline(t_shell *shell);
-int			is_builtin(char *cmd_name, bool exec_in_parent_only);
+int is_parent_builtin(const char *cmd);
+int is_builtin(const char *cmd);
 int 		run_builtin_without_output_in_parent(t_shell *shell, t_command *cmd);
 int			run_any_builtin_in_child(t_shell *shell, t_command *cmd);
-int			exec_pipeline_forking(t_shell *shell, const t_pipeline *pl, char **envp);
+int			exec_pipeline_forking(t_shell *shell, const t_pipeline *pl);
 static void	apply_redirs_or_die(const t_command *cmd);
 static int	open_redir_file(const t_redir *redir);
 static void	close_if_valid(int fd);

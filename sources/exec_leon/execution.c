@@ -1,14 +1,16 @@
 #include "minishell.h"
 
 int			execute_pipeline(t_shell *shell);
-int			is_builtin(char *cmd_name, bool exec_in_parent_only);
+// int			is_builtin(char *cmd_name, bool exec_in_parent_only);
 int 		run_builtin_without_output_in_parent(t_shell *shell, t_command *cmd);
 int			run_any_builtin_in_child(t_shell *shell, t_command *cmd);
-int			exec_pipeline_forking(t_shell *shell, const t_pipeline *pl, char **envp);
+int			exec_pipeline_forking(t_shell *shell, const t_pipeline *pl);
 static void	apply_redirs_or_die(const t_command *cmd);
 static int	open_redir_file(const t_redir *redir);
 static void	close_if_valid(int fd);
 static int	wait_all_and_get_last(pid_t *pids, size_t count);
+int is_parent_builtin(const char *cmd);
+int is_builtin(const char *cmd);
 
 /*
 Redirections - Test commands :
@@ -43,7 +45,7 @@ int execute_pipeline(t_shell *shell)
 	cmd = &pl->cmds[0];
 
 	// cd/export/unset/exit with and w/o redirections = all commands that don't print anything but modify the shell
-	if (pl->count == 1 && cmd->argv && cmd->argv[0] && is_builtin(cmd->argv[0], true))
+	if (pl->count == 1 && cmd->argv && cmd->argv[0] && is_parent_builtin(cmd->argv[0]))
 		return (run_builtin_without_output_in_parent(shell, cmd));
 
 	// Command line starting with a redirection, but no pipe, no cmd and no other redirection, e.g. '> outfile'
@@ -57,30 +59,38 @@ int execute_pipeline(t_shell *shell)
 	}
 
 	// only redirections, builtins and external commands both with and w/o redirections
-	return (exec_pipeline_forking(shell, pl, cmd));
+	return (exec_pipeline_forking(shell, pl));
 }
 
-// exec_in_parent_only = only cmds without output
-int is_builtin(char *cmd_name, bool exec_in_parent_only)
+int is_builtin(const char *cmd)
 {
-	if (cmd_name && ((ft_strcmp(cmd_name, "cd") == 0) ||
-			(ft_strcmp(cmd_name, "export") == 0) ||
-				(ft_strcmp(cmd_name, "unset") == 0) ||
-					(ft_strcmp(cmd_name, "exit") == 0)))
-	{
-		return (true);
-	}
-	if (!exec_in_parent_only)
-	{
-		if (cmd_name && ((ft_strcmp(cmd_name, "echo") == 0) ||
-			(ft_strcmp(cmd_name, "pwd") == 0) ||
-				(ft_strcmp(cmd_name, "env") == 0)))
-		{
-			return (true);
-		}
-	}
-	return (false);
+	if (!cmd)
+		return (0);
+
+	return (
+		ft_strcmp(cmd, "echo") == 0
+		|| ft_strcmp(cmd, "cd") == 0
+		|| ft_strcmp(cmd, "pwd") == 0
+		|| ft_strcmp(cmd, "export") == 0
+		|| ft_strcmp(cmd, "unset") == 0
+		|| ft_strcmp(cmd, "env") == 0
+		|| ft_strcmp(cmd, "exit") == 0
+	);
 }
+
+int is_parent_builtin(const char *cmd)
+{
+	if (!cmd)
+		return (0);
+
+	return (
+		ft_strcmp(cmd, "cd") == 0
+		|| ft_strcmp(cmd, "export") == 0
+		|| ft_strcmp(cmd, "unset") == 0
+		|| ft_strcmp(cmd, "exit") == 0
+	);
+}
+
 
 // examples: cd /tmp > out.txt or unset PATH
 // save backup of stdin/stdout (dup)				-- No need anymore, as nothing is happening in the fd
@@ -135,7 +145,7 @@ int run_any_builtin_in_child(t_shell *shell, t_command *cmd)
 	backup_stdout = dup(STDOUT_FILENO);
 	backup_stdin = dup(STDIN_FILENO);
 
-	if (is_builtin(cmd->argv, true))
+	if (is_builtin(cmd->argv[0]))
 	{
 		if (shell->pipeline->count > 1)	// Builtin without output : cd / export / unset BUT with pipes involved : 'cd | ls' : command ignored, jump to next
 			return (0);
@@ -151,7 +161,7 @@ int run_any_builtin_in_child(t_shell *shell, t_command *cmd)
 }
 
 // only redirections, builtins and external commands both with and w/o redirections
-int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl, char **envp)
+int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 {
 	size_t	i;
 	int		prev_read;
@@ -229,7 +239,7 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl, char **envp)
 			// if ((!pl->cmds[i].argv) && (pl->cmds[i].redirs))
 			// 	exit (0);
 
-			if (is_builtin(pl->cmds[i].argv[0], false))
+			if (is_builtin(pl->cmds[i].argv[0]))
 			{
 				last_status = run_any_builtin_in_child(shell, &pl->cmds[i]);
 				exit (last_status);
