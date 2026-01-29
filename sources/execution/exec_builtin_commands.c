@@ -25,34 +25,33 @@ char	*fetch_current_working_directory(void)
 void	execute_echo(t_command *cmds)
 {
 	int		i;
-	int		fd;
 	bool	line_return;
-	char	*join_all_strings;
+	char	*all_argv;
 	char	**separate_words;
 
-	fd = 1;
 	line_return = is_line_return(cmds->argv, &i);
-	join_all_strings = calloc(sizeof(char), 1);
+
+/*
+echo bah alors comme ca on test			-	bah alors comme ca on test
+echo c'est la     vie					-	quote>
+echo c'est    la 'vie					-	cest la     vie
+echo cest    la     vie					-	cest la vie
+echo "c'est       la      vie"			-	c'est       la      vie
+echo "c'est"   "la" "vie     hello"		-	c'est la vie     hello
+*/
+
 	while (cmds->argv[i])
 	{
-		join_all_strings = ft_strjoin(join_all_strings, cmds->argv[i]);			// Mallocs done here, remember to free
-		join_all_strings = ft_strjoin(join_all_strings, " ");					// Mallocs
+		write(1, cmds->argv[i], ft_strlen(cmds->argv[i]));
+		if (cmds->argv[i+1])
+		{
+			write(1, " ", 1);
+		}
 		i++;
 	}
 
-	separate_words = ft_split(join_all_strings, ' ');							// Malloc
-	free(join_all_strings);
-	i = 0;
-	while(separate_words[i])
-	{
-		write(fd, separate_words[i], ft_strlen(separate_words[i]));
-		if(separate_words[i+1])
-			write(fd, " ", 1);
-		i++;
-	}
 	if(line_return == true)
-		write(fd, "\n", 1);
-	free(separate_words);
+		write(1, "\n", 1);
 }
 
 bool	is_line_return(char **cmd, int *i)

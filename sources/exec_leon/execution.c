@@ -25,11 +25,12 @@ export FRUIT=apple > new_outile
 
 Pipes - Test commands :
 ls | grep sources | wc
-ls -la | grep ob | wc -l
+ls -la | grep git | wc -l
 cat z | sort | head -5
 ls | exit | grep a
 pwd | grep z | wc -m
-echo "London" | wc -w
+echo London | cat -e			NOPE
+
 */
 
 int execute_pipeline(t_shell *shell)
@@ -206,6 +207,8 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 
 		if (pid == 0) // child
 		{
+			if(i = 1)
+				printf("Debug\n");
 			if (prev_read != -1) // if not the 1st pipe
 			{
 				if (dup2(prev_read, STDIN_FILENO) < 0) // dup2(old, new)
