@@ -32,4 +32,4 @@ w
 y
 z
 # For Valgrind to ignore mem leaks from readline
-readline.supp
+# readline.supp
