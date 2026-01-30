@@ -230,14 +230,14 @@ void free_buf(t_buf *buf);
 void init_buffer(t_buf *buf);
 
 // heredoc
-int	process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, t_exit_status exit_status);
-static char *generate_heredoc_filename(size_t heredoc_index);
-static int expand_heredoc(char **line, t_env_var_list *env_vars, t_exit_status exit_status);
+int			process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, t_exit_status exit_status);
+static char	*generate_heredoc_filename(size_t heredoc_index);
+static int	expand_heredoc(char **line, t_env_var_list *env_vars, t_exit_status exit_status);
 int			write_line_in_fd(int fd, char *line);
-static int append_charter(char **line, char c);
-static int append_string(char **line, const char *str);
-static void redir_replace_with_infile(t_redir *r, char *filename);
-static int get_heredoc(t_redir *redir, t_env_var_list *env_vars, t_exit_status exit_status, size_t *heredoc_index);
+static int	append_charter(char **line, char c);
+static int	append_string(char **line, const char *str);
+static void	redir_replace_with_infile(t_redir *r, char *filename);
+static int	get_heredoc(t_redir *redir, t_env_var_list *env_vars, t_exit_status exit_status, size_t *heredoc_index);
 
 // utils.c
 void reset_iteration(t_shell *shell);
@@ -280,6 +280,7 @@ void	execute_exit(t_shell *minishell);
 
 // exec_external_commands.c
 int		execute_external_commands(t_shell *minishell, t_command *cmd);
+void	fetch_and_check_bin_path(t_shell *minishell, char *cmd);
 
 // exec_utils_fd.c
 char	*build_path(char *file_name);
@@ -287,8 +288,5 @@ int		open_fd(char *file_name, bool append, bool truncate);
 void	fd_update_if_redirections(t_command *all_commands, int *fd_in, int *fd_out);
 void	add_user_input_to_fd(t_shell *minishell);
 void	close_and_set_to_neg(int *fd);
-
-// exec_utils.c
-void	replace_cmd_by_binary_path(char *cmd);
 
 #endif
