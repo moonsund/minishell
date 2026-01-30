@@ -42,7 +42,7 @@ SRC_FILES = \
 	heredoc/heredoc.c \
 	envp/envp.c \
 	envp/envp_utils.c \
-	execution/execution_begins.c \
+	execution/exec_begins.c \
 	execution/exec_command_filter.c \
 	execution/exec_builtin_commands.c \
 	execution/exec_builtin_commands_env.c \

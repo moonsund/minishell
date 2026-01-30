@@ -31,3 +31,5 @@ Pipe_testing_w_Fab.c
 w
 y
 z
+# For Valgrind to ignore mem leaks from readline
+readline.supp

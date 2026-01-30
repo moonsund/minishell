@@ -8,10 +8,11 @@ static void	apply_redirs_or_die(const t_command *cmd);
 static int	open_redir_file(const t_redir *redir);
 static void	close_if_valid(int fd);
 static int	wait_all_and_get_last(pid_t *pids, size_t count);
-int is_parent_builtin(const char *cmd);
-int is_builtin(const char *cmd);
+int			is_parent_builtin(const char *cmd);
+int			is_builtin(const char *cmd);
 
 /*
+Auto check Valgrind VSCode : Ctrl Shift p > run task > Valgrind
 Redirections - Test commands :
 wc -l < infile
 sort < infile

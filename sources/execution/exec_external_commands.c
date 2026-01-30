@@ -1,8 +1,9 @@
 #include "minishell.h"
 #include "libft.h"
 
+char	*build_path_to_check(char *dir, char c, char *cmd);
+char	*fetch_and_check_bin_path(t_shell *minishell, char *cmd);
 int		execute_external_commands(t_shell *minishell, t_command *cmd);
-void	fetch_and_check_bin_path(t_shell *minishell, char *cmd);
 
 char	*build_path_to_check(char *dir, char c, char *cmd)
 {
@@ -17,10 +18,10 @@ char	*build_path_to_check(char *dir, char c, char *cmd)
 	return (path_to_check);
 }
 
-void	fetch_and_check_bin_path(t_shell *minishell, char *cmd)
+char	*fetch_and_check_bin_path(t_shell *minishell, char *cmd)
 {
 	char	*path_var_in_env;
-	char	**all_directories_from_path;
+	char	**all_directories_in_path_var;
 	char	*path_to_check;
 	int		i;
 
@@ -28,44 +29,42 @@ void	fetch_and_check_bin_path(t_shell *minishell, char *cmd)
 	if (ft_strchr(cmd, '/'))			// Command is already entered as binary
 	{
 		if (access(cmd, X_OK) == 0)		// Success = Command is executable
-			return;
+			return (cmd);
 		perror("error");
+		return (NULL);
 	}
 	path_var_in_env = getenv("PATH");
-	all_directories_from_path = ft_split(path_var_in_env, ':');			// Should I select only the ones containing 'bin' ?
-	while (all_directories_from_path[i])
+	all_directories_in_path_var = ft_split(path_var_in_env, ':');
+	while (all_directories_in_path_var[i])
 	{
-		path_to_check = build_path_to_check(all_directories_from_path[i], '/', cmd);
+		path_to_check = build_path_to_check(all_directories_in_path_var[i], '/', cmd);	// Malloc
 		if (access(path_to_check, X_OK) == 0)
 		{
-			free(cmd);							// Check w/ Leon if cmds were malloc'ed during parsing. If not, don't free
-			cmd = ft_strdup(path_to_check);		// To keep the same address (easier to debug)
-			free(path_to_check);
-			free(all_directories_from_path);
-			return;
+			free(all_directories_in_path_var);
+			return (path_to_check);
 		}
+		free(path_to_check);
 		i++;
 	}
 	// Bin command not found = error message dealt with later - Nothing to do here (TBC)
-	free(path_to_check);
-	free(all_directories_from_path);
+	free(all_directories_in_path_var);
+	return (NULL);
 }
 
 int		execute_external_commands(t_shell *minishell, t_command *cmd)
 {
 	char	**envp;
-	envp = build_envp(&minishell->env_vars);
-
 	char	**execve_args;
+	char	*updated_path;
 
+	envp = build_envp(&minishell->env_vars);
 	if (cmd->argv)
 	{
 		execve_args = cmd->argv;
-		fetch_and_check_bin_path(minishell, execve_args[0]);
+		updated_path = fetch_and_check_bin_path(minishell, execve_args[0]);
 	}
-
-	execve(execve_args[0], execve_args, envp);
+	execve(updated_path, execve_args, envp);
 	// if execve fails :
-	free (envp);									// How to free envp if execve doesn't fail ? Put in struct ?
+	free (envp);
 	return (0);
 }

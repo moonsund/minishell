@@ -279,8 +279,9 @@ void	execute_env(t_shell *minishell);
 void	execute_exit(t_shell *minishell);
 
 // exec_external_commands.c
+char	*build_path_to_check(char *dir, char c, char *cmd);
+char	*fetch_and_check_bin_path(t_shell *minishell, char *cmd);
 int		execute_external_commands(t_shell *minishell, t_command *cmd);
-void	fetch_and_check_bin_path(t_shell *minishell, char *cmd);
 
 // exec_utils_fd.c
 char	*build_path(char *file_name);
