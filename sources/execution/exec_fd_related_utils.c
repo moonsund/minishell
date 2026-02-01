@@ -1,11 +1,10 @@
 #include "minishell.h"
 #include "libft.h"
 
-char	*build_path(char *file_name);
-int		open_fd(char *file_name, bool append, bool truncate);
-void	fd_update_if_redirections(t_command *all_commands, int *fd_in, int *fd_out);
-void	add_user_input_to_fd(t_shell *minishell);
-void	close_and_set_to_neg(int *fd);
+char		*build_path(char *file_name);
+int			open_fd(char *file_name, bool append, bool truncate);
+void		fd_update_if_redirections(t_command *all_commands, int *fd_in, int *fd_out);
+void		add_user_input_to_fd(t_shell *minishell);
 
 char	*build_path(char *file_name)
 {
@@ -81,14 +80,5 @@ void	add_user_input_to_fd(t_shell *minishell)
 		}
 		write_line_in_fd(fd, line);
 		free(line);
-	}
-}
-
-void	close_and_set_to_neg(int *fd)
-{
-	if (*fd && *fd != -1)
-	{
-		close(*fd);
-		*fd = -1;
 	}
 }

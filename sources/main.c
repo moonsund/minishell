@@ -23,7 +23,7 @@ int main(int argc, char **argv, char **envp)
 	{
 		line = readline("minishell> ");
 
-		if (!line || ft_strcmp(line, "exit") == 0) // Ctrl+D (EOF) or exit command
+		if (!line/*  || ft_strcmp(line, "exit") == 0 */) // Ctrl+D (EOF) or exit command
 		{
 			// printf("exit\n");					// Doesn't need to be printed
 			break;
@@ -98,7 +98,6 @@ int main(int argc, char **argv, char **envp)
 			continue;
 		}
 
-		// check_command_type_and_execute(&shell);	// Exec testing starts here
 		shell.exit_status = execute_pipeline(&shell);
 		free(line);
 		reset_iteration(&shell);
@@ -108,9 +107,6 @@ int main(int argc, char **argv, char **envp)
 		free_tokens(&shell.tokens); // to be deleted
 
 		// debug_print_heredoc_files(shell.pipeline); // for debugging, to be deleted
-
-		execute_pipeline(&shell);	// Exec testing starts here
-
 	}
 
 	// if(ft_strcmp(minishell->pipeline->cmds->infile, ".heredoc_0") == 0)			// Free the heredoc file ? - TBC w/ Leon

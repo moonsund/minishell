@@ -1,10 +1,11 @@
 #include "minishell.h"
 
 t_var  *find_var(t_env_var_list *list, const char *name);
-int     set_var(t_env_var_list *list, const char *name, const char *value);   // export
-int     unset_var(t_env_var_list *list, const char *name);                    // unset
-char   *get_var_value(t_env_var_list *var_list, const char *var);             // my_getenv
-char  **build_envp(t_env_var_list *list);                                     // before execve
+int     set_var(t_env_var_list *list, const char *name, const char *value);		// export
+int     unset_var(t_env_var_list *list, const char *name);						// unset
+char   *get_var_value(t_env_var_list *var_list, const char *var);				// my_getenv
+char  **build_envp(t_env_var_list *list);										// before execve
+char  **sort_envp_alpha(char **envp);											// export no args
 
 t_var   *find_var(t_env_var_list *list, const char *name)
 {
@@ -196,3 +197,13 @@ char  **build_envp(t_env_var_list *list)
     envp[i] = NULL;
     return (envp);
 }
+
+// char  **sort_envp_alpha(char **envp)
+// {
+// 	ft_strcmp
+// }
+
+// void	str_swap(char **s1, char **s2)
+// {
+
+// }

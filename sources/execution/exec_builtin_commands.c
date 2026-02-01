@@ -80,6 +80,6 @@ void	execute_pwd(char *current_working_directory)
 // Subject : "exit with no options"
 void	execute_exit(t_shell *minishell)
 {
-	// Free memory
+	shell_destroy(minishell);
 	exit (minishell->exit_status);
 }

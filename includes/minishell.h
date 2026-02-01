@@ -179,10 +179,11 @@ int init_shell(t_shell *shell, char **envp);
 
 // envp.c
 t_var	*find_var(t_env_var_list *list, const char *name);
-int		set_var(t_env_var_list *list, const char *name, const char *value);   // export
-int		unset_var(t_env_var_list *list, const char *name);                    // unset
-char	*get_var_value(t_env_var_list *var_list, const char *var);            // my_getenv
-char	**build_envp(t_env_var_list *list);                                   // for execve
+int		set_var(t_env_var_list *list, const char *name, const char *value);		// export
+int		unset_var(t_env_var_list *list, const char *name);						// unset
+char	*get_var_value(t_env_var_list *var_list, const char *var);				// my_getenv
+char	**build_envp(t_env_var_list *list);										// before execve
+char	**sort_envp_alpha(char **envp);											// export no args
 
 // envp_utils.c
 void free_envp_partial(char **envp, size_t used);
@@ -253,18 +254,16 @@ void setup_signals(void);
 
 // execution.c
 int			execute_pipeline(t_shell *shell);
-int			is_parent_builtin(const char *cmd);
-int 		is_builtin(const char *cmd);
-int 		run_builtin_without_output_in_parent(t_shell *shell, t_command *cmd);
-int			run_any_builtin_in_child(t_shell *shell, t_command *cmd);
 int			exec_pipeline_forking(t_shell *shell, const t_pipeline *pl);
 static void	apply_redirs_or_die(const t_command *cmd);
 static int	open_redir_file(const t_redir *redir);
-static void	close_if_valid(int fd);
 static int	wait_all_and_get_last(pid_t *pids, size_t count);
 
 // exec_command_filter.c
-void	check_command_type_and_execute(t_shell *minishell);
+int 	is_builtin(const char *cmd);
+int		is_parent_builtin(const char *cmd);
+int 	run_builtin_without_output_in_parent(t_shell *shell, t_command *cmd);
+int		run_any_builtin_in_child(t_shell *shell, t_command *cmd);
 
 // exec_builtin_commands.c
 void	execute_built_in_commands(t_shell *minishell);
@@ -288,6 +287,11 @@ char	*build_path(char *file_name);
 int		open_fd(char *file_name, bool append, bool truncate);
 void	fd_update_if_redirections(t_command *all_commands, int *fd_in, int *fd_out);
 void	add_user_input_to_fd(t_shell *minishell);
+
+// exec_close_and_free.c
 void	close_and_set_to_neg(int *fd);
+void	close_if_valid(int fd);
+void	free_envp(t_env_var_list *list);
+void	free_ft_split_output(char **array);
 
 #endif

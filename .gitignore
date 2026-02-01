@@ -26,10 +26,11 @@ minishell
 *.log
 .DS_Store
 
-# Sophie's test / unfinished files
-Pipe_testing_w_Fab.c
+# Test files (input / output / pipes)
 w
 y
 z
+
 # For Valgrind to ignore mem leaks from readline
-# readline.supp
+readline.supp
+valgrind-output.txt

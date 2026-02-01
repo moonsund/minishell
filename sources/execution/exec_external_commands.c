@@ -20,7 +20,7 @@ char	*build_path_to_check(char *dir, char c, char *cmd)
 
 char	*fetch_and_check_bin_path(t_shell *minishell, char *cmd)
 {
-	char	*path_var_in_env;
+	t_var	*path_var_in_env;
 	char	**all_directories_in_path_var;
 	char	*path_to_check;
 	int		i;
@@ -33,8 +33,10 @@ char	*fetch_and_check_bin_path(t_shell *minishell, char *cmd)
 		perror("error");
 		return (NULL);
 	}
-	path_var_in_env = getenv("PATH");
-	all_directories_in_path_var = ft_split(path_var_in_env, ':');
+	path_var_in_env = find_var(&minishell->env_vars, "PATH");
+	char	*path_value = path_var_in_env->value;
+
+	all_directories_in_path_var = ft_split(path_value, ':');
 	while (all_directories_in_path_var[i])
 	{
 		path_to_check = build_path_to_check(all_directories_in_path_var[i], '/', cmd);	// Malloc
@@ -53,18 +55,19 @@ char	*fetch_and_check_bin_path(t_shell *minishell, char *cmd)
 
 int		execute_external_commands(t_shell *minishell, t_command *cmd)
 {
-	char	**envp;
+	char	**converted_envp;
 	char	**execve_args;
 	char	*updated_path;
 
-	envp = build_envp(&minishell->env_vars);
+	converted_envp = build_envp(&minishell->env_vars);
 	if (cmd->argv)
 	{
 		execve_args = cmd->argv;
 		updated_path = fetch_and_check_bin_path(minishell, execve_args[0]);
 	}
-	execve(updated_path, execve_args, envp);
+	execve(updated_path, execve_args, converted_envp);
 	// if execve fails :
-	free (envp);
+	free_envp (&minishell->env_vars);
+	free_ft_split_output(converted_envp);
 	return (0);
 }
