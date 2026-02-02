@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:31 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/02 20:20:13 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/02 20:37:56 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,12 @@ static int	wait_all_and_get_last(pid_t *pids, size_t count);
 /*
 Auto check Valgrind VSCode : Ctrl Shift p > run task > Valgrind
 Redirections - Test commands :
-wc -l < infile_that_doesn't exist
+wc -l < w
 sort < infile
 grep ok << end
-pwd > outfile
+pwd > outfile			----- LEAK
 ls >> outfile
-export FRUIT=apple > new_outile
+export FRUIT=apple > new_outfile
 cat w y z > new
 
 Pipes - Test commands :

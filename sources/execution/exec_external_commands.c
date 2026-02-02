@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:18:42 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/02 20:18:44 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/02 20:33:54 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,14 +54,14 @@ char	*fetch_and_check_bin_path(t_shell *minishell, char *cmd)
 		path_to_check = build_path_to_check(all_directories_in_path_var[i], '/', cmd);	// Malloc
 		if (access(path_to_check, X_OK) == 0)
 		{
-			free(all_directories_in_path_var);
+			free_strings_array(all_directories_in_path_var);
 			return (path_to_check);
 		}
 		free(path_to_check);
 		i++;
 	}
 	// Bin command not found = error message dealt with later - Nothing to do here (TBC)
-	free(all_directories_in_path_var);
+	free_strings_array(all_directories_in_path_var);
 	return (NULL);
 }
 
