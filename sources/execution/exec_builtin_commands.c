@@ -2,11 +2,11 @@
 #include "libft.h"
 
 char	*fetch_current_working_directory(void);
-void	execute_echo(t_command *cmds);
+int		execute_echo(t_command *cmds);
 bool	is_line_return(char **cmd, int *i);
-void	execute_cd(t_command *cmds);
-void	execute_pwd(char *current_working_directory);
-void	execute_exit(t_shell *minishell);
+int		execute_cd(t_command *cmds);
+int		execute_pwd(char *current_working_directory);
+int		execute_exit(t_shell *minishell);
 
 char	*fetch_current_working_directory(void)
 {
@@ -23,7 +23,7 @@ char	*fetch_current_working_directory(void)
 }
 
 // Subject : "echo with option -n"
-void	execute_echo(t_command *cmds)
+int	execute_echo(t_command *cmds)
 {
 	int		i;
 	bool	line_return;
@@ -44,6 +44,7 @@ void	execute_echo(t_command *cmds)
 
 	if(line_return == true)
 		write(1, "\n", 1);
+	return (0);
 }
 
 bool	is_line_return(char **cmd, int *i)
@@ -61,25 +62,28 @@ bool	is_line_return(char **cmd, int *i)
 }
 
 // Subject : "cd with only a relative or absolute path"
-void	execute_cd(t_command *cmds)
+int	execute_cd(t_command *cmds)
 {
 	if (cmds->argv[1])
 	{
 		if(chdir(cmds->argv[1]) == -1)
 		{
 			perror("Error");
+			return (1);
 		}
 	}
+	return (0);
 }
 
 // Subject : "pwd with no options"
-void	execute_pwd(char *current_working_directory)
+int	execute_pwd(char *current_working_directory)
 {
 	printf("%s\n", current_working_directory);
+	return (0);
 }
 
 // Subject : "exit with no options"
-void	execute_exit(t_shell *minishell)
+int	execute_exit(t_shell *minishell)
 {
 	shell_destroy(minishell);
 	exit (minishell->exit_status);

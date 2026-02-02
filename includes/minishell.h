@@ -260,24 +260,24 @@ static int	open_redir_file(const t_redir *redir);
 static int	wait_all_and_get_last(pid_t *pids, size_t count);
 
 // exec_command_filter.c
-int 	is_builtin(const char *cmd);
-int		is_parent_builtin(const char *cmd);
-int 	run_builtin_without_output_in_parent(t_shell *shell, t_command *cmd);
-int		run_any_builtin_in_child(t_shell *shell, t_command *cmd);
-void	execute_built_in_commands(t_shell *minishell);
+int	is_builtin(const char *cmd);
+int	is_parent_builtin(const char *cmd);
+int	run_builtin_without_output_in_parent(t_shell *shell, t_command *cmd);
+int	run_any_builtin_in_child(t_shell *shell, t_command *cmd);
+int	execute_built_in_commands(t_shell *minishell);
 
 // exec_builtin_commands.c
 char	*fetch_current_working_directory(void);
-void	execute_echo(t_command *cmds);
+int	execute_echo(t_command *cmds);
 bool	is_line_return(char **cmd, int *i);
-void	execute_cd(t_command *cmds);
-void	execute_pwd(char *current_working_directory);
-void	execute_exit(t_shell *minishell);
+int	execute_cd(t_command *cmds);
+int	execute_pwd(char *current_working_directory);
+int	execute_exit(t_shell *minishell);
 
 // exec_builtin_commands_env.c
-void	execute_export(t_shell *minishell);
-void	execute_unset(t_shell *minishell);
-void	execute_env(t_shell *minishell);
+int	execute_export(t_shell *minishell);
+int	execute_unset(t_shell *minishell);
+int	execute_env(t_shell *minishell);
 void	sort_envp_alpha(char **envp);								// export no args
 void	str_swap(char **s1, char **s2);
 
