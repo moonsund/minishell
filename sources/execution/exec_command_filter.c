@@ -5,6 +5,7 @@ int 	is_builtin(const char *cmd);
 int		is_parent_builtin(const char *cmd);
 int 	run_builtin_without_output_in_parent(t_shell *shell, t_command *cmd);
 int		run_any_builtin_in_child(t_shell *shell, t_command *cmd);
+void	execute_built_in_commands(t_shell *minishell);
 
 int is_builtin(const char *cmd)
 {

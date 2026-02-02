@@ -4,7 +4,7 @@
 void	close_and_set_to_neg(int *fd);
 void	close_if_valid(int fd);
 void	free_envp(t_env_var_list *list);
-void	free_ft_split_output(char **array);
+void	free_strings_array(char **array);
 
 // Not used anymore - Replaced by the one below
 void	close_and_set_to_neg(int *fd)
@@ -39,7 +39,7 @@ void	free_envp(t_env_var_list *list)
 	}
 }
 
-void	free_ft_split_output(char **array)
+void	free_strings_array(char **array)
 {
 	int	i;
 

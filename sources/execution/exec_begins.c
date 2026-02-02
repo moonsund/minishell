@@ -102,7 +102,7 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 			free(pids);
 			return (1);
 		}
-
+// TESTING : echo z > w | echo ok
 		if (pid == 0) // child
 		{
 			if (prev_read != -1) // if not the 1st pipe

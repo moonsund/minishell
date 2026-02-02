@@ -183,7 +183,7 @@ int		set_var(t_env_var_list *list, const char *name, const char *value);		// exp
 int		unset_var(t_env_var_list *list, const char *name);						// unset
 char	*get_var_value(t_env_var_list *var_list, const char *var);				// my_getenv
 char	**build_envp(t_env_var_list *list);										// before execve
-char	**sort_envp_alpha(char **envp);											// export no args
+void	sort_envp_alpha(char **envp);											// export no args
 
 // envp_utils.c
 void free_envp_partial(char **envp, size_t used);
@@ -264,18 +264,22 @@ int 	is_builtin(const char *cmd);
 int		is_parent_builtin(const char *cmd);
 int 	run_builtin_without_output_in_parent(t_shell *shell, t_command *cmd);
 int		run_any_builtin_in_child(t_shell *shell, t_command *cmd);
+void	execute_built_in_commands(t_shell *minishell);
 
 // exec_builtin_commands.c
-void	execute_built_in_commands(t_shell *minishell);
 char	*fetch_current_working_directory(void);
 void	execute_echo(t_command *cmds);
 bool	is_line_return(char **cmd, int *i);
 void	execute_cd(t_command *cmds);
 void	execute_pwd(char *current_working_directory);
+void	execute_exit(t_shell *minishell);
+
+// exec_builtin_commands_env.c
 void	execute_export(t_shell *minishell);
 void	execute_unset(t_shell *minishell);
 void	execute_env(t_shell *minishell);
-void	execute_exit(t_shell *minishell);
+void	sort_envp_alpha(char **envp);								// export no args
+void	str_swap(char **s1, char **s2);
 
 // exec_external_commands.c
 char	*build_path_to_check(char *dir, char c, char *cmd);
@@ -292,6 +296,6 @@ void	add_user_input_to_fd(t_shell *minishell);
 void	close_and_set_to_neg(int *fd);
 void	close_if_valid(int fd);
 void	free_envp(t_env_var_list *list);
-void	free_ft_split_output(char **array);
+void	free_strings_array(char **array);
 
 #endif

@@ -6,6 +6,7 @@ void	execute_echo(t_command *cmds);
 bool	is_line_return(char **cmd, int *i);
 void	execute_cd(t_command *cmds);
 void	execute_pwd(char *current_working_directory);
+void	execute_exit(t_shell *minishell);
 
 char	*fetch_current_working_directory(void)
 {

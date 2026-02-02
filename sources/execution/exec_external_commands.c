@@ -68,6 +68,6 @@ int		execute_external_commands(t_shell *minishell, t_command *cmd)
 	execve(updated_path, execve_args, converted_envp);
 	// if execve fails :
 	free_envp (&minishell->env_vars);
-	free_ft_split_output(converted_envp);
+	free_strings_array(converted_envp);
 	return (0);
 }
