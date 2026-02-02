@@ -6,26 +6,22 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:14 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/02 20:19:15 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/02 21:14:18 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 #include "minishell.h"
 
+// The 3 next functions are wrappers for Leo's functions
 int		execute_export(t_shell *minishell);
 int		execute_unset(t_shell *minishell);
 int		execute_env(t_shell *minishell);
-void	sort_envp_alpha(char **envp); // export no args
-void	str_swap(char **s1, char **s2);
-
-// The 3 next functions are wrappers for Leo's functions
 
 // Subject : "export with no options"
 int	execute_export(t_shell *minishell)
 {
 	char	**env_var_data;
-	char	**envp_to_sort;
 	char	**envp_sorted;
 	int		i;
 	char	*key;
@@ -33,22 +29,12 @@ int	execute_export(t_shell *minishell)
 
 	if (!minishell->pipeline->cmds->argv[1])
 	{
-		envp_to_sort = build_envp(&minishell->env_vars);
-		sort_envp_alpha(envp_to_sort);
-		i = 0;
-		while (envp_to_sort[i])
-		{
-			printf("declare -x ");
-			printf("%s\n", envp_to_sort[i]);
-			i++;
-		}
-		free_strings_array(envp_to_sort);
+		print_export(minishell);
 		return (0);
 	}
 	env_var_data = ft_split(minishell->pipeline->cmds->argv[1], '=');
 	key = env_var_data[0];
 	value = env_var_data[1];
-	// si on rencontre des chars qui ne sont ni alnum, ni _
 	i = 0;
 	if (!key || ft_isdigit(key[0]))
 	{
@@ -82,8 +68,8 @@ int	execute_unset(t_shell *minishell)
 	unset_var(&minishell->env_vars, minishell->pipeline->cmds->argv[1]);
 	return (0);
 }
+
 // Subject : "env with no options or arguments"
-// Loop through all env vars and print them
 int	execute_env(t_shell *minishell)
 {
 	char	**env_to_print;
@@ -98,35 +84,4 @@ int	execute_env(t_shell *minishell)
 	}
 	free_strings_array(env_to_print);
 	return (0);
-}
-
-void	sort_envp_alpha(char **envp)
-{
-	int	i;
-	int	j;
-
-	i = 0;
-	j = 0;
-	while (envp[i])
-	{
-		j = i + 1;
-		while (envp[j])
-		{
-			if (ft_strcmp(envp[i], envp[j]) > 0)
-			{
-				str_swap(&(envp[i]), &(envp[j]));
-			}
-			j++;
-		}
-		i++;
-	}
-}
-
-void	str_swap(char **s1, char **s2)
-{
-	char	*tmp;
-
-	tmp = *s1;
-	*s1 = *s2;
-	*s2 = tmp;
 }

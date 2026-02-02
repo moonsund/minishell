@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:18:42 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/02 20:33:54 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/02 21:03:14 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,35 +33,26 @@ char	*build_path_to_check(char *dir, char c, char *cmd)
 char	*fetch_and_check_bin_path(t_shell *minishell, char *cmd)
 {
 	t_var	*path_var_in_env;
-	char	**all_directories_in_path_var;
+	char	**path_var_dirs;
 	char	*path_to_check;
 	int		i;
 
 	i = 0;
-	if (ft_strchr(cmd, '/'))			// Command is already entered as binary
-	{
-		if (access(cmd, X_OK) == 0)		// Success = Command is executable
-			return (cmd);
-		perror("error");
-		return (NULL);
-	}
 	path_var_in_env = find_var(&minishell->env_vars, "PATH");
-	char	*path_value = path_var_in_env->value;
-
-	all_directories_in_path_var = ft_split(path_value, ':');
-	while (all_directories_in_path_var[i])
+	path_var_dirs = ft_split(path_var_in_env->value, ':');
+	while (path_var_dirs[i])
 	{
-		path_to_check = build_path_to_check(all_directories_in_path_var[i], '/', cmd);	// Malloc
+		path_to_check = build_path_to_check(path_var_dirs[i], '/', cmd);
 		if (access(path_to_check, X_OK) == 0)
 		{
-			free_strings_array(all_directories_in_path_var);
+			free_strings_array(path_var_dirs);
 			return (path_to_check);
 		}
 		free(path_to_check);
 		i++;
 	}
 	// Bin command not found = error message dealt with later - Nothing to do here (TBC)
-	free_strings_array(all_directories_in_path_var);
+	free_strings_array(path_var_dirs);
 	return (NULL);
 }
 
@@ -75,7 +66,18 @@ int		execute_external_commands(t_shell *minishell, t_command *cmd)
 	if (cmd->argv)
 	{
 		execve_args = cmd->argv;
-		updated_path = fetch_and_check_bin_path(minishell, execve_args[0]);
+		if (ft_strchr(cmd->argv[0], '/'))				// Command is already entered as binary
+		{
+			if (access(cmd->argv[0], X_OK) == 0)		// Success = Command is executable
+				updated_path = cmd->argv[0];
+			else
+			{
+				perror("error");
+				return (1);
+			}
+		}
+		else
+			updated_path = fetch_and_check_bin_path(minishell, execve_args[0]);
 	}
 	execve(updated_path, execve_args, converted_envp);
 	// if execve fails :

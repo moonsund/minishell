@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:31 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/02 20:37:56 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/02 20:43:56 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,8 +162,7 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 		i++;
 	}
 	/*
-	exit status of the WHOLE pipeline = exit status of the LAST command in the pipeline: ls | grep x | wc
-		-l
+	exit status of the WHOLE pipeline = exit status of the LAST command in the pipeline: ls | grep x | wc -l
 	When we fork a pipeline:
 		we know the pid of each segment
 		we know the pid of the last command

@@ -46,6 +46,7 @@ SRC_FILES = \
 	execution/exec_command_filter.c \
 	execution/exec_builtin_commands.c \
 	execution/exec_builtin_commands_env.c \
+	execution/exec_builtin_commands_env_utils.c \
 	execution/exec_external_commands.c \
 	execution/exec_fd_related_utils.c \
 	execution/exec_close_and_free.c

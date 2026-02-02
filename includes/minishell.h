@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/02 20:18:01 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/02 21:12:50 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -285,7 +285,10 @@ int								execute_exit(t_shell *minishell);
 int								execute_export(t_shell *minishell);
 int								execute_unset(t_shell *minishell);
 int								execute_env(t_shell *minishell);
-void							sort_envp_alpha(char **envp);
+
+// exec_builtin_commands_env_utils.c
+void							print_export(t_shell *minishell);
+void							sort_envp_alpha(char **envp); // export no args
 void							str_swap(char **s1, char **s2);
 
 // exec_external_commands.c
