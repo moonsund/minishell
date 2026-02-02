@@ -23,6 +23,8 @@ void	print_export(t_shell *minishell)
 	int		i;
 
 	envp_to_sort = build_envp(&minishell->env_vars);
+	if (!envp_to_sort)
+		return ;
 	sort_envp_alpha(envp_to_sort);
 	i = 0;
 	while (envp_to_sort[i])

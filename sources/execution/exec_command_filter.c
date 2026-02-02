@@ -126,6 +126,7 @@ int	execute_built_in_commands(t_shell *minishell, t_command *cmd)
 		exit_status = execute_env(minishell);
 	else if(ft_strcmp(cmd->argv[0], "exit") == 0)
 	{
+		free(current_working_directory);
 		exit_status = execute_exit(minishell, cmd);
 		exit(exit_status);
 	}

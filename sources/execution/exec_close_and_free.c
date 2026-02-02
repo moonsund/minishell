@@ -40,9 +40,9 @@ void	free_envp(t_env_var_list *list)
 {
 	int	i;
 
-	i = list->count;
 	if (!list)
 		return ;
+	i = list->count;
 	while (i > 0)
 	{
 		unset_var(list, list->head->name);

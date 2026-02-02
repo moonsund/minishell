@@ -33,11 +33,17 @@ int	execute_export(t_shell *minishell)
 		return (0);
 	}
 	env_var_data = ft_split(minishell->pipeline->cmds->argv[1], '=');
+	if (!env_var_data)
+	{
+		err_malloc_print("execute_export");
+		return (1);
+	}
 	key = env_var_data[0];
 	value = env_var_data[1];
 	i = 0;
 	if (!key || ft_isdigit(key[0]))
 	{
+		free_strings_array(env_var_data);
 		err_print(1, "not a valid identifier");
 		return (1);
 	}
@@ -47,6 +53,7 @@ int	execute_export(t_shell *minishell)
 		{
 			if (!ft_strchr(key, '_'))
 			{
+				free_strings_array(env_var_data);
 				err_print(1, "not a valid identifier");
 				return (1);
 			}
@@ -55,6 +62,7 @@ int	execute_export(t_shell *minishell)
 	}
 	if (!set_var(&minishell->env_vars, key, value))
 	{
+		free_strings_array(env_var_data);
 		err_print(1, "failed to create environment variable");
 		return (1);
 	}
@@ -76,6 +84,8 @@ int	execute_env(t_shell *minishell)
 	int		i;
 
 	env_to_print = build_envp(&minishell->env_vars);
+	if (!env_to_print)
+		return (1);
 	i = 0;
 	while (env_to_print[i])
 	{

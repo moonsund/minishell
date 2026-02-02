@@ -39,16 +39,21 @@ char	*fetch_and_check_bin_path(t_shell *minishell, char *cmd)
 
 	i = 0;
 	path_var_in_env = find_var(&minishell->env_vars, "PATH");
+	if (!path_var_in_env || !path_var_in_env->value)
+		return (NULL);
 	path_var_dirs = ft_split(path_var_in_env->value, ':');
+	if (!path_var_dirs)
+		return (NULL);
 	while (path_var_dirs[i])
 	{
 		path_to_check = build_path_to_check(path_var_dirs[i], '/', cmd);
-		if (access(path_to_check, X_OK) == 0)
+		if (path_to_check && access(path_to_check, X_OK) == 0)
 		{
 			free_strings_array(path_var_dirs);
 			return (path_to_check);
 		}
-		free(path_to_check);
+		if (path_to_check)
+			free(path_to_check);
 		i++;
 	}
 	// Bin command not found = error message dealt with later - Nothing to do here (TBC)
@@ -61,27 +66,49 @@ int		execute_external_commands(t_shell *minishell, t_command *cmd)
 	char	**converted_envp;
 	char	**execve_args;
 	char	*updated_path;
+	bool	path_allocated;
 
 	converted_envp = build_envp(&minishell->env_vars);
+	if (!converted_envp)
+		return (1);
+	path_allocated = false;
 	if (cmd->argv)
 	{
 		execve_args = cmd->argv;
 		if (ft_strchr(cmd->argv[0], '/'))				// Command is already entered as binary
 		{
 			if (access(cmd->argv[0], X_OK) == 0)		// Success = Command is executable
+			{
 				updated_path = cmd->argv[0];
+				path_allocated = false;
+			}
 			else
 			{
 				perror("error");
+				free_strings_array(converted_envp);
 				return (1);
 			}
 		}
 		else
+		{
 			updated_path = fetch_and_check_bin_path(minishell, execve_args[0]);
+			if (!updated_path)
+			{
+				free_strings_array(converted_envp);
+				return (1);
+			}
+			path_allocated = true;
+		}
+	}
+	else
+	{
+		free_strings_array(converted_envp);
+		return (1);
 	}
 	execve(updated_path, execve_args, converted_envp);
 	// if execve fails :
-	free_envp (&minishell->env_vars);
+	if (path_allocated)
+		free(updated_path);
 	free_strings_array(converted_envp);
 	return (0);
 }
