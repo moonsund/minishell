@@ -5,7 +5,7 @@ int	is_builtin(const char *cmd);
 int	is_parent_builtin(const char *cmd);
 int	run_builtin_without_output_in_parent(t_shell *shell, t_command *cmd);
 int	run_any_builtin_in_child(t_shell *shell, t_command *cmd);
-int	execute_built_in_commands(t_shell *minishell);
+int	execute_built_in_commands(t_shell *minishell, t_command *cmd);
 
 int is_builtin(const char *cmd)
 {
@@ -78,35 +78,35 @@ int run_any_builtin_in_child(t_shell *shell, t_command *cmd)
 		if (shell->pipeline->count > 1)	// Builtin without output : cd / export / unset BUT with pipes involved : 'cd | ls' : command ignored, jump to next
 			return (0);
 		else							// One command only = Normal expected exec
-			return (execute_built_in_commands(shell));
+			return (execute_built_in_commands(shell, cmd));
 	}
 	else										// Builtin with output : process to execution (after FD update TBC ? - if applicable)
 	{
-		return (execute_built_in_commands(shell));		// Only builtins w/ ouputs, because the other ones have been filtered out at the start of this function
+		return (execute_built_in_commands(shell, cmd));        // Only builtins w/ ouputs, because the other ones have been filtered out at the start of this function
 	}
 }
 
 // We're in a child process.
 // If there are pipes, commands without output have been ignored, the others will execute normally with the correct FDs (if applicable)
-int	execute_built_in_commands(t_shell *minishell)
+int	execute_built_in_commands(t_shell *minishell, t_command *cmd)
 {
 	int		exit_status;
 	char	*current_working_directory;
 
 	current_working_directory = fetch_current_working_directory();
-	if(ft_strcmp(minishell->pipeline->cmds->argv[0], "echo") == 0)
-		exit_status = execute_echo(minishell->pipeline->cmds);
-	else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "cd") == 0)
-		exit_status = execute_cd(minishell->pipeline->cmds);
-	else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "pwd") == 0)
+	if(ft_strcmp(cmd->argv[0], "echo") == 0)
+		exit_status = execute_echo(cmd);
+	else if(ft_strcmp(cmd->argv[0], "cd") == 0)
+		exit_status = execute_cd(cmd);
+	else if(ft_strcmp(cmd->argv[0], "pwd") == 0)
 		exit_status = execute_pwd(current_working_directory);
-	else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "export") == 0)
+	else if(ft_strcmp(cmd->argv[0], "export") == 0)
 		exit_status = execute_export(minishell);
-	else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "unset") == 0)
+	else if(ft_strcmp(cmd->argv[0], "unset") == 0)
 		exit_status = execute_unset(minishell);
-	else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "env") == 0)
+	else if(ft_strcmp(cmd->argv[0], "env") == 0)
 		exit_status = execute_env(minishell);
-	else if(ft_strcmp(minishell->pipeline->cmds->argv[0], "exit") == 0)
+	else if(ft_strcmp(cmd->argv[0], "exit") == 0)
 		exit_status = execute_exit(minishell);
 	free(current_working_directory);
 	return (exit_status);

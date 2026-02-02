@@ -64,6 +64,11 @@ bool	is_line_return(char **cmd, int *i)
 // Subject : "cd with only a relative or absolute path"
 int	execute_cd(t_command *cmds)
 {
+	if (cmds->argv[2])
+	{
+		err_print(1, "too many arguments");
+		return (1);
+	}
 	if (cmds->argv[1])
 	{
 		if(chdir(cmds->argv[1]) == -1)
@@ -85,6 +90,7 @@ int	execute_pwd(char *current_working_directory)
 // Subject : "exit with no options"
 int	execute_exit(t_shell *minishell)
 {
+	printf("exit\n");
 	shell_destroy(minishell);
 	exit (minishell->exit_status);
 }

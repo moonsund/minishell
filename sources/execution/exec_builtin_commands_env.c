@@ -42,7 +42,7 @@ int	execute_export(t_shell *minishell)
 	i = 0;
 	if(!key || ft_isdigit(key[0]))
 	{
-		err_print(1, "missing/invalid identifier");
+		err_print(1, "not a valid identifier");
 		return (1);
 	}
 	while (key[i])
@@ -51,7 +51,7 @@ int	execute_export(t_shell *minishell)
 		{
 			if (!ft_strchr(key, '_'))
 			{
-				err_print(1, "invalid identifier");
+				err_print(1, "not a valid identifier");
 				return (1);
 			}
 		}
@@ -69,11 +69,7 @@ int	execute_export(t_shell *minishell)
 // Subject : "unset with no options"
 int	execute_unset(t_shell *minishell)
 {
-	if (!unset_var(&minishell->env_vars, minishell->pipeline->cmds->argv[1]))
-	{
-		err_print(1, "failed to unset environment variable");
-		return (1);
-	}
+	unset_var(&minishell->env_vars, minishell->pipeline->cmds->argv[1]);
 	return (0);
 }
 // Subject : "env with no options or arguments"

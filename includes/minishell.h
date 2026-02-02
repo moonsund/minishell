@@ -264,7 +264,7 @@ int	is_builtin(const char *cmd);
 int	is_parent_builtin(const char *cmd);
 int	run_builtin_without_output_in_parent(t_shell *shell, t_command *cmd);
 int	run_any_builtin_in_child(t_shell *shell, t_command *cmd);
-int	execute_built_in_commands(t_shell *minishell);
+int	execute_built_in_commands(t_shell *minishell, t_command *cmd);
 
 // exec_builtin_commands.c
 char	*fetch_current_working_directory(void);

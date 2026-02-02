@@ -5,7 +5,7 @@ static int init_env_var_list(t_env_var_list *list, char **envp);
 
 int init_shell(t_shell *shell, char **envp)
 {
-    shell->exit_status = 1;
+    shell->exit_status = 0;
 	shell->pipeline = NULL;
     shell->tokens.count = 0;
     shell->tokens.head = NULL;

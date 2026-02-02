@@ -6,12 +6,13 @@ static void print_pipeline(t_pipeline *pipeline);
 
 int main(int argc, char **argv, char **envp)
 {
-	char *line;
+	char	*line;
 	t_shell	shell;
+	int		exit_status;
 
 	(void)argc;
 	(void)argv;
-
+	exit_status = 0;
 	if (!init_shell(&shell, envp))
 	{
 		err_print(ES_GENERAL, "init_shell");
@@ -47,34 +48,36 @@ int main(int argc, char **argv, char **envp)
 		}
 		add_history(line);
 
-
-		shell.exit_status = tokenize_with_qmap(line, &shell.tokens);
-		if (shell.exit_status != ES_SUCCESS)
+		exit_status = tokenize_with_qmap(line, &shell.tokens);
+		if (exit_status != ES_SUCCESS)
 		{
 			free(line);
 			reset_iteration(&shell);
+			shell.exit_status = exit_status;
 			continue;
 		}
 		// printf("\n[tokens_list_debug]:\n");	// for debugging, to be deleted
 		// print_token_list(&shell.tokens);	// for debugging, to be deleted
 
 
-		shell.exit_status = expand_tokens(&shell.tokens, &shell.env_vars, shell.exit_status);
-		if (shell.exit_status != ES_SUCCESS)
+		exit_status = expand_tokens(&shell.tokens, &shell.env_vars, shell.exit_status);
+		if (exit_status != ES_SUCCESS)
 		{
 			free(line);
 			reset_iteration(&shell);
+			shell.exit_status = exit_status;
 			continue;
 		}
 //		printf("\n[expanded_tokens_list_debug]:\n"); // for debugging, to be deleted
 //		print_token_list(&shell.tokens);	// for debugging, to be deleted
 
 
-		shell.exit_status = build_pipeline_from_tokens(&shell);
-		if (shell.exit_status != ES_SUCCESS)
+		exit_status = build_pipeline_from_tokens(&shell);
+		if (exit_status != ES_SUCCESS)
 		{
 			free(line);
 			reset_iteration(&shell);
+			shell.exit_status = exit_status;
 			continue;
 		}
 		// printf("\n[pipelines_debug]:\n");	// for debugging, to be deleted
