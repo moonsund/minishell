@@ -6,7 +6,7 @@
 /*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/02 23:13:41 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/02 23:23:27 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define MINISHELL_H
 
 # include "libft.h"
+# include <stdio.h>     // perror
 # include <dirent.h> // opendir
 # include <errno.h>  // errno
 # include <fcntl.h>  // open
@@ -22,7 +23,6 @@
 # include <readline/readline.h>
 # include <signal.h>
 # include <stdbool.h>
-# include <stdio.h>     // perror
 # include <stdlib.h>    // EXIT_FAILURE, EXIT_SUCCESS
 # include <sys/stat.h>  // open
 # include <sys/time.h>  // time
