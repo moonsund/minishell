@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   exec_begins.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/02/02 20:19:31 by lorlov            #+#    #+#             */
+/*   Updated: 2026/02/02 20:20:13 by schappuy         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
 int			execute_pipeline(t_shell *shell);
@@ -15,8 +27,6 @@ grep ok << end
 pwd > outfile
 ls >> outfile
 export FRUIT=apple > new_outile
-> outfile		(this command invites user to write lines, then puts them in the outfile, heredoc-style)
->> outfile		(this command invites user to write lines, then adds them to the outfile, heredoc-style)
 cat w y z > new
 
 Pipes - Test commands :
@@ -29,32 +39,28 @@ echo London | cat -e > y
 
 */
 
-int execute_pipeline(t_shell *shell)
+int	execute_pipeline(t_shell *shell)
 {
-	t_pipeline *pl;
+	t_pipeline	*pl;
 	t_command	*cmd;
 
 	pl = shell->pipeline;
-
 	if (pl->count == 0 || !pl->cmds)
 		return (ES_GENERAL);
-
 	cmd = &pl->cmds[0];
-
 	// cd/export/unset/exit with and w/o redirections = all commands that don't print anything but modify the shell
-	if (pl->count == 1 && cmd->argv && cmd->argv[0] && is_parent_builtin(cmd->argv[0]))
+	if (pl->count == 1 && cmd->argv && cmd->argv[0]
+		&& is_parent_builtin(cmd->argv[0]))
 		return (run_builtin_without_output_in_parent(shell, cmd));
-
 	// Command line starting with a redirection, but no pipe, no cmd and no other redirection, e.g. '> outfile'
-	if((shell->pipeline->count == 1) && (!shell->pipeline->cmds->argv) &&
-		shell->pipeline->cmds->redirs &&
-			(shell->pipeline->cmds->redirs->type == R_OUT ||
-				shell->pipeline->cmds->redirs->type == R_APPEND))
+	if ((shell->pipeline->count == 1) && (!shell->pipeline->cmds->argv)
+		&& shell->pipeline->cmds->redirs
+		&& (shell->pipeline->cmds->redirs->type == R_OUT
+			|| shell->pipeline->cmds->redirs->type == R_APPEND))
 	{
 		open_and_close_fd(cmd);
 		return (0);
 	}
-
 	// only redirections, builtins and external commands both with and w/o redirections
 	return (exec_pipeline_forking(shell, pl));
 }
@@ -71,17 +77,15 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 
 	if (!pl || pl->count == 0)
 		return (0);
-
 	pids = (pid_t *)malloc(sizeof(pid_t) * pl->count);
 	if (!pids)
 		return (1);
-
 	i = 0;
 	prev_read = -1;
-	while (pl->count > i)  // true while we have commands for the execution
+	while (pl->count > i) // true while we have commands for the execution
 	{
-		pipefds[0] = -1; // read end
-		pipefds[1] = -1;	// write end
+		pipefds[0] = -1;       // read end
+		pipefds[1] = -1;       // write end
 		if (i + 1 < pl->count) // checks if we need a pipe for the current command
 		{
 			if (pipe(pipefds) < 0)
@@ -91,7 +95,6 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 				return (1);
 			}
 		}
-
 		pid = fork();
 		if (pid < 0)
 		{
@@ -102,7 +105,7 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 			free(pids);
 			return (1);
 		}
-// TESTING : echo z > w | echo ok
+		// TESTING : echo z > w | echo ok
 		if (pid == 0) // child
 		{
 			if (prev_read != -1) // if not the 1st pipe
@@ -122,36 +125,31 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 					exit(1);
 				}
 			}
-
 			close_if_valid(prev_read);
 			close_if_valid(pipefds[0]);
 			close_if_valid(pipefds[1]);
-
 			// apply redirs
 			apply_redirs_or_die(&pl->cmds[i]);
-
 			// command line with only redirections, e.g. "< in > out"
 			if (!pl->cmds[i].argv || !pl->cmds[i].argv[0])
 				exit(0);
-
 			// in-pipes redirections without command 'ls | > y' - Nothing to do
 			// if ((!pl->cmds[i].argv) && (pl->cmds[i].redirs))
 			// 	exit (0);
-
 			if (is_builtin(pl->cmds[i].argv[0]))
 			{
 				last_status = run_any_builtin_in_child(shell, &pl->cmds[i]);
-				exit (last_status);
+				exit(last_status);
 			}
 			else
 			{
 				if (!execute_external_commands(shell, &pl->cmds[i]))
 				{
 					perror("execve");
-					if (errno == ENOENT)     // No such file or directory
-						exit (127);
+					if (errno == ENOENT) // No such file or directory
+						exit(127);
 					else
-						exit (126);  // EACCES, EISDIR, ENOEXEC, etc.
+						exit(126); // EACCES, EISDIR, ENOEXEC, etc.
 				}
 			}
 			// NB: the child MUST ALWAYS terminate with exit(status)
@@ -161,11 +159,11 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 		close_if_valid(prev_read);
 		close_if_valid(pipefds[1]);
 		prev_read = pipefds[0];
-
 		i++;
 	}
 	/*
-	exit status of the WHOLE pipeline = exit status of the LAST command in the pipeline: ls | grep x | wc -l
+	exit status of the WHOLE pipeline = exit status of the LAST command in the pipeline: ls | grep x | wc
+		-l
 	When we fork a pipeline:
 		we know the pid of each segment
 		we know the pid of the last command

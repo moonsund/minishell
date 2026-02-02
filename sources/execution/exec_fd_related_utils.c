@@ -1,10 +1,21 @@
-#include "minishell.h"
-#include "libft.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   exec_fd_related_utils.c                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/02/02 20:18:36 by schappuy          #+#    #+#             */
+/*   Updated: 2026/02/02 20:18:37 by schappuy         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-char		*build_path(char *file_name);
-int			open_fd(char *file_name, bool append, bool truncate);
-// void		fd_update_if_redirections(t_command *all_commands, int *fd_in, int *fd_out);
-void		open_and_close_fd(t_command *cmd);
+#include "libft.h"
+#include "minishell.h"
+
+char	*build_path(char *file_name);
+int		open_fd(char *file_name, bool append, bool truncate);
+void	open_and_close_fd(t_command *cmd);
 
 char	*build_path(char *file_name)
 {
@@ -20,13 +31,13 @@ char	*build_path(char *file_name)
 	return (file_path);
 }
 
+// Flag 0644 = permissions
 int	open_fd(char *file_name, bool append, bool truncate)
 {
 	int		fd;
 	char	*file_path;
 
 	file_path = build_path(file_name);
-	// HYPER IMPORTANT - Tout se joue dans les flags - 0644 = permissions
 	if (append)
 	{
 		fd = open(file_path, O_CREAT | O_APPEND | O_RDWR, 0644);
@@ -47,17 +58,6 @@ int	open_fd(char *file_name, bool append, bool truncate)
 	return (fd);
 }
 
-// void	fd_update_if_redirections(t_command *all_commands, int *fd_in, int *fd_out)
-// {
-// 	// R_IN / R_OUT / R_APPEND / R_HEREDOC
-// 	if (all_commands->redirs->type == R_IN)
-// 		fd_in[0] = open_fd(all_commands->redirs->target, false, false);
-// 	else if (all_commands->redirs->type == R_OUT)
-// 		fd_out[0] = open_fd(all_commands->redirs->target, false, true);
-// 	else if (all_commands->redirs->type == R_APPEND)
-// 		fd_out[0] = open_fd(all_commands->redirs->target, true, false);
-// }
-
 void	open_and_close_fd(t_command *cmd)
 {
 	int		fd;
@@ -70,16 +70,4 @@ void	open_and_close_fd(t_command *cmd)
 	else
 		return ;
 	close(fd);
-
-	// while (true)					// Not required - Could create issues if kept ?
-	// {
-	// 	line = readline(NULL);
-	// 	if (g_sigint) // ctrl+c - Not functional yet
-	// 	{
-	// 		close(fd);
-	// 		return ;
-	// 	}
-	// 	write_line_in_fd(fd, line);
-	// 	free(line);
-	// }
 }

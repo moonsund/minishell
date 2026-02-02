@@ -1,5 +1,17 @@
-#include "minishell.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   exec_close_and_free.c                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/02/02 20:19:00 by schappuy          #+#    #+#             */
+/*   Updated: 2026/02/02 20:21:57 by schappuy         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "libft.h"
+#include "minishell.h"
 
 void	close_and_set_to_neg(int *fd);
 void	close_if_valid(int fd);
@@ -29,9 +41,8 @@ void	free_envp(t_env_var_list *list)
 	int	i;
 
 	i = list->count;
-	if(!list)
-		return;
-
+	if (!list)
+		return ;
 	while (i > 0)
 	{
 		unset_var(list, list->head->name);
@@ -44,8 +55,8 @@ void	free_strings_array(char **array)
 	int	i;
 
 	i = 0;
-	if(!array)
-		return;
+	if (!array)
+		return ;
 	while (array[i])
 	{
 		free(array[i]);
