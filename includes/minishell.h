@@ -289,8 +289,8 @@ int		execute_external_commands(t_shell *minishell, t_command *cmd);
 // exec_utils_fd.c
 char	*build_path(char *file_name);
 int		open_fd(char *file_name, bool append, bool truncate);
-void	fd_update_if_redirections(t_command *all_commands, int *fd_in, int *fd_out);
-void	add_user_input_to_fd(t_shell *minishell);
+// void	fd_update_if_redirections(t_command *all_commands, int *fd_in, int *fd_out);
+void	open_and_close_fd(t_command *cmd);
 
 // exec_close_and_free.c
 void	close_and_set_to_neg(int *fd);

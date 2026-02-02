@@ -9,7 +9,7 @@ static int	wait_all_and_get_last(pid_t *pids, size_t count);
 /*
 Auto check Valgrind VSCode : Ctrl Shift p > run task > Valgrind
 Redirections - Test commands :
-wc -l < infile
+wc -l < infile_that_doesn't exist
 sort < infile
 grep ok << end
 pwd > outfile
@@ -51,7 +51,7 @@ int execute_pipeline(t_shell *shell)
 			(shell->pipeline->cmds->redirs->type == R_OUT ||
 				shell->pipeline->cmds->redirs->type == R_APPEND))
 	{
-		add_user_input_to_fd(shell);
+		open_and_close_fd(cmd);
 		return (0);
 	}
 

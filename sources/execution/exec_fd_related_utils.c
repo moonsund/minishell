@@ -3,8 +3,8 @@
 
 char		*build_path(char *file_name);
 int			open_fd(char *file_name, bool append, bool truncate);
-void		fd_update_if_redirections(t_command *all_commands, int *fd_in, int *fd_out);
-void		add_user_input_to_fd(t_shell *minishell);
+// void		fd_update_if_redirections(t_command *all_commands, int *fd_in, int *fd_out);
+void		open_and_close_fd(t_command *cmd);
 
 char	*build_path(char *file_name)
 {
@@ -47,38 +47,39 @@ int	open_fd(char *file_name, bool append, bool truncate)
 	return (fd);
 }
 
-void	fd_update_if_redirections(t_command *all_commands, int *fd_in, int *fd_out)
-{
-	// R_IN / R_OUT / R_APPEND / R_HEREDOC
-	if (all_commands->redirs->type == R_IN)
-		fd_in[0] = open_fd(all_commands->redirs->target, false, false);
-	else if (all_commands->redirs->type == R_OUT)
-		fd_out[0] = open_fd(all_commands->redirs->target, false, true);
-	else if (all_commands->redirs->type == R_APPEND)
-		fd_out[0] = open_fd(all_commands->redirs->target, true, false);
-}
+// void	fd_update_if_redirections(t_command *all_commands, int *fd_in, int *fd_out)
+// {
+// 	// R_IN / R_OUT / R_APPEND / R_HEREDOC
+// 	if (all_commands->redirs->type == R_IN)
+// 		fd_in[0] = open_fd(all_commands->redirs->target, false, false);
+// 	else if (all_commands->redirs->type == R_OUT)
+// 		fd_out[0] = open_fd(all_commands->redirs->target, false, true);
+// 	else if (all_commands->redirs->type == R_APPEND)
+// 		fd_out[0] = open_fd(all_commands->redirs->target, true, false);
+// }
 
-void	add_user_input_to_fd(t_shell *minishell)
+void	open_and_close_fd(t_command *cmd)
 {
 	int		fd;
 	char	*line;
 
-	if (minishell->pipeline->cmds->redirs->type == R_OUT)						// Bash : Erase content if file exists / Create file if doesn't exist
-		fd = open_fd(minishell->pipeline->cmds->redirs->target, false, true);
-	else if (minishell->pipeline->cmds->redirs->type == R_APPEND)
-		fd = open_fd(minishell->pipeline->cmds->redirs->target, true, false);
+	if (cmd->redirs->type == R_OUT)
+		fd = open_fd(cmd->redirs->target, false, true);
+	else if (cmd->redirs->type == R_APPEND)
+		fd = open_fd(cmd->redirs->target, true, false);
 	else
 		return ;
+	close(fd);
 
-	while (true)
-	{
-		line = readline(NULL);
-		if (g_sigint) // ctrl+c - Not functional yet
-		{
-			close(fd);
-			return ;
-		}
-		write_line_in_fd(fd, line);
-		free(line);
-	}
+	// while (true)					// Not required - Could create issues if kept ?
+	// {
+	// 	line = readline(NULL);
+	// 	if (g_sigint) // ctrl+c - Not functional yet
+	// 	{
+	// 		close(fd);
+	// 		return ;
+	// 	}
+	// 	write_line_in_fd(fd, line);
+	// 	free(line);
+	// }
 }
