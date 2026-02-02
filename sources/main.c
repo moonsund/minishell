@@ -102,12 +102,14 @@ int main(int argc, char **argv, char **envp)
 		}
 
 		shell.exit_status = execute_pipeline(&shell);
+		if (shell.should_terminate)
+			break;
 		free(line);
 		reset_iteration(&shell);
 		continue;
 
-		shell.pipeline = NULL; // to be deleted
-		free_tokens(&shell.tokens); // to be deleted
+		// shell.pipeline = NULL; // to be deleted
+		// free_tokens(&shell.tokens); // to be deleted
 
 		// debug_print_heredoc_files(shell.pipeline); // for debugging, to be deleted
 	}
@@ -120,7 +122,7 @@ int main(int argc, char **argv, char **envp)
 	// }
 
 	shell_destroy(&shell);
-	return (EXIT_SUCCESS);
+	return (shell.exit_status);
 }
 
 static void print_token_list(t_token_list *tokens) // for debugging, to be deleted

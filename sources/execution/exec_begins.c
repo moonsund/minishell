@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec_begins.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:31 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/02 20:43:56 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/02 23:16:27 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,9 +49,9 @@ int	execute_pipeline(t_shell *shell)
 		return (ES_GENERAL);
 	cmd = &pl->cmds[0];
 	// cd/export/unset/exit with and w/o redirections = all commands that don't print anything but modify the shell
-	if (pl->count == 1 && cmd->argv && cmd->argv[0]
-		&& is_parent_builtin(cmd->argv[0]))
-		return (run_builtin_without_output_in_parent(shell, cmd));
+	if (pl->count == 1 && cmd->argv && cmd->argv[0] && is_parent_builtin(cmd->argv[0]))
+		return (exec_builtin_in_parent(shell, cmd));
+
 	// Command line starting with a redirection, but no pipe, no cmd and no other redirection, e.g. '> outfile'
 	if ((shell->pipeline->count == 1) && (!shell->pipeline->cmds->argv)
 		&& shell->pipeline->cmds->redirs
@@ -224,14 +224,17 @@ static int	wait_all_and_get_last(pid_t *pids, size_t count)
 	size_t	i;
 	int		status;
 	int		last_status;
+	pid_t	last_pid;
+
+	last_status = 0;
+	last_pid = pids[count - 1];
 
 	i = 0;
-	last_status = 0;
 	while (i < count)
 	{
 		if (waitpid(pids[i], &status, 0) > 0)
 		{
-			if (i + 1 == count)
+			if (pids[i] == last_pid)
 			{
 				if (WIFEXITED(status))
 					last_status = WEXITSTATUS(status);

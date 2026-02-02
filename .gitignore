@@ -3,6 +3,7 @@ minishell
 
 # Ignore testing files
 /testing/
+minishell_tester/
 
 # Ignore libft library
 /libft/
