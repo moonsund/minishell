@@ -3,7 +3,7 @@
 
 int	is_builtin(const char *cmd);
 int	is_parent_builtin(const char *cmd);
-int	run_builtin_without_output_in_parent(t_shell *shell, t_command *cmd);
+int	exec_builtin_in_parent(t_shell *shell, t_command *cmd);
 int	run_any_builtin_in_child(t_shell *shell, t_command *cmd);
 int	execute_built_in_commands(t_shell *minishell, t_command *cmd);
 
@@ -42,7 +42,7 @@ int is_parent_builtin(const char *cmd)
 // execute the builtin
 // restore stdin/stdout (dup2 back)					-- No need anymore, as nothing is happening in the fd
 // close backup fds									-- No need anymore, I only need to close the new fd
-int run_builtin_without_output_in_parent(t_shell *shell, t_command *cmd)
+int exec_builtin_in_parent(t_shell *shell, t_command *cmd)
 {
 	int	exit_status;
 	int	new_fd;
@@ -67,7 +67,10 @@ int run_builtin_without_output_in_parent(t_shell *shell, t_command *cmd)
 	else if(ft_strcmp(cmd->argv[0], "unset") == 0)
 		exit_status = execute_unset(shell);
 	else if(ft_strcmp(cmd->argv[0], "exit") == 0)
-		exit_status = execute_exit(shell);
+	{
+		printf("exit\n");
+		exit_status = execute_exit(shell, cmd);
+	}
 	return (exit_status);
 }
 
@@ -75,6 +78,9 @@ int run_any_builtin_in_child(t_shell *shell, t_command *cmd)
 {
 	if (is_parent_builtin(cmd->argv[0]))
 	{
+		// exit should always execute, even in pipeline
+		if (ft_strcmp(cmd->argv[0], "exit") == 0)
+			return (execute_built_in_commands(shell, cmd));
 		if (shell->pipeline->count > 1)	// Builtin without output : cd / export / unset BUT with pipes involved : 'cd | ls' : command ignored, jump to next
 			return (0);
 		else							// One command only = Normal expected exec
@@ -107,7 +113,10 @@ int	execute_built_in_commands(t_shell *minishell, t_command *cmd)
 	else if(ft_strcmp(cmd->argv[0], "env") == 0)
 		exit_status = execute_env(minishell);
 	else if(ft_strcmp(cmd->argv[0], "exit") == 0)
-		exit_status = execute_exit(minishell);
+	{
+		exit_status = execute_exit(minishell, cmd);
+		exit(exit_status);
+	}
 	free(current_working_directory);
 	return (exit_status);
 }

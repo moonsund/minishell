@@ -161,6 +161,7 @@ typedef struct s_parser_context
 typedef struct s_shell
 {
 	int				exit_status;
+	int should_terminate;
 	t_env_var_list	env_vars;				// envp vars saved in linked list
 	t_token_list	tokens;
 	t_pipeline		*pipeline;				// Only base to consider for exec
@@ -262,6 +263,7 @@ static int	wait_all_and_get_last(pid_t *pids, size_t count);
 // exec_command_filter.c
 int	is_builtin(const char *cmd);
 int	is_parent_builtin(const char *cmd);
+int	exec_builtin_in_parent(t_shell *shell, t_command *cmd);
 int	run_builtin_without_output_in_parent(t_shell *shell, t_command *cmd);
 int	run_any_builtin_in_child(t_shell *shell, t_command *cmd);
 int	execute_built_in_commands(t_shell *minishell, t_command *cmd);
@@ -272,7 +274,7 @@ int	execute_echo(t_command *cmds);
 bool	is_line_return(char **cmd, int *i);
 int	execute_cd(t_command *cmds);
 int	execute_pwd(char *current_working_directory);
-int	execute_exit(t_shell *minishell);
+int	execute_exit(t_shell *shell, t_command *cmd);
 
 // exec_builtin_commands_env.c
 int	execute_export(t_shell *minishell);
@@ -287,10 +289,8 @@ char	*fetch_and_check_bin_path(t_shell *minishell, char *cmd);
 int		execute_external_commands(t_shell *minishell, t_command *cmd);
 
 // exec_utils_fd.c
-char	*build_path(char *file_name);
-int		open_fd(char *file_name, bool append, bool truncate);
-// void	fd_update_if_redirections(t_command *all_commands, int *fd_in, int *fd_out);
-void	open_and_close_fd(t_command *cmd);
+int	open_fd(const char *path, bool append, bool truncate);
+void		open_and_close_fd(t_command *cmd);
 
 // exec_close_and_free.c
 void	close_and_set_to_neg(int *fd);

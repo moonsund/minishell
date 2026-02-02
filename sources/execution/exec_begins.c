@@ -43,7 +43,7 @@ int execute_pipeline(t_shell *shell)
 
 	// cd/export/unset/exit with and w/o redirections = all commands that don't print anything but modify the shell
 	if (pl->count == 1 && cmd->argv && cmd->argv[0] && is_parent_builtin(cmd->argv[0]))
-		return (run_builtin_without_output_in_parent(shell, cmd));
+		return (exec_builtin_in_parent(shell, cmd));
 
 	// Command line starting with a redirection, but no pipe, no cmd and no other redirection, e.g. '> outfile'
 	if((shell->pipeline->count == 1) && (!shell->pipeline->cmds->argv) &&
@@ -227,14 +227,17 @@ static int	wait_all_and_get_last(pid_t *pids, size_t count)
 	size_t	i;
 	int		status;
 	int		last_status;
+	pid_t	last_pid;
+
+	last_status = 0;
+	last_pid = pids[count - 1];
 
 	i = 0;
-	last_status = 0;
 	while (i < count)
 	{
 		if (waitpid(pids[i], &status, 0) > 0)
 		{
-			if (i + 1 == count)
+			if (pids[i] == last_pid)
 			{
 				if (WIFEXITED(status))
 					last_status = WEXITSTATUS(status);
