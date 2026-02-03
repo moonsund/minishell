@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:31 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/03 18:25:37 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/03 22:52:01 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,6 @@ int	execute_pipeline(t_shell *shell)
 	// cd/export/unset/exit with and w/o redirections = all commands that don't print anything but modify the shell
 	if (pl->count == 1 && cmd->argv && cmd->argv[0] && is_parent_builtin(cmd->argv[0]))
 		return (exec_builtin_in_parent(shell, cmd));
-
 	// Command line starting with a redirection, but no pipe, no cmd and no other redirection, e.g. '> outfile'
 	if ((shell->pipeline->count == 1) && (!shell->pipeline->cmds->argv)
 		&& shell->pipeline->cmds->redirs
@@ -61,7 +60,6 @@ int	execute_pipeline(t_shell *shell)
 		open_and_close_fd(cmd);
 		return (0);
 	}
-	// only redirections, builtins and external commands both with and w/o redirections
 	return (exec_pipeline_forking(shell, pl));
 }
 
@@ -82,11 +80,11 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 		return (1);
 	i = 0;
 	prev_read = -1;
-	while (pl->count > i) // true while we have commands for the execution
+	while (pl->count > i)
 	{
-		pipefds[0] = -1;       // read end
-		pipefds[1] = -1;       // write end
-		if (i + 1 < pl->count) // checks if we need a pipe for the current command
+		pipefds[0] = -1;
+		pipefds[1] = -1;
+		if (i + 1 < pl->count)	// checks if we need a pipe for the current command
 		{
 			if (pipe(pipefds) < 0)
 			{
@@ -105,19 +103,17 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 			free(pids);
 			return (1);
 		}
-		// TESTING : echo z > w | echo ok
-		if (pid == 0) // child
+		if (pid == 0)
 		{
 			if (prev_read != -1) // if not the 1st pipe
 			{
-				if (dup2(prev_read, STDIN_FILENO) < 0) // dup2(old, new)
+				if (dup2(prev_read, STDIN_FILENO) < 0)
 				{
 					perror("dup2 stdin");
 					exit(1);
 				}
 			}
-			// if not the last command
-			if (pipefds[1] != -1)
+			if (pipefds[1] != -1) // if not the last command
 			{
 				if (dup2(pipefds[1], STDOUT_FILENO) < 0)
 				{
@@ -128,14 +124,9 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 			close_if_valid(prev_read);
 			close_if_valid(pipefds[0]);
 			close_if_valid(pipefds[1]);
-			// apply redirs
 			apply_redirs_or_die(&pl->cmds[i]);
-			// command line with only redirections, e.g. "< in > out"
 			if (!pl->cmds[i].argv || !pl->cmds[i].argv[0])
 				exit(0);
-			// in-pipes redirections without command 'ls | > y' - Nothing to do
-			// if ((!pl->cmds[i].argv) && (pl->cmds[i].redirs))
-			// 	exit (0);
 			if (is_builtin(pl->cmds[i].argv[0]))
 			{
 				last_status = run_any_builtin_in_child(shell, &pl->cmds[i]);
@@ -143,36 +134,21 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 			}
 			else
 			{
-				// if (!execute_external_commands(shell, &pl->cmds[i]))			// Old version - Not functional
 				if (execute_external_commands(shell, &pl->cmds[i]) > 0)
 				{
-					// perror("command not found");								// Problematic (error message handled in execute_external_commands)
 					if (errno == ENOENT) // No such file or directory
 						exit(127);
 					else
 						exit(126); // EACCES, EISDIR, ENOEXEC, etc.
 				}
 			}
-			// NB: the child MUST ALWAYS terminate with exit(status)
 		}
-		// parent
 		pids[i] = pid;
 		close_if_valid(prev_read);
 		close_if_valid(pipefds[1]);
 		prev_read = pipefds[0];
 		i++;
 	}
-	/*
-	exit status of the WHOLE pipeline = exit status of the LAST command in the pipeline: ls | grep x | wc -l
-	When we fork a pipeline:
-		we know the pid of each segment
-		we know the pid of the last command
-		we wait for ALL pids
-		but we take the exit status only from last_pid
-	Hence, the parent:
-		- waits for all
-		- returns the status of the last command in the pipeline
-	*/
 	close_if_valid(prev_read);
 	last_status = wait_all_and_get_last(pids, pl->count);
 	free(pids);
