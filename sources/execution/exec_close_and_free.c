@@ -6,27 +6,16 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:00 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/02 20:21:57 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/03 20:33:15 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 #include "minishell.h"
 
-void	close_and_set_to_neg(int *fd);
 void	close_if_valid(int fd);
 void	free_envp(t_env_var_list *list);
 void	free_strings_array(char **array);
-
-// Not used anymore - Replaced by the one below
-void	close_and_set_to_neg(int *fd)
-{
-	if (*fd && *fd != -1)
-	{
-		close(*fd);
-		*fd = -1;
-	}
-}
 
 // Ok to pass the fd rather than a pointer to it ? TBC
 // Would it be smart to set to -1  after closing ? TBD
