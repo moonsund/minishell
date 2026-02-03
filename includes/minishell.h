@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/03 17:54:59 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/03 18:27:28 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -240,13 +240,7 @@ void							init_buffer(t_buf *buf);
 
 // heredoc
 int								process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, t_exit_status exit_status);
-char							*generate_heredoc_filename(size_t heredoc_index);
-int								expand_heredoc(char **line, t_env_var_list *env_vars, t_exit_status exit_status);
 int								write_line_in_fd(int fd, char *line);
-int								append_charter(char **line, char c);
-int								append_string(char **line, const char *str);
-void							redir_replace_with_infile(t_redir *r, char *filename);
-int								get_heredoc(t_redir *redir, t_env_var_list *env_vars, t_exit_status exit_status, size_t *heredoc_index);
 
 // utils.c
 void							reset_iteration(t_shell *shell);
@@ -263,9 +257,6 @@ void							setup_signals(void);
 // execution.c
 int								execute_pipeline(t_shell *shell);
 int								exec_pipeline_forking(t_shell *shell, const t_pipeline *pl);
-void							apply_redirs_or_die(const t_command *cmd);
-int								open_redir_file(const t_redir *redir);
-int								wait_all_and_get_last(pid_t *pids, size_t count);
 
 // exec_command_filter.c
 int								is_builtin(const char *cmd);
