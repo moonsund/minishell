@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec_builtin_commands.c                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:08 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/02 23:18:20 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/03 13:51:31 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ int	execute_echo(t_command *cmds)
 
 bool	is_line_return(char **cmd, int *i)
 {
-	if (cmd[1] && (ft_strcmp(cmd[1], "-n") == 0))
+	if (cmd[1] && (cmd[1][0] == '-') && (cmd[1][1] == 'n'))
 	{
 		*i = 2;
 		return (false);
@@ -75,7 +75,7 @@ bool	is_line_return(char **cmd, int *i)
 
 int	execute_cd(t_command *cmds)
 {
-	if (cmds->argv[2])
+	if (cmds->argv[1] && cmds->argv[2])
 	{
 		err_print(1, "too many arguments");
 		return (1);

@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:18:42 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/02 21:03:14 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/03 13:45:40 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ char	*fetch_and_check_bin_path(t_shell *minishell, char *cmd)
 			free_strings_array(path_var_dirs);
 			return (path_to_check);
 		}
-		if (path_to_check)
+		// if (path_to_check)			// Not necessary
 			free(path_to_check);
 		i++;
 	}
@@ -94,8 +94,9 @@ int		execute_external_commands(t_shell *minishell, t_command *cmd)
 			updated_path = fetch_and_check_bin_path(minishell, execve_args[0]);
 			if (!updated_path)
 			{
+				perror("command not found");
 				free_strings_array(converted_envp);
-				return (1);
+				return (127);
 			}
 			path_allocated = true;
 		}

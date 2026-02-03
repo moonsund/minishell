@@ -6,14 +6,14 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:14 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/02 21:14:18 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/03 14:24:30 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 #include "minishell.h"
 
-// The 3 next functions are wrappers for Leo's functions
+// The 3 next functions are wrappers for Leon's functions
 int		execute_export(t_shell *minishell);
 int		execute_unset(t_shell *minishell);
 int		execute_env(t_shell *minishell);
@@ -39,7 +39,8 @@ int	execute_export(t_shell *minishell)
 		return (1);
 	}
 	key = env_var_data[0];
-	value = env_var_data[1];
+	if(env_var_data[0] && env_var_data[1])
+		value = env_var_data[1];
 	i = 0;
 	if (!key || ft_isdigit(key[0]))
 	{

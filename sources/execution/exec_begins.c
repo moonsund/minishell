@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec_begins.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:31 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/02 23:16:27 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/03 14:24:16 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ Redirections - Test commands :
 wc -l < w
 sort < infile
 grep ok << end
-pwd > outfile			----- LEAK
+pwd > outfile
 ls >> outfile
 export FRUIT=apple > new_outfile
 cat w y z > new
@@ -143,9 +143,10 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 			}
 			else
 			{
-				if (!execute_external_commands(shell, &pl->cmds[i]))
+				// if (!execute_external_commands(shell, &pl->cmds[i]))			// Old version - Not functional
+				if (execute_external_commands(shell, &pl->cmds[i]) > 0)
 				{
-					perror("execve");
+					// perror("command not found");								// Problematic (error message handled in execute_external_commands)
 					if (errno == ENOENT) // No such file or directory
 						exit(127);
 					else
@@ -228,7 +229,6 @@ static int	wait_all_and_get_last(pid_t *pids, size_t count)
 
 	last_status = 0;
 	last_pid = pids[count - 1];
-
 	i = 0;
 	while (i < count)
 	{
