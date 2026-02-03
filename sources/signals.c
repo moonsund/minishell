@@ -1,7 +1,7 @@
 #include "minishell.h"
 
 volatile sig_atomic_t g_sigint = 0;
-static void ctrl_c_handler(int signum);
+void ctrl_c_handler(int signum);
 
 
 void setup_signals(void)
@@ -17,7 +17,7 @@ void setup_signals(void)
     sigaction(SIGQUIT, &sa, NULL);
 }
 
-static void ctrl_c_handler(int signum)
+void ctrl_c_handler(int signum)
 {
     (void)signum;
     g_sigint = 1;

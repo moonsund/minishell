@@ -6,18 +6,18 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:18:42 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/03 13:45:40 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/03 17:52:14 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 #include "libft.h"
 
-char	*build_path_to_check(char *dir, char c, char *cmd);
+char	*build_path_to_check(char *dir, char *cmd);
 char	*fetch_and_check_bin_path(t_shell *minishell, char *cmd);
 int		execute_external_commands(t_shell *minishell, t_command *cmd);
 
-char	*build_path_to_check(char *dir, char c, char *cmd)
+char	*build_path_to_check(char *dir, char *cmd)
 {
 	char	*path_to_check;
 	char	*tmp;
@@ -46,7 +46,7 @@ char	*fetch_and_check_bin_path(t_shell *minishell, char *cmd)
 		return (NULL);
 	while (path_var_dirs[i])
 	{
-		path_to_check = build_path_to_check(path_var_dirs[i], '/', cmd);
+		path_to_check = build_path_to_check(path_var_dirs[i], cmd);
 		if (path_to_check && access(path_to_check, X_OK) == 0)
 		{
 			free_strings_array(path_var_dirs);
@@ -108,8 +108,9 @@ int		execute_external_commands(t_shell *minishell, t_command *cmd)
 	}
 	execve(updated_path, execve_args, converted_envp);
 	// if execve fails :
+	perror("command not found");
 	if (path_allocated)
 		free(updated_path);
 	free_strings_array(converted_envp);
-	return (0);
+	return (126);
 }

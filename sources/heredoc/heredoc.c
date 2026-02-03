@@ -1,13 +1,13 @@
 #include "minishell.h"
 
 int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, t_exit_status exit_status);
-static char *generate_heredoc_filename(size_t heredoc_index);
-static int expand_heredoc(char **line, t_env_var_list *env_vars, t_exit_status exit_status);
+char *generate_heredoc_filename(size_t heredoc_index);
+int expand_heredoc(char **line, t_env_var_list *env_vars, t_exit_status exit_status);
 int write_line_in_fd(int fd, char *line);
-static int append_charter(char **line, char c);
-static int append_string(char **line, const char *str);
-static void redir_replace_with_infile(t_redir *r, char *filename);
-static int get_heredoc(t_redir *redir, t_env_var_list *env_vars, t_exit_status exit_status, size_t *heredoc_index);
+int append_charter(char **line, char c);
+int append_string(char **line, const char *str);
+void redir_replace_with_infile(t_redir *r, char *filename);
+int get_heredoc(t_redir *redir, t_env_var_list *env_vars, t_exit_status exit_status, size_t *heredoc_index);
 
 int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, t_exit_status exit_status)
 {
@@ -37,7 +37,7 @@ int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, t_exit_statu
     return (1);
 }
 
-static int get_heredoc(t_redir *redir, t_env_var_list *env_vars, t_exit_status exit_status, size_t *heredoc_index)
+int get_heredoc(t_redir *redir, t_env_var_list *env_vars, t_exit_status exit_status, size_t *heredoc_index)
 {
     char *heredoc_filename;
     int fd;
@@ -109,7 +109,7 @@ static int get_heredoc(t_redir *redir, t_env_var_list *env_vars, t_exit_status e
     return (1);
 }
 
-static char *generate_heredoc_filename(size_t heredoc_index)
+char *generate_heredoc_filename(size_t heredoc_index)
 {
     char *file_index;
     char *file_name;
@@ -122,7 +122,7 @@ static char *generate_heredoc_filename(size_t heredoc_index)
     return (file_name);
 }
 
-static int expand_heredoc(char **line, t_env_var_list *env_vars, t_exit_status exit_status)
+int expand_heredoc(char **line, t_env_var_list *env_vars, t_exit_status exit_status)
 {
     size_t  i;
     size_t  j;
@@ -251,7 +251,7 @@ int write_line_in_fd(int fd, char *line)
     return (1);
 }
 
-static int append_charter(char **line, char c)
+int append_charter(char **line, char c)
 {
     char *new_line;
     size_t line_length;
@@ -284,7 +284,7 @@ static int append_charter(char **line, char c)
     }
 }
 
-static int append_string(char **line, const char *str)
+int append_string(char **line, const char *str)
 {
     size_t line_length;
     size_t str_length;
@@ -321,7 +321,7 @@ static int append_string(char **line, const char *str)
     }
 }
 
-static void redir_replace_with_infile(t_redir *r, char *filename)
+void redir_replace_with_infile(t_redir *r, char *filename)
 {
     /* r->target содержал limiter, его надо освободить */
     free(r->target);

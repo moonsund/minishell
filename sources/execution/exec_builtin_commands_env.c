@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:14 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/03 14:24:30 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/03 17:44:46 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,6 @@ int		execute_env(t_shell *minishell);
 int	execute_export(t_shell *minishell)
 {
 	char	**env_var_data;
-	char	**envp_sorted;
 	int		i;
 	char	*key;
 	char	*value;

@@ -1,7 +1,7 @@
 #include "minishell.h"
 
 int init_shell(t_shell *shell, char **envp);
-static int init_env_var_list(t_env_var_list *list, char **envp);
+int init_env_var_list(t_env_var_list *list, char **envp);
 
 int init_shell(t_shell *shell, char **envp)
 {
@@ -16,7 +16,7 @@ int init_shell(t_shell *shell, char **envp)
 	return (1);
 }
 
-static int init_env_var_list(t_env_var_list *list, char **envp)
+int init_env_var_list(t_env_var_list *list, char **envp)
 {
 	t_var *var;
 	size_t i;

@@ -6,17 +6,17 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:31 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/03 14:24:16 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/03 17:54:07 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int			execute_pipeline(t_shell *shell);
-int			exec_pipeline_forking(t_shell *shell, const t_pipeline *pl);
-static void	apply_redirs_or_die(const t_command *cmd);
-static int	open_redir_file(const t_redir *redir);
-static int	wait_all_and_get_last(pid_t *pids, size_t count);
+int		execute_pipeline(t_shell *shell);
+int		exec_pipeline_forking(t_shell *shell, const t_pipeline *pl);
+void	apply_redirs_or_die(const t_command *cmd);
+int		open_redir_file(const t_redir *redir);
+int		wait_all_and_get_last(pid_t *pids, size_t count);
 
 /*
 Auto check Valgrind VSCode : Ctrl Shift p > run task > Valgrind
@@ -179,7 +179,7 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 	return (last_status);
 }
 
-static void	apply_redirs_or_die(const t_command *cmd)
+void	apply_redirs_or_die(const t_command *cmd)
 {
 	t_redir	*redir;
 	int		fd;
@@ -204,7 +204,7 @@ static void	apply_redirs_or_die(const t_command *cmd)
 	}
 }
 
-static int	open_redir_file(const t_redir *redir)
+int	open_redir_file(const t_redir *redir)
 {
 	int	fd;
 
@@ -220,7 +220,7 @@ static int	open_redir_file(const t_redir *redir)
 	return (fd);
 }
 
-static int	wait_all_and_get_last(pid_t *pids, size_t count)
+int	wait_all_and_get_last(pid_t *pids, size_t count)
 {
 	size_t	i;
 	int		status;

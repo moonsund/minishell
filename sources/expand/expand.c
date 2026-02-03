@@ -3,7 +3,7 @@
 static bool token_needs_expansion(t_token *token);
 static t_exit_status expand_word_token(t_token *token, t_env_var_list *env_vars, t_exit_status exit_status);
 char *get_last_status_string(t_exit_status exit_status);
-static int append_str(t_buf *buf, char *str, t_qmark quote_mark);
+int append_str(t_buf *buf, char *str, t_qmark quote_mark);
 
 t_exit_status expand_tokens(t_token_list *tokens, t_env_var_list *env_vars, t_exit_status exit_status)
 {
@@ -140,7 +140,7 @@ static t_exit_status expand_word_token(t_token *token, t_env_var_list *env_vars,
     return (ES_SUCCESS);
 }
 
-static int append_str(t_buf *buf, char *str, t_qmark quote_mark)
+int append_str(t_buf *buf, char *str, t_qmark quote_mark)
 {
     size_t i;
     size_t str_length;

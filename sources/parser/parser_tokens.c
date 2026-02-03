@@ -1,11 +1,11 @@
 #include "minishell.h"
 
-static int process_word_token(t_parser_context *ctx);
-static int append_arg(t_command *cmd, char *arg);
+int process_word_token(t_parser_context *ctx);
+int append_arg(t_command *cmd, char *arg);
 static t_exit_status process_pipe_token(t_pipeline *pl, t_parser_context *ctx);
 static t_exit_status process_redir_tokens(t_parser_context *ctx);
-static int token_has_any_quotes(t_token *token);
-static int redir_push_back(t_redir **lst, t_redir *node);
+int token_has_any_quotes(t_token *token);
+int redir_push_back(t_redir **lst, t_redir *node);
 static t_redir *init_redirect(t_parser_context *ctx);
 
 t_exit_status process_tokens(t_pipeline *pl, t_token_list *list, t_parser_context *ctx)
@@ -59,7 +59,7 @@ t_exit_status process_tokens(t_pipeline *pl, t_token_list *list, t_parser_contex
     return (ES_SUCCESS);
 }
 
-static int process_word_token(t_parser_context *ctx)
+int process_word_token(t_parser_context *ctx)
 {
     if (!ctx->cmd_started)
     {
@@ -74,7 +74,7 @@ static int process_word_token(t_parser_context *ctx)
     return (1);
 }
 
-static int append_arg(t_command *cmd, char *arg)
+int append_arg(t_command *cmd, char *arg)
 {
     char **new_argv;
     char *dup;
@@ -214,7 +214,7 @@ static t_redir *init_redirect(t_parser_context *ctx)
     return redir;
 }
 
-static int token_has_any_quotes(t_token *token)
+int token_has_any_quotes(t_token *token)
 {
     size_t i;
 
@@ -230,7 +230,7 @@ static int token_has_any_quotes(t_token *token)
     return (0);
 }
 
-static int redir_push_back(t_redir **lst, t_redir *node)
+int redir_push_back(t_redir **lst, t_redir *node)
 {
 	t_redir	*cur;
 

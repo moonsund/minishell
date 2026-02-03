@@ -1,8 +1,8 @@
 #include "minishell.h"
 
-static void print_token_list(t_token_list *list);
-static void print_pipeline(t_pipeline *pipeline);
-// static int debug_print_heredoc_files(t_pipeline *pipeline);
+void print_token_list(t_token_list *list);
+void print_pipeline(t_pipeline *pipeline);
+// int debug_print_heredoc_files(t_pipeline *pipeline);
 
 int main(int argc, char **argv, char **envp)
 {
@@ -125,7 +125,7 @@ int main(int argc, char **argv, char **envp)
 	return (shell.exit_status);
 }
 
-static void print_token_list(t_token_list *tokens) // for debugging, to be deleted
+void print_token_list(t_token_list *tokens) // for debugging, to be deleted
 {
 	static const char *g_token_type_str[] =
 	{
@@ -174,7 +174,7 @@ static const char *redir_type_to_str(t_redir_type type)
 	return ("?");
 }
 
-static void	print_pipeline(t_pipeline *pipeline) /* for debugging, to be deleted */
+void	print_pipeline(t_pipeline *pipeline) /* for debugging, to be deleted */
 {
 	size_t	i;
 	size_t	j;
@@ -224,7 +224,7 @@ static void	print_pipeline(t_pipeline *pipeline) /* for debugging, to be deleted
 }
 
 /*
-static int debug_print_heredoc_files(t_pipeline *pipeline) // for debugging, to be deleted
+int debug_print_heredoc_files(t_pipeline *pipeline) // for debugging, to be deleted
 {
 	size_t i;
 	int fd;

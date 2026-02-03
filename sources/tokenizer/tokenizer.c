@@ -1,8 +1,8 @@
 #include "minishell.h"
 
-static void init_lexer_context(t_lexer_context *context);
-static int process_quotes(const char *str, t_lexer_context *ctx);
-static int process_spaces_outside_quotes(const char *str, t_token_list *tokens, t_lexer_context *ctx);
+void init_lexer_context(t_lexer_context *context);
+int process_quotes(const char *str, t_lexer_context *ctx);
+int process_spaces_outside_quotes(const char *str, t_token_list *tokens, t_lexer_context *ctx);
 
 t_exit_status tokenize_with_qmap(const char *str, t_token_list *tokens)
 {
@@ -56,7 +56,7 @@ t_exit_status tokenize_with_qmap(const char *str, t_token_list *tokens)
     return (ES_SUCCESS);
 }
 
-static void init_lexer_context(t_lexer_context *context)
+void init_lexer_context(t_lexer_context *context)
 {
     init_buffer(&context->buf);
 

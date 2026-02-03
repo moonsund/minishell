@@ -3,8 +3,7 @@ NAME       = minishell
 CC         = cc
 UNAME := $(shell uname)
 
-# Add -Wall -Wextra -Werror when testing done and almost ready to submit
-CFLAGS     = -g -Iincludes -I$(LIBFT_DIR) #-fsanitize=address
+CFLAGS     = -g -Wall -Wextra -Werror -Iincludes -I$(LIBFT_DIR) #-fsanitize=address
 
 LIBFT_DIR  = libft
 LIBFT_A    = $(LIBFT_DIR)/libft.a

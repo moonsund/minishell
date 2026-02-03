@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:08 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/03 13:51:31 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/03 17:44:30 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ bool	is_line_return(char **cmd, int *i);
 int		execute_cd(t_command *cmds);
 int		execute_pwd(char *current_working_directory);
 int		execute_exit(t_shell *shell, t_command *cmd);
-static int	parse_exit_code(const char *str, int *exit_code);
+int	parse_exit_code(const char *str, int *exit_code);
 static bool	is_numeric_string(const char *str);
 
 char	*fetch_current_working_directory(void)
@@ -40,8 +40,6 @@ char	*fetch_current_working_directory(void)
 int	execute_echo(t_command *cmds)
 {
 	int		i;
-	char	*all_argv;
-	char	**separate_words;
 
 	bool line_return ;
 	line_return = is_line_return(cmds->argv, &i);
@@ -117,7 +115,7 @@ static bool	is_numeric_string(const char *str)
 	return (true);
 }
 
-static int	parse_exit_code(const char *str, int *exit_code)
+int	parse_exit_code(const char *str, int *exit_code)
 {
 	long long	result;
 	int			sign;
@@ -153,6 +151,7 @@ static int	parse_exit_code(const char *str, int *exit_code)
 
 int	execute_exit(t_shell *shell, t_command *cmd)
 {
+	// printf("DEBUG\n");
 	int	exit_code;
 
 	if (!cmd || !cmd->argv)

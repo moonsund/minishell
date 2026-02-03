@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:18:53 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/02 20:18:55 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/03 17:43:39 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ int exec_builtin_in_parent(t_shell *shell, t_command *cmd)
 	int	new_fd;
 
 	new_fd = -1;
-
+	exit_status = 0;						// ok to remove only if return trick working
 	if (cmd->redirs)		// FD opened and closed right after because these commands don't print anything
 	{
 		if (cmd->redirs->type == R_IN)								// Bash : Do nothing if file exists / Error if file doesn't exist - Error not handled in Minishell
@@ -73,7 +73,7 @@ int exec_builtin_in_parent(t_shell *shell, t_command *cmd)
 	}
 
 	if(ft_strcmp(cmd->argv[0], "cd") == 0)
-		exit_status = execute_cd(cmd);
+		exit_status = execute_cd(cmd);				// or 'return (exit_status = execute_cd(cmd))' (check if Norminette ok, to gain lines)
 	else if(ft_strcmp(cmd->argv[0], "export") == 0)
 		exit_status = execute_export(shell);
 	else if(ft_strcmp(cmd->argv[0], "unset") == 0)
@@ -111,6 +111,7 @@ int	execute_built_in_commands(t_shell *minishell, t_command *cmd)
 	int		exit_status;
 	char	*current_working_directory;
 
+	exit_status = 0;					// try same trick as exec_builtin_in_parent function
 	current_working_directory = fetch_current_working_directory();
 	if(ft_strcmp(cmd->argv[0], "echo") == 0)
 		exit_status = execute_echo(cmd);

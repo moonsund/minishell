@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/02 23:23:27 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/03 17:54:59 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -240,13 +240,13 @@ void							init_buffer(t_buf *buf);
 
 // heredoc
 int								process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, t_exit_status exit_status);
-static char						*generate_heredoc_filename(size_t heredoc_index);
-static int						expand_heredoc(char **line, t_env_var_list *env_vars, t_exit_status exit_status);
+char							*generate_heredoc_filename(size_t heredoc_index);
+int								expand_heredoc(char **line, t_env_var_list *env_vars, t_exit_status exit_status);
 int								write_line_in_fd(int fd, char *line);
-static int						append_charter(char **line, char c);
-static int						append_string(char **line, const char *str);
-static void						redir_replace_with_infile(t_redir *r, char *filename);
-static int						get_heredoc(t_redir *redir, t_env_var_list *env_vars, t_exit_status exit_status, size_t *heredoc_index);
+int								append_charter(char **line, char c);
+int								append_string(char **line, const char *str);
+void							redir_replace_with_infile(t_redir *r, char *filename);
+int								get_heredoc(t_redir *redir, t_env_var_list *env_vars, t_exit_status exit_status, size_t *heredoc_index);
 
 // utils.c
 void							reset_iteration(t_shell *shell);
@@ -263,25 +263,25 @@ void							setup_signals(void);
 // execution.c
 int								execute_pipeline(t_shell *shell);
 int								exec_pipeline_forking(t_shell *shell, const t_pipeline *pl);
-static void						apply_redirs_or_die(const t_command *cmd);
-static int						open_redir_file(const t_redir *redir);
-static int						wait_all_and_get_last(pid_t *pids, size_t count);
+void							apply_redirs_or_die(const t_command *cmd);
+int								open_redir_file(const t_redir *redir);
+int								wait_all_and_get_last(pid_t *pids, size_t count);
 
 // exec_command_filter.c
-int	is_builtin(const char *cmd);
-int	is_parent_builtin(const char *cmd);
-int	exec_builtin_in_parent(t_shell *shell, t_command *cmd);
-int	run_builtin_without_output_in_parent(t_shell *shell, t_command *cmd);
-int	run_any_builtin_in_child(t_shell *shell, t_command *cmd);
-int	execute_built_in_commands(t_shell *minishell, t_command *cmd);
+int								is_builtin(const char *cmd);
+int								is_parent_builtin(const char *cmd);
+int								exec_builtin_in_parent(t_shell *shell, t_command *cmd);
+int								run_builtin_without_output_in_parent(t_shell *shell, t_command *cmd);
+int								run_any_builtin_in_child(t_shell *shell, t_command *cmd);
+int								execute_built_in_commands(t_shell *minishell, t_command *cmd);
 
 // exec_builtin_commands.c
-char	*fetch_current_working_directory(void);
-int	execute_echo(t_command *cmds);
-bool	is_line_return(char **cmd, int *i);
-int	execute_cd(t_command *cmds);
-int	execute_pwd(char *current_working_directory);
-int	execute_exit(t_shell *shell, t_command *cmd);
+char							*fetch_current_working_directory(void);
+int								execute_echo(t_command *cmds);
+bool							is_line_return(char **cmd, int *i);
+int								execute_cd(t_command *cmds);
+int								execute_pwd(char *current_working_directory);
+int								execute_exit(t_shell *shell, t_command *cmd);
 
 // exec_builtin_commands_env.c
 int								execute_export(t_shell *minishell);
@@ -294,13 +294,13 @@ void							sort_envp_alpha(char **envp); // export no args
 void							str_swap(char **s1, char **s2);
 
 // exec_external_commands.c
-char							*build_path_to_check(char *dir, char c, char *cmd);
+char							*build_path_to_check(char *dir, char *cmd);
 char							*fetch_and_check_bin_path(t_shell *minishell, char *cmd);
 int								execute_external_commands(t_shell *minishell, t_command *cmd);
 
 // exec_utils_fd.c
-int	open_fd(const char *path, bool append, bool truncate);
-void		open_and_close_fd(t_command *cmd);
+int								open_fd(const char *path, bool append, bool truncate);
+void							open_and_close_fd(t_command *cmd);
 
 // exec_close_and_free.c
 void							close_and_set_to_neg(int *fd);

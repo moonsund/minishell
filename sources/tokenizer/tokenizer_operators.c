@@ -1,6 +1,6 @@
 #include "minishell.h"
 
-static int process_operator_token(t_token_type type, const char *literal, t_token_list *tokens, t_lexer_context *context);
+int process_operator_token(t_token_type type, const char *literal, t_token_list *tokens, t_lexer_context *context);
 static t_token *make_operator_token(t_token_type type, const char *literal);
 
 int check_operators(const char *str, t_token_list *tokens, t_lexer_context *context)
@@ -44,7 +44,7 @@ int check_operators(const char *str, t_token_list *tokens, t_lexer_context *cont
     return (0);
 }
 
-static int process_operator_token(t_token_type type, const char *literal, t_token_list *tokens, t_lexer_context *context)
+int process_operator_token(t_token_type type, const char *literal, t_token_list *tokens, t_lexer_context *context)
 {
     t_token *token;
 
