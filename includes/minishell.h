@@ -3,16 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/03 18:27:28 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/03 20:48:58 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
+#define _POSIX_C_SOURCE 200809L
 # include "libft.h"
 # include <stdio.h>     // perror
 # include <dirent.h> // opendir
@@ -124,6 +125,13 @@ typedef struct s_env
 	struct s_env				*next;
 }								t_env;
 
+typedef struct s_strbuf
+{
+    char    *buf;
+    size_t  len;
+    size_t  cap;
+}   t_strbuf;
+
 typedef struct s_var
 {
 	char						*name;
@@ -172,7 +180,8 @@ typedef struct s_parser_context
 typedef struct s_shell
 {
 	int				exit_status;
-	int should_terminate;
+	int should_exit;
+	char * input;
 	t_env_var_list	env_vars;				// envp vars saved in linked list
 	t_token_list	tokens;
 	t_pipeline		*pipeline; // Only base to consider for exec
@@ -182,9 +191,26 @@ typedef struct s_shell
 // ------------------------------------------------------------------------------------------ From Leo
 
 // main.c
+int main(int argc, char **argv, char **envp);
 
-// init.c
+// minishell
+void minishell_loop(t_shell *shell);
+char *handle_input(void);
+void	process_input(char *input, t_shell *shell);
+int	parse_and_prepare(t_shell *shell, char *input);
+int	execute_prepared(t_shell *shell);
 int								init_shell(t_shell *shell, char **envp);
+void							reset_iteration(t_shell *shell);
+void							shell_destroy(t_shell *shell);
+void							free_tokens(t_token_list *list);
+void							free_pipeline(t_pipeline *pl);
+void							free_env_var_list(t_env_var_list *vars);
+void							err_print(t_exit_status exit_status, const char *ctx);
+void							err_malloc_print(const char *where);
+void							setup_signals(void);
+
+
+
 
 // envp.c
 t_var							*find_var(t_env_var_list *list, const char *name);
@@ -239,20 +265,17 @@ void							free_buf(t_buf *buf);
 void							init_buffer(t_buf *buf);
 
 // heredoc
-int								process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, t_exit_status exit_status);
-int								write_line_in_fd(int fd, char *line);
-
-// utils.c
-void							reset_iteration(t_shell *shell);
-void							shell_destroy(t_shell *shell);
-void							free_tokens(t_token_list *list);
-void							free_pipeline(t_pipeline *pl);
-void							free_env_var_list(t_env_var_list *vars);
-void							err_print(t_exit_status exit_status, const char *ctx);
-void							err_malloc_print(const char *where);
-
-// signals.c
-void							setup_signals(void);
+t_exit_status		process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, t_exit_status exit_status);
+t_exit_status expand_heredoc(char **line, t_env_var_list *env_vars, t_exit_status exit_status);
+t_exit_status strbuf_init(t_strbuf *strbuf);
+void strbuf_free(t_strbuf *strbuf);
+t_exit_status strbuf_reserve(t_strbuf *strbuf, size_t extra);
+t_exit_status strbuf_append_char(t_strbuf *strbuf, char c);
+t_exit_status strbuf_append_str(t_strbuf *strbuf, const char *s);
+t_exit_status heredoc_cleanup_return(int fd, char *filename, t_exit_status st);
+void redir_replace_with_infile(t_redir *r, char *filename);
+char *generate_heredoc_filename(size_t heredoc_index);
+t_exit_status write_line_in_fd(int fd, char *line);
 
 // execution.c
 int								execute_pipeline(t_shell *shell);

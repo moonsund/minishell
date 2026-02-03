@@ -1,24 +1,20 @@
 #include "minishell.h"
 
-int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, t_exit_status exit_status);
-int write_line_in_fd(int fd, char *line);
-static char *generate_heredoc_filename(size_t heredoc_index);
-static int expand_heredoc(char **line, t_env_var_list *env_vars, t_exit_status exit_status);
-static int append_charter(char **line, char c);
-static int append_string(char **line, const char *str);
-static void redir_replace_with_infile(t_redir *r, char *filename);
-static int get_heredoc(t_redir *redir, t_env_var_list *env_vars, t_exit_status exit_status, size_t *heredoc_index);
+t_exit_status		process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, t_exit_status exit_status);
+static t_exit_status get_heredoc(t_redir *redir, t_env_var_list *env_vars, t_exit_status exit_status, size_t *heredoc_index);
+static t_exit_status heredoc_loop(t_redir *redir, t_env_var_list *env_vars, t_exit_status exit_status, int fd, char *filename);
 
-int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, t_exit_status exit_status)
+t_exit_status process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, t_exit_status last_status)
 {
     size_t  i;
     t_redir *redir;
     size_t  heredoc_index;
+    t_exit_status status;
+
+    if (!pipeline || !env_vars)
+        return (ES_GENERAL);
 
     heredoc_index = 0;
-    if (!pipeline || !env_vars)
-        return (0);
-
     i = 0;
     while (i < pipeline->count)
     {
@@ -27,46 +23,59 @@ int process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, t_exit_statu
         {
             if (redir->type == R_HEREDOC)
             {
-                if (!get_heredoc(redir, env_vars, exit_status, &heredoc_index))
-                    return (0);
+                status = get_heredoc(redir, env_vars, last_status, &heredoc_index);
+                if (status != ES_SUCCESS)
+                    return (status);
             }
             redir = redir->next;
         }
         i++;
     }
-    return (1);
+    return (ES_SUCCESS);
 }
 
-static int get_heredoc(t_redir *redir, t_env_var_list *env_vars, t_exit_status exit_status, size_t *heredoc_index)
+static t_exit_status get_heredoc(t_redir *redir, t_env_var_list *env_vars, t_exit_status exit_status, size_t *heredoc_index)
 {
-    char *heredoc_filename;
-    int fd;
-    char *line;
+    char        *heredoc_filename;
+    int         fd;
+    t_exit_status st;
 
     heredoc_filename = generate_heredoc_filename((*heredoc_index)++);
     if (!heredoc_filename)
-        return (0);
+        return (ES_GENERAL);
 
     fd = open(heredoc_filename, O_WRONLY | O_CREAT | O_TRUNC, 0600);
     if (fd < 0)
     {
         free(heredoc_filename);
-        return (0);
+        return (ES_GENERAL);
     }
+
+    st = heredoc_loop(redir, env_vars, exit_status, fd, heredoc_filename);
+    if (st != ES_SUCCESS)
+        return (st);
+
+    close(fd);
+    redir_replace_with_infile(redir, heredoc_filename);
+    return (ES_SUCCESS);
+}
+
+static t_exit_status heredoc_loop(t_redir *redir, t_env_var_list *env_vars, t_exit_status exit_status, int fd, char *filename)
+{
+    char        *line;
+    t_exit_status status;
 
     while (true)
     {
         line = readline("heredoc> ");
 
-        if (g_sigint) // ctrl+c
+        if (g_sigint) /* Ctrl+C */
         {
-            close(fd);
-            unlink(heredoc_filename);
-            free(heredoc_filename);
-            return (0);
+            g_sigint = 0;
+            return (heredoc_cleanup_return(fd, filename, ES_SIGINT));
         }
 
-        if (!line)
+        if (!line) /* Ctrl+D (EOF) */
             break;
 
         if (redir->target && ft_strcmp(line, redir->target) == 0)
@@ -75,259 +84,25 @@ static int get_heredoc(t_redir *redir, t_env_var_list *env_vars, t_exit_status e
             break;
         }
 
-        if (!is_empty(line))
-            add_history(line);
-
         if (redir->expand)
         {
-            if (!expand_heredoc(&line, env_vars, exit_status))
+            status = expand_heredoc(&line, env_vars, exit_status);
+            if (status != ES_SUCCESS)
             {
                 free(line);
-                close(fd);
-                unlink(heredoc_filename);
-                free(heredoc_filename);
-                return (0);
+                return (heredoc_cleanup_return(fd, filename, status));
             }
         }
 
-        if (!write_line_in_fd(fd, line))
+        status = write_line_in_fd(fd, line);
+        if (status != ES_SUCCESS)
         {
             free(line);
-            close(fd);
-            unlink(heredoc_filename);
-            free(heredoc_filename);
-            return (0);
+            return (heredoc_cleanup_return(fd, filename, status));
         }
+
         free(line);
     }
 
-    close(fd);
-
-    /* converting << limiter in < .heredoc_N */
-    redir_replace_with_infile(redir, heredoc_filename);
-
-    return (1);
-}
-
-static char *generate_heredoc_filename(size_t heredoc_index)
-{
-    char *file_index;
-    char *file_name;
-
-    file_index = ft_itoa(heredoc_index);
-    if (!file_index)
-        return (NULL);
-    file_name = ft_strjoin(".heredoc_", file_index);
-    free (file_index);
-    return (file_name);
-}
-
-static int expand_heredoc(char **line, t_env_var_list *env_vars, t_exit_status exit_status)
-{
-    size_t  i;
-    size_t  j;
-    size_t  start;
-    char    *new_line;
-    char    *var_name;
-    size_t  var_length;
-    char    *value;
-
-    if (!line)
-        return (0);
-
-    new_line = ft_strdup("");
-    if (!new_line)
-        return (0);
-    i = 0;
-
-    while ((*line)[i])
-    {
-        if ((*line)[i] == '$')
-        {
-            if (!(*line)[i + 1])
-            {
-                if (!append_charter(&new_line, (*line)[i]))
-                {
-                    free(new_line);
-                    return (0);
-                }
-                i++;
-                continue;
-            }
-
-            else if ((*line)[i + 1] == '?')
-            {
-                if (!append_string(&new_line, get_last_status_string(exit_status)))
-                {
-                    free(new_line);
-                    return (0);
-                }
-                i += 2;
-                continue;
-            }
-
-            start = i + 1;
-            j = start;
-            while ((*line)[j]
-                && (ft_isalnum((unsigned char)(*line)[j]) || (*line)[j] == '_'))
-                j++;
-
-            var_length = j - start;
-
-            if (var_length == 0)
-            {
-                if (!append_charter(&new_line, (*line)[i]))
-                {
-                    free(new_line);
-                    return (0);
-                }
-                i++;
-                continue;
-            }
-
-            var_name = malloc(var_length + 1);
-            if (!var_name)
-            {
-                free(new_line);
-                return (0);
-            }
-
-            ft_memcpy(var_name, *line + start, var_length);
-            var_name[var_length] = '\0';
-
-            value = get_var_value(env_vars, var_name);
-            free(var_name);
-
-            if (value && value[0] != '\0')
-            {
-                if (!append_string(&new_line, value))
-                {
-                    free(new_line);
-                    return (0);
-                }
-            }
-            i = j;
-            continue;
-        }
-        else
-        {
-            if (!append_charter(&new_line, (*line)[i]))
-            {
-                free(new_line);
-                return (0);
-            }
-        }
-        i++;
-    }
-    free(*line);
-    *line = new_line;
-    return (1);
-}
-
-int write_line_in_fd(int fd, char *line)
-{
-    ssize_t bytes_written;
-    size_t line_length;
-
-    if (!line)
-    {
-        bytes_written = write(fd, "\n", 1);
-        if (bytes_written < 0)
-                return (0);
-        return (1);
-    }
-
-
-    line_length = ft_strlen(line);
-    if (line_length > 0)
-    {
-        bytes_written = write(fd, line, line_length);
-        if (bytes_written < 0)
-            return (0);
-    }
-    bytes_written = write(fd, "\n", 1);
-    if (bytes_written < 0)
-            return (0);
-    return (1);
-}
-
-static int append_charter(char **line, char c)
-{
-    char *new_line;
-    size_t line_length;
-
-    if (!line)
-        return (0);
-
-    if (!*line)
-    {
-        new_line = malloc(2);
-        if (!new_line)
-            return (0);
-        new_line[0] = c;
-        new_line[1] = '\0';
-        *line = new_line;
-        return (1);
-    }
-    else
-    {
-        line_length = ft_strlen(*line);
-        new_line = malloc(line_length + 2);
-        if (!new_line)
-            return (0);
-        ft_memcpy(new_line, *line, line_length);
-        new_line[line_length] = c;
-        new_line[line_length + 1] = '\0';
-        free(*line);
-        *line = new_line;
-        return (1);
-    }
-}
-
-static int append_string(char **line, const char *str)
-{
-    size_t line_length;
-    size_t str_length;
-    char *new_line;
-
-    if (!line)
-        return (0);
-
-    str_length = ft_strlen(str);
-
-    if (!*line)
-    {
-        new_line = malloc(str_length + 1);
-        if (!new_line)
-            return (0);
-        ft_memcpy(new_line, str, str_length);
-        new_line[str_length] = '\0';
-        *line = new_line;
-        return (1);
-    }
-    else
-    {
-        line_length = ft_strlen(*line);
-        new_line = malloc(str_length + line_length + 1);
-        if (!new_line)
-            return (0);
-        ft_memcpy(new_line, *line, line_length);
-        ft_memcpy(new_line + line_length, str, str_length);
-        new_line[str_length + line_length] = '\0';
-
-        free(*line);
-        *line = new_line;
-        return (1);
-    }
-}
-
-static void redir_replace_with_infile(t_redir *r, char *filename)
-{
-    /* r->target содержал limiter, его надо освободить */
-    free(r->target);
-    r->target = filename;
-
-    r->type = R_IN;
-    r->fd = 0;
-    r->expand = 0;
+    return (ES_SUCCESS);
 }
