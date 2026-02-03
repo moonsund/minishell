@@ -2,40 +2,19 @@
 
 int main(int argc, char **argv, char **envp)
 {
-    char *line;
-    t_shell	shell;
+	t_shell	shell;
+	int		exit_status;
 
-    shell.exit_status = 1;
-    (void)argc;
-    (void)argv;
-    (void)envp;
-
-
-    setup_signals();
-    // init();
-    while(true) // or exit_status
-    {
-        line = readline("minishell> ");
-        if (!line)
-        {
-            printf("exit\n");
-            break;
-        }
-
-        if (!is_empty(line))
-            add_history(line);
-
-        shell.normalized_cmd_str = normalize_str(line);
-        if (!shell.normalized_cmd_str)
-            perror("normalize_str");
-        printf("[normalize_debug]: \"%s\"\n", shell.normalized_cmd_str);
-
-        // tokenize(line);
-        free(line);
-        
-        // parser();
-        // execute();
-    }
-
-    return (EXIT_SUCCESS);
+	(void)argc;
+	(void)argv;
+	if (!init_shell(&shell, envp))
+	{
+		err_print(ES_GENERAL, "init_shell");
+			return (EXIT_FAILURE);
+	}
+	setup_signals();
+	minishell_loop(&shell);
+	exit_status = shell.exit_status;
+	shell_destroy(&shell);
+	return (exit_status);
 }

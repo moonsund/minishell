@@ -1,14 +1,17 @@
-# Ignore the project executable
-minishell
+# Ignore the project executable (root binary only)
+/minishell
+!/minishell/
 
 # Ignore testing files
 /testing/
+/minishell_tester/
 
 # Ignore libft library
 /libft/
 
 # Ignore text files
 *.txt
+*.heredoc_*
 
 # Ignore object files
 /object/
@@ -25,5 +28,11 @@ minishell
 *.log
 .DS_Store
 
-# Sophie's test files
-execution
+# Test files (input / output / pipes)
+w
+y
+z
+
+# For Valgrind to ignore mem leaks from readline
+readline.supp
+valgrind-output.txt

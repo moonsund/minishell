@@ -3,7 +3,7 @@ NAME       = minishell
 CC         = cc
 UNAME := $(shell uname)
 
-CFLAGS     = -g -Wall -Wextra -Werror -Iincludes
+CFLAGS     = -g -Wall -Wextra -Werror -Iincludes -I$(LIBFT_DIR) -fsanitize=address
 
 LIBFT_DIR  = libft
 LIBFT_A    = $(LIBFT_DIR)/libft.a
@@ -15,16 +15,46 @@ ifeq ($(UNAME), Darwin) # macOS (Homebrew readline)
   LDFLAGS += -L/opt/homebrew/opt/readline/lib
 endif
 
-# NB have not tested on Linux yet
+# NB have not been tested on Linux yet
 ifeq ($(UNAME), Linux)
   LDLIBS  += -lncurses
 endif
 
-
 SRC_PATH = sources/
 OBJ_PATH = objects/
 
-SRC_FILES = main.c signals.c lexer.c normalize.c utils.c
+SRC_FILES = \
+	main.c \
+	minishell/minishell.c \
+	minishell/init_shell.c \
+	minishell/signals.c \
+	minishell/utils.c \
+	tokenizer/tokenizer.c \
+	tokenizer/tokenizer_words.c \
+	tokenizer/tokenizer_operators.c \
+	tokenizer/tokenizer_chars.c \
+	tokenizer/tokenizer_utils.c \
+	parser/parser_init.c \
+	parser/parser_tokens.c \
+	parser/parser_utils.c \
+	parser/parser.c \
+	expand/expand.c \
+	heredoc/heredoc.c \
+	heredoc/heredoc_expand.c \
+	heredoc/heredoc_expand_utils.c \
+	heredoc/heredoc_utils.c \
+	envp/envp.c \
+	envp/envp_utils.c \
+	execution/exec_begins.c \
+	execution/exec_command_filter.c \
+	execution/exec_builtin_commands.c \
+	execution/exec_builtin_cmds_utils.c \
+	execution/exec_builtin_env_commands.c \
+	execution/exec_builtin_env_cmds_utils.c \
+	execution/exec_external_commands.c \
+	execution/exec_external_cmds_utils.c \
+	execution/exec_fd_related_utils.c \
+	execution/exec_close_and_free.c
 
 SRCS = $(addprefix $(SRC_PATH),$(SRC_FILES))
 OBJS = $(addprefix $(OBJ_PATH),$(SRC_FILES:.c=.o))
@@ -39,9 +69,8 @@ $(NAME): $(LIBFT_A) $(OBJS)
 	@echo "✅ Built $(NAME)"
 
 $(OBJ_PATH)%.o: $(SRC_PATH)%.c
-	@mkdir -p $(OBJ_PATH)
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
-
 
 # libft fetch/build
 $(LIBFT_DIR):
@@ -50,12 +79,12 @@ $(LIBFT_DIR):
 $(LIBFT_A): | $(LIBFT_DIR)
 	$(MAKE) -C $(LIBFT_DIR)
 
-
 clean:
 	rm -rf $(OBJ_PATH)
 
 fclean: clean
-	rm -f $(NAME)
+	@$(MAKE) -C $(LIBFT_DIR) fclean
+	@rm -f $(NAME)
 
 re: fclean all
 
