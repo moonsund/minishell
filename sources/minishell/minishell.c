@@ -8,31 +8,31 @@ int	execute_prepared(t_shell *shell);
 
 void minishell_loop(t_shell *shell)
 {
-    char    *input;
+	char    *input;
 
-    while (!shell->should_exit)
-    {
-        input = handle_input();
-        if (!input)
-        {
-            shell->should_exit = true;
-            break;
-        }
+	while (!shell->should_exit)
+	{
+		input = handle_input();
+		if (!input)
+		{
+			shell->should_exit = true;
+			break;
+		}
 
-        if (g_sigint)
-        {
-            g_sigint = 0;
-            shell->exit_status = ES_SIGINT;
-            free(input);
-            reset_iteration(shell);
-            continue;
-        }
+		if (g_sigint)
+		{
+			g_sigint = 0;
+			shell->exit_status = ES_SIGINT;
+			free(input);
+			reset_iteration(shell);
+			continue;
+		}
 
-        process_input(input, shell);
+		process_input(input, shell);
 
-        free(input);
-        reset_iteration(shell);
-    }
+		free(input);
+		reset_iteration(shell);
+	}
 }
 
 char *handle_input(void)
@@ -50,13 +50,13 @@ char *handle_input(void)
 
 void process_input(char *input, t_shell *shell)
 {
-    t_exit_status status;
+	t_exit_status status;
 
-    status = (t_exit_status)parse_and_prepare(shell, input);
-    if (status == ES_SUCCESS)
-        status = (t_exit_status)execute_prepared(shell);
+	status = (t_exit_status)parse_and_prepare(shell, input);
+	if (status == ES_SUCCESS)
+		status = (t_exit_status)execute_prepared(shell);
 
-    shell->exit_status = status;
+	shell->exit_status = status;
 }
 
 int	parse_and_prepare(t_shell *shell, char *input)
@@ -76,8 +76,8 @@ int	parse_and_prepare(t_shell *shell, char *input)
 		return (status);
 
 	status = process_heredoc(shell->pipeline, &shell->env_vars, shell->exit_status);
-    if (status != ES_SUCCESS)
-        return (status);
+	if (status != ES_SUCCESS)
+		return (status);
 
 	return (ES_SUCCESS);
 }
