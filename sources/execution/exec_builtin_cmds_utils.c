@@ -6,7 +6,7 @@
 /*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:08 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/03 23:11:58 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/03 23:15:29 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ char	*fetch_current_working_directory(void)
 	current_working_directory = ft_calloc(sizeof(char), PATH_MAX);
 	if (!current_working_directory)
 	{
-		perror("");
+		perror("calloc: current_working_directory");
 		return (NULL);
 	}
 	getcwd(current_working_directory, PATH_MAX);
