@@ -3,7 +3,7 @@ NAME       = minishell
 CC         = cc
 UNAME := $(shell uname)
 
-CFLAGS     = -g -Wall -Wextra -Werror -Iincludes -I$(LIBFT_DIR) #-fsanitize=address
+CFLAGS     = -g -Wall -Wextra -Werror -Iincludes -I$(LIBFT_DIR) -fsanitize=address
 
 LIBFT_DIR  = libft
 LIBFT_A    = $(LIBFT_DIR)/libft.a
@@ -44,9 +44,11 @@ SRC_FILES = \
 	execution/exec_begins.c \
 	execution/exec_command_filter.c \
 	execution/exec_builtin_commands.c \
-	execution/exec_builtin_commands_env.c \
-	execution/exec_builtin_commands_env_utils.c \
+	execution/exec_builtin_cmds_utils.c \
+	execution/exec_builtin_env_commands.c \
+	execution/exec_builtin_env_cmds_utils.c \
 	execution/exec_external_commands.c \
+	execution/exec_external_cmds_utils.c \
 	execution/exec_fd_related_utils.c \
 	execution/exec_close_and_free.c
 

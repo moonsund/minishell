@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   exec_builtin_commands_env.c                        :+:      :+:    :+:   */
+/*   exec_builtin_env_commands.c                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:14 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/03 17:44:46 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/03 20:51:05 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,9 @@
 #include "minishell.h"
 
 // The 3 next functions are wrappers for Leon's functions
-int		execute_export(t_shell *minishell);
-int		execute_unset(t_shell *minishell);
-int		execute_env(t_shell *minishell);
+int	execute_export(t_shell *minishell);
+int	execute_unset(t_shell *minishell);
+int	execute_env(t_shell *minishell);
 
 // Subject : "export with no options"
 int	execute_export(t_shell *minishell)
@@ -38,7 +38,7 @@ int	execute_export(t_shell *minishell)
 		return (1);
 	}
 	key = env_var_data[0];
-	if(env_var_data[0] && env_var_data[1])
+	if (env_var_data[0] && env_var_data[1])
 		value = env_var_data[1];
 	i = 0;
 	if (!key || ft_isdigit(key[0]))

@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/03 18:27:28 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/03 20:48:02 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -179,8 +179,6 @@ typedef struct s_shell
 	// t_ast ast;
 }								t_shell;
 
-// ------------------------------------------------------------------------------------------ From Leo
-
 // main.c
 
 // init.c
@@ -267,34 +265,42 @@ int								run_any_builtin_in_child(t_shell *shell, t_command *cmd);
 int								execute_built_in_commands(t_shell *minishell, t_command *cmd);
 
 // exec_builtin_commands.c
-char							*fetch_current_working_directory(void);
-int								execute_echo(t_command *cmds);
-bool							is_line_return(char **cmd, int *i);
-int								execute_cd(t_command *cmds);
-int								execute_pwd(char *current_working_directory);
-int								execute_exit(t_shell *shell, t_command *cmd);
+int			execute_echo(t_command *cmds);
+int			execute_cd(t_command *cmds);
+int			execute_pwd(char *current_working_directory);
+int			execute_exit(t_shell *shell, t_command *cmd);
 
-// exec_builtin_commands_env.c
+// exec_builtin_cmds_utils.c
+char		*fetch_current_working_directory(void);
+bool		is_line_return(char **cmd, int *i);
+bool	is_numeric_string(const char *str);
+int			parse_exit_code(const char *str, int *exit_code);
+
+// exec_builtin_env_commands.c
 int								execute_export(t_shell *minishell);
 int								execute_unset(t_shell *minishell);
 int								execute_env(t_shell *minishell);
 
-// exec_builtin_commands_env_utils.c
+// exec_builtin_env_cmds_utils.c
 void							print_export(t_shell *minishell);
 void							sort_envp_alpha(char **envp); // export no args
 void							str_swap(char **s1, char **s2);
 
 // exec_external_commands.c
-char							*build_path_to_check(char *dir, char *cmd);
-char							*fetch_and_check_bin_path(t_shell *minishell, char *cmd);
 int								execute_external_commands(t_shell *minishell, t_command *cmd);
+
+// exec_external_cmds_utils.c
+bool							is_input_exec_ok(char *cmd, char **updated_path, bool *path_alloc);
+bool							is_cmd_binary_found(char **updated_path, t_shell *minishell, char *cmd, bool *path_alloc);
+char							*fetch_and_check_bin_path(t_shell *minishell, char *cmd);
+char							*build_path_to_check(char *dir, char *cmd);
+void							execve_fail(bool path_alloc, char **updated_path, char ***conv_envp);
 
 // exec_utils_fd.c
 int								open_fd(const char *path, bool append, bool truncate);
 void							open_and_close_fd(t_command *cmd);
 
 // exec_close_and_free.c
-void							close_and_set_to_neg(int *fd);
 void							close_if_valid(int fd);
 void							free_envp(t_env_var_list *list);
 void							free_strings_array(char **array);
