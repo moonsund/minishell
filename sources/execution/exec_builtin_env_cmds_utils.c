@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   exec_builtin_commands_env_utils.c                  :+:      :+:    :+:   */
+/*   exec_builtin_env_cmds_utils.c                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:14 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/02 21:14:40 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/03 22:56:34 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 void	print_export(t_shell *minishell);
 void	sort_envp_alpha(char **envp);
 void	str_swap(char **s1, char **s2);
+int		fetch_and_check_env_var_data(char ***env_var_data, char *argv, char **key, char **value);
+int		key_value_check_init(char **key, char ***env_var_data, char **value);
 
 void	print_export(t_shell *minishell)
 {
@@ -65,4 +67,49 @@ void	str_swap(char **s1, char **s2)
 	tmp = *s1;
 	*s1 = *s2;
 	*s2 = tmp;
+}
+
+int	fetch_and_check_env_var_data(char ***env_var_data, char *argv, char **key, char **value)
+{
+	if (argv[0] == '=')
+	{
+		err_print(1, "not a valid identifier");
+		return (0);
+	}
+	*env_var_data = ft_split(argv, '=');
+	if (!*env_var_data)
+	{
+		err_malloc_print("execute_export");
+		return (0);
+	}
+	if (!key_value_check_init(key, env_var_data, value))
+		return (0);
+	return (1);
+}
+
+int	key_value_check_init(char **key, char ***env_var_data, char **value)
+{
+	int	i;
+
+	i = 0;
+	*key = (*env_var_data)[0];
+	if ((*env_var_data)[0] && (*env_var_data)[1])
+		*value = (*env_var_data)[1];
+	if (!*key || ft_isdigit((*key)[0]))
+	{
+		free_strings_array(*env_var_data);
+		err_print(1, "not a valid identifier");
+		return (0);
+	}
+	while ((*key)[i])
+	{
+		if (!ft_isalnum((*key)[i]) && (!ft_strchr(*key, '_')))
+		{
+			free_strings_array(*env_var_data);
+			err_print(1, "not a valid identifier");
+			return (0);
+		}
+		i++;
+	}
+	return (1);
 }

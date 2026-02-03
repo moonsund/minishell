@@ -6,17 +6,17 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:08 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/03 20:48:32 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/03 22:53:20 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 #include "minishell.h"
 
-char		*fetch_current_working_directory(void);
-bool		is_line_return(char **cmd, int *i);
+char	*fetch_current_working_directory(void);
+bool	is_line_return(char **cmd, int *i);
 bool	is_numeric_string(const char *str);
-int			parse_exit_code(const char *str, int *exit_code);
+int		parse_exit_code(const char *str, int *exit_code);
 
 char	*fetch_current_working_directory(void)
 {

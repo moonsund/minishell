@@ -3,20 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   exec_builtin_commands.c                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:08 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/03 21:11:44 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/03 22:55:32 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 #include "minishell.h"
 
-int			execute_echo(t_command *cmds);
-int			execute_cd(t_command *cmds);
-int			execute_pwd(char *current_working_directory);
-int			execute_exit(t_shell *shell, t_command *cmd);
+int	execute_echo(t_command *cmds);
+int	execute_cd(t_command *cmds);
+int	execute_pwd(char *current_working_directory);
+int	execute_exit(t_shell *shell, t_command *cmd);
 
 // Subject : "echo with option -n"
 int	execute_echo(t_command *cmds)

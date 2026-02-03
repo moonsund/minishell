@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:14 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/03 20:51:05 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/03 22:57:30 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,6 @@ int	execute_env(t_shell *minishell);
 int	execute_export(t_shell *minishell)
 {
 	char	**env_var_data;
-	int		i;
 	char	*key;
 	char	*value;
 
@@ -31,35 +30,8 @@ int	execute_export(t_shell *minishell)
 		print_export(minishell);
 		return (0);
 	}
-	env_var_data = ft_split(minishell->pipeline->cmds->argv[1], '=');
-	if (!env_var_data)
-	{
-		err_malloc_print("execute_export");
+	if (!fetch_and_check_env_var_data(&env_var_data, minishell->pipeline->cmds->argv[1], &key, &value))
 		return (1);
-	}
-	key = env_var_data[0];
-	if (env_var_data[0] && env_var_data[1])
-		value = env_var_data[1];
-	i = 0;
-	if (!key || ft_isdigit(key[0]))
-	{
-		free_strings_array(env_var_data);
-		err_print(1, "not a valid identifier");
-		return (1);
-	}
-	while (key[i])
-	{
-		if (!ft_isalnum(key[i]))
-		{
-			if (!ft_strchr(key, '_'))
-			{
-				free_strings_array(env_var_data);
-				err_print(1, "not a valid identifier");
-				return (1);
-			}
-		}
-		i++;
-	}
 	if (!set_var(&minishell->env_vars, key, value))
 	{
 		free_strings_array(env_var_data);
