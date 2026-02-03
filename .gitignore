@@ -1,5 +1,6 @@
-# Ignore the project executable
-minishell
+# Ignore the project executable (root binary only)
+/minishell
+!/minishell/
 
 # Ignore testing files
 /testing/
