@@ -41,6 +41,9 @@ SRC_FILES = \
 	parser/parser.c \
 	expand/expand.c \
 	heredoc/heredoc.c \
+	heredoc/heredoc_expand.c \
+	heredoc/heredoc_expand_utils.c \
+	heredoc/heredoc_utils.c \
 	envp/envp.c \
 	envp/envp_utils.c \
 	execution/exec_begins.c \

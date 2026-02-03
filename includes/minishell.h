@@ -6,7 +6,7 @@
 /*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/03 18:57:14 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/03 19:41:40 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -266,11 +266,16 @@ void							init_buffer(t_buf *buf);
 
 // heredoc
 t_exit_status		process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, t_exit_status exit_status);
-static t_exit_status get_heredoc(t_redir *redir, t_env_var_list *env_vars, t_exit_status exit_status, size_t *heredoc_index);
-static void         redir_replace_with_infile(t_redir *r, char *filename);
-static char         *generate_heredoc_filename(size_t heredoc_index);
-static t_exit_status expand_heredoc(char **line, t_env_var_list *env_vars, t_exit_status exit_status);
-static t_exit_status write_line_in_fd(int fd, char *line);
+t_exit_status expand_heredoc(char **line, t_env_var_list *env_vars, t_exit_status exit_status);
+t_exit_status strbuf_init(t_strbuf *strbuf);
+void strbuf_free(t_strbuf *strbuf);
+t_exit_status strbuf_reserve(t_strbuf *strbuf, size_t extra);
+t_exit_status strbuf_append_char(t_strbuf *strbuf, char c);
+t_exit_status strbuf_append_str(t_strbuf *strbuf, const char *s);
+t_exit_status heredoc_cleanup_return(int fd, char *filename, t_exit_status st);
+void redir_replace_with_infile(t_redir *r, char *filename);
+char *generate_heredoc_filename(size_t heredoc_index);
+t_exit_status write_line_in_fd(int fd, char *line);
 
 // execution.c
 int								execute_pipeline(t_shell *shell);
