@@ -26,9 +26,10 @@ OBJ_PATH = objects/
 
 SRC_FILES = \
 	main.c \
-	init/init_shell.c \
-	signals.c \
-	utils.c \
+	minishell/minishell.c \
+	minishell/init_shell.c \
+	minishell/signals.c \
+	minishell/utils.c \
 	tokenizer/tokenizer.c \
 	tokenizer/tokenizer_words.c \
 	tokenizer/tokenizer_operators.c \
