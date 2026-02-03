@@ -45,24 +45,24 @@ void free_tokens(t_token_list *list)
 
 void free_pipeline(t_pipeline *pl)
 {
-    size_t i;
+	size_t i;
 
-    if (!pl)
-        return;
+	if (!pl)
+		return;
 
-    i = 0;
-    while (i < pl->count)
-    {
-        free_cmd(&pl->cmds[i]);
-        i++;
-    }
-    free(pl->cmds);
-    free(pl);
+	i = 0;
+	while (i < pl->count)
+	{
+		free_cmd(&pl->cmds[i]);
+		i++;
+	}
+	free(pl->cmds);
+	free(pl);
 }
 
 void free_env_var_list(t_env_var_list *vars)
 {
-    t_var *cur;
+	t_var *cur;
 	t_var *next;
 
 	if (!vars)
@@ -74,11 +74,11 @@ void free_env_var_list(t_env_var_list *vars)
 		next = cur->next;
 		free(cur->name);
 		free(cur->value);
-        free(cur);
+		free(cur);
 		cur = next;
 	}
 	vars->head = NULL;
-    vars->tail = NULL;
+	vars->tail = NULL;
 	vars->count = 0;
 }
 
@@ -102,7 +102,7 @@ void err_print(t_exit_status type, const char *where)
 	}
 	else
 	{
-        // printf( "minishell: %s\n", where);
+		// printf( "minishell: %s\n", where);
 		write(2, "minishell: ", 11);
 		write(2, where, ft_strlen(where));
 		write(2, "\n", 1);
