@@ -3,62 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   tokenizer_utils.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:39 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 13:17:21 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 18:02:40 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-bool	is_empty(const char *str);
-bool	is_space(unsigned char c);
-bool	is_operator(unsigned char c);
-void	append_token(t_token_list *list, t_token *token);
 void	free_tokens(t_token_list *list);
 void	reset_buf(t_buf *buf);
 void	free_buf(t_buf *buf);
-
-bool	is_empty(const char *str)
-{
-	if (!str || !*str)
-		return (true);
-	while (*str)
-	{
-		if (!is_space((unsigned char)*str))
-			return (false);
-		str++;
-	}
-	return (true);
-}
-
-bool	is_space(unsigned char c)
-{
-	return (c == ' ' || c == '\t' || c == '\n' || c == '\r');
-}
-
-bool	is_operator(unsigned char c)
-{
-	return (c == '<' || c == '>' || c == '|');
-}
-
-void	append_token(t_token_list *list, t_token *token)
-{
-	if (!token)
-		return ;
-	if (list->head == NULL)
-	{
-		list->tail = token;
-		list->head = token;
-	}
-	else
-	{
-		list->tail->next = token;
-		list->tail = token;
-	}
-	list->count++;
-}
+void			init_lexer_context(t_lexer_context *context);
 
 void	reset_buf(t_buf *buf)
 {
@@ -83,4 +40,13 @@ void	init_buffer(t_buf *buf)
 	buf->quotes_map = NULL;
 	buf->capacity = 0;
 	buf->used_length = 0;
+}
+
+void	init_lexer_context(t_lexer_context *context)
+{
+	init_buffer(&context->buf);
+	context->quote_mark = Q_NONE;
+	context->i = 0;
+	context->in_dq = false;
+	context->in_sq = false;
 }

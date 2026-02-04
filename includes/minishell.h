@@ -6,7 +6,7 @@
 /*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/04 16:07:18 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 17:53:20 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -271,8 +271,11 @@ t_exit_status					build_pipeline_from_tokens(t_shell *shell);
 int								append_cmd(t_pipeline *pl, t_command cmd);
 
 // tokenizer.c
-t_exit_status					tokenize_with_qmap(const char *str,
-									t_token_list *tokens);
+t_exit_status	tokenize_with_qmap(const char *str, t_token_list *tokens);
+int				process_quotes(const char *str, t_lexer_context *ctx);
+int				process_spaces_outside_quotes(const char *str,
+					t_token_list *tokens, t_lexer_context *ctx);
+void			init_lexer_context(t_lexer_context *context);
 t_token							*make_word_token(t_buf *buf);
 
 // tokenizer_words.c
@@ -283,6 +286,13 @@ int								process_word(t_token_list *tokens,
 int								check_operators(const char *str,
 									t_token_list *tokens,
 									t_lexer_context *context);
+int	process_operator_token(t_token_type type, const char *literal,
+		t_token_list *tokens, t_lexer_context *context);
+int	should_handle_operator(const char *str, const t_lexer_context *ctx);
+int	flush_word_buf_as_token(t_token_list *tokens, t_lexer_context *ctx);
+int	dispatch_operator_token(const char *str,
+									t_token_list *tokens,
+									t_lexer_context *ctx);
 
 // tokenizer_chars.c
 int								append_char(char c, t_buf *buf,

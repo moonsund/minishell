@@ -3,79 +3,88 @@
 /*                                                        :::      ::::::::   */
 /*   tokenizer.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:46 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 13:19:14 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 17:31:05 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void			init_lexer_context(t_lexer_context *context);
+t_exit_status	tokenize_with_qmap(const char *str, t_token_list *tokens);
 int				process_quotes(const char *str, t_lexer_context *ctx);
 int				process_spaces_outside_quotes(const char *str,
 					t_token_list *tokens, t_lexer_context *ctx);
+static t_exit_status	lex_process_step(const char *str, t_token_list *tokens,
+						t_lexer_context *ctx);
+static t_exit_status	lex_finalize(t_token_list *tokens, t_lexer_context *ctx);
 
 t_exit_status	tokenize_with_qmap(const char *str, t_token_list *tokens)
 {
 	t_lexer_context	ctx;
-	int				sp_res;
-	int				op_res;
+	t_exit_status	status;
 
 	init_lexer_context(&ctx);
 	while (str[ctx.i])
 	{
-		if (process_quotes(str, &ctx))
-			continue ;
-		sp_res = process_spaces_outside_quotes(str, tokens, &ctx);
-		if (sp_res < 0)
-			return (ES_GENERAL);
-		if (sp_res > 0)
-			continue ;
-		op_res = check_operators(str, tokens, &ctx);
-		if (op_res < 0)
-			return (ES_GENERAL);
-		if (op_res > 0)
-			continue ;
-		if (!append_char(str[ctx.i], &ctx.buf, ctx.quote_mark))
-		{
-			free_buf(&ctx.buf);
-			return (ES_GENERAL);
-		}
-		ctx.i++;
+		status = lex_process_step(str, tokens, &ctx);
+		if (status != ES_SUCCESS)
+			return (status);
 	}
-	if (ctx.in_sq || ctx.in_dq)
+	return (lex_finalize(tokens, &ctx));
+}
+
+static t_exit_status	lex_process_step(const char *str, t_token_list *tokens,
+						t_lexer_context *ctx)
+{
+	int	res;
+
+	if (process_quotes(str, ctx))
+		return (ES_SUCCESS);
+	res = process_spaces_outside_quotes(str, tokens, ctx);
+	if (res < 0)
+		return (free_buf(&ctx->buf), ES_GENERAL);
+	if (res > 0)
+		return (ES_SUCCESS);
+	res = check_operators(str, tokens, ctx);
+	if (res < 0)
+		return (free_buf(&ctx->buf), ES_GENERAL);
+	if (res > 0)
+		return (ES_SUCCESS);
+	if (!append_char(str[ctx->i], &ctx->buf, ctx->quote_mark))
 	{
-		free_buf(&ctx.buf);
-		return (ES_INVALID_USAGE);
+		free_buf(&ctx->buf);
+		return (ES_GENERAL);
 	}
-	if (ctx.buf.used_length > 0)
-	{
-		if (!process_word(tokens, &ctx))
-			return (ES_GENERAL);
-	}
-	free_buf(&ctx.buf);
+	ctx->i++;
 	return (ES_SUCCESS);
 }
 
-void	init_lexer_context(t_lexer_context *context)
+static t_exit_status	lex_finalize(t_token_list *tokens, t_lexer_context *ctx)
 {
-	init_buffer(&context->buf);
-	context->quote_mark = Q_NONE;
-	context->i = 0;
-	context->in_dq = false;
-	context->in_sq = false;
+	if (ctx->in_sq || ctx->in_dq)
+	{
+		free_buf(&ctx->buf);
+		return (ES_INVALID_USAGE);
+	}
+	if (ctx->buf.used_length > 0)
+	{
+		if (!process_word(tokens, ctx))
+		{
+			free_buf(&ctx->buf);
+			return (ES_GENERAL);
+		}
+	}
+	free_buf(&ctx->buf);
+	return (ES_SUCCESS);
 }
 
 int	process_quotes(const char *str, t_lexer_context *ctx)
 {
-	char	c;
-
 	if (!str || !ctx)
 		return (0);
-	c = str[ctx->i];
-	if (!ctx->in_dq && c == '\'')
+	if (!ctx->in_dq && str[ctx->i] == '\'')
 	{
 		ctx->in_sq = !ctx->in_sq;
 		if (ctx->in_sq)
@@ -85,7 +94,7 @@ int	process_quotes(const char *str, t_lexer_context *ctx)
 		ctx->i++;
 		return (1);
 	}
-	if (!ctx->in_sq && c == '\"')
+	if (!ctx->in_sq && str[ctx->i] == '\"')
 	{
 		ctx->in_dq = !ctx->in_dq;
 		if (ctx->in_dq)

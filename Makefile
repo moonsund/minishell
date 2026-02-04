@@ -34,8 +34,10 @@ SRC_FILES = \
 	tokenizer/tokenizer.c \
 	tokenizer/tokenizer_words.c \
 	tokenizer/tokenizer_operators.c \
+	tokenizer/tokenizer_operators_utils.c \
 	tokenizer/tokenizer_chars.c \
 	tokenizer/tokenizer_utils.c \
+	tokenizer/tokenizer_helpers.c \
 	parser/parser_init.c \
 	parser/parser_tokens.c \
 	parser/parser_utils.c \
