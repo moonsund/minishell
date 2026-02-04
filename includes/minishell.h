@@ -6,7 +6,7 @@
 /*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/03 23:25:50 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 10:11:58 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -271,7 +271,7 @@ t_exit_status					strbuf_append_str(t_strbuf *strbuf, const char *s);
 t_exit_status					heredoc_cleanup_return(int fd, char *filename, t_exit_status st);
 void							redir_replace_with_infile(t_redir *r, char *filename);
 char							*generate_heredoc_filename(size_t heredoc_index);
-t_exit_status					write_line_in_fd(int fd, char *line);
+t_exit_status					write_line_in_fd(int fd, const char *line);
 
 // execution.c
 int								execute_pipeline(t_shell *shell);
