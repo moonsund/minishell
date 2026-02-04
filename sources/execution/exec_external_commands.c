@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:18:42 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/04 16:11:13 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 18:39:46 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,6 @@ int	execute_external_commands(t_shell *shell, t_command *cmd)
 	bool	path_alloc;
 
 	path_alloc = false;
-
-
 	if (cmd->argv)
 	{
 		if (cmd->argv[0][0] == '\0')
@@ -34,7 +32,7 @@ int	execute_external_commands(t_shell *shell, t_command *cmd)
 				return (1);
 		}
 		else if (!is_binary_found(&updt_path, shell, cmd->argv[0], &path_alloc))
-				return (127);
+			return (127);
 	}
 	else
 		return (1);
