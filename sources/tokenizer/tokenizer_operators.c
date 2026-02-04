@@ -3,21 +3,23 @@
 /*                                                        :::      ::::::::   */
 /*   tokenizer_operators.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:36 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 10:15:37 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 13:16:43 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int process_operator_token(t_token_type type, const char *literal, t_token_list *tokens, t_lexer_context *context);
-static t_token *make_operator_token(t_token_type type, const char *literal);
+int				process_operator_token(t_token_type type, const char *literal,
+					t_token_list *tokens, t_lexer_context *context);
+static t_token	*make_operator_token(t_token_type type, const char *literal);
 
-int check_operators(const char *str, t_token_list *tokens, t_lexer_context *context)
+int	check_operators(const char *str, t_token_list *tokens,
+		t_lexer_context *context)
 {
-	t_token *token;
+	t_token	*token;
 
 	if (!context->in_sq && !context->in_dq && is_operator(str[context->i]))
 	{
@@ -33,32 +35,34 @@ int check_operators(const char *str, t_token_list *tokens, t_lexer_context *cont
 			append_token(tokens, token);
 			reset_buf(&context->buf);
 		}
-
 		if (str[context->i] == '|')
 			return (process_operator_token(TOK_PIPE, "|", tokens, context));
-
 		else if (str[context->i] == '<')
 		{
-			if (str[context->i+1] == '<')
-				return (process_operator_token(TOK_HEREDOC, "<<", tokens, context));
+			if (str[context->i + 1] == '<')
+				return (process_operator_token(TOK_HEREDOC, "<<", tokens,
+						context));
 			else
-				return (process_operator_token(TOK_REDIR_IN, "<", tokens, context));
+				return (process_operator_token(TOK_REDIR_IN, "<", tokens,
+						context));
 		}
-
 		else if (str[context->i] == '>')
 		{
 			if (str[context->i + 1] == '>')
-				return (process_operator_token(TOK_APPEND, ">>", tokens, context));
+				return (process_operator_token(TOK_APPEND, ">>", tokens,
+						context));
 			else
-				return (process_operator_token(TOK_REDIR_OUT, ">", tokens, context));
+				return (process_operator_token(TOK_REDIR_OUT, ">", tokens,
+						context));
 		}
 	}
 	return (0);
 }
 
-int process_operator_token(t_token_type type, const char *literal, t_token_list *tokens, t_lexer_context *context)
+int	process_operator_token(t_token_type type, const char *literal,
+		t_token_list *tokens, t_lexer_context *context)
 {
-	t_token *token;
+	t_token	*token;
 
 	token = make_operator_token(type, literal);
 	if (!token)
@@ -72,15 +76,14 @@ int process_operator_token(t_token_type type, const char *literal, t_token_list 
 	return (1);
 }
 
-static t_token *make_operator_token(t_token_type type, const char *literal)
+static t_token	*make_operator_token(t_token_type type, const char *literal)
 {
-	t_token *token;
-	size_t len;
+	t_token	*token;
+	size_t	len;
 
 	token = malloc(sizeof(*token));
 	if (!token)
 		return (NULL);
-
 	len = ft_strlen(literal);
 	token->raw_str = malloc(sizeof(char) * (len + 1));
 	if (!token->raw_str)
@@ -88,7 +91,6 @@ static t_token *make_operator_token(t_token_type type, const char *literal)
 		free(token);
 		return (NULL);
 	}
-
 	ft_memcpy(token->raw_str, literal, len + 1);
 	token->length = len;
 	token->type = type;

@@ -3,24 +3,24 @@
 /*                                                        :::      ::::::::   */
 /*   tokenizer_utils.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:39 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 10:15:40 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 13:17:21 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-bool is_empty(const char *str);
-bool is_space(unsigned char c);
-bool is_operator(unsigned char c);
-void append_token(t_token_list *list, t_token *token);
-void free_tokens(t_token_list *list);
-void reset_buf(t_buf *buf);
-void free_buf(t_buf *buf);
+bool	is_empty(const char *str);
+bool	is_space(unsigned char c);
+bool	is_operator(unsigned char c);
+void	append_token(t_token_list *list, t_token *token);
+void	free_tokens(t_token_list *list);
+void	reset_buf(t_buf *buf);
+void	free_buf(t_buf *buf);
 
-bool is_empty(const char *str)
+bool	is_empty(const char *str)
 {
 	if (!str || !*str)
 		return (true);
@@ -33,17 +33,17 @@ bool is_empty(const char *str)
 	return (true);
 }
 
-bool is_space(unsigned char c)
+bool	is_space(unsigned char c)
 {
 	return (c == ' ' || c == '\t' || c == '\n' || c == '\r');
 }
 
-bool is_operator(unsigned char c)
+bool	is_operator(unsigned char c)
 {
 	return (c == '<' || c == '>' || c == '|');
 }
 
-void append_token(t_token_list *list, t_token *token)
+void	append_token(t_token_list *list, t_token *token)
 {
 	if (!token)
 		return ;
@@ -60,12 +60,12 @@ void append_token(t_token_list *list, t_token *token)
 	list->count++;
 }
 
-void reset_buf(t_buf *buf)
+void	reset_buf(t_buf *buf)
 {
 	buf->used_length = 0;
 }
 
-void free_buf(t_buf *buf)
+void	free_buf(t_buf *buf)
 {
 	if (buf->characters)
 		free(buf->characters);
@@ -77,7 +77,7 @@ void free_buf(t_buf *buf)
 	buf->used_length = 0;
 }
 
-void init_buffer(t_buf *buf)
+void	init_buffer(t_buf *buf)
 {
 	buf->characters = NULL;
 	buf->quotes_map = NULL;
