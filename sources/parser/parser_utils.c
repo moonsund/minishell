@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser_utils.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:23 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 20:19:26 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 21:43:40 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ static bool	is_heredoc_file(const char *filename);
 void	free_cmd(t_command *cmd)
 {
 	if (!cmd)
-		return;
+		return ;
 	free_cmd_argv(cmd);
 	free_cmd_redirs(cmd);
 	init_command(cmd);
@@ -31,7 +31,7 @@ static void	free_cmd_argv(t_command *cmd)
 	size_t	i;
 
 	if (!cmd || !cmd->argv)
-		return;
+		return ;
 	i = 0;
 	while (cmd->argv[i])
 	{
@@ -48,7 +48,7 @@ static void	free_cmd_redirs(t_command *cmd)
 	t_redir	*next;
 
 	if (!cmd)
-		return;
+		return ;
 	redir = cmd->redirs;
 	while (redir)
 	{

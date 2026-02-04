@@ -3,19 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   parser_tokens.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:20 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 20:27:31 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 21:44:48 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int						process_word_token(t_parser_context *ctx);
-t_exit_status			process_pipe_token(t_pipeline *pl, t_parser_context *ctx);
-t_exit_status			process_redir_tokens(t_parser_context *ctx);
-int	append_arg(t_command *cmd, char *arg);
+int				process_word_token(t_parser_context *ctx);
+t_exit_status	process_pipe_token(t_pipeline *pl, t_parser_context *ctx);
+t_exit_status	process_redir_tokens(t_parser_context *ctx);
+int				append_arg(t_command *cmd, char *arg);
 
 int	process_word_token(t_parser_context *ctx)
 {

@@ -3,21 +3,23 @@
 /*                                                        :::      ::::::::   */
 /*   parser.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:26 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 20:25:05 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 21:45:07 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-t_exit_status	build_pipeline_from_tokens(t_shell *shell);
+t_exit_status			build_pipeline_from_tokens(t_shell *shell);
 static t_exit_status	process_tokens(t_pipeline *pl, t_token_list *list,
-		t_parser_context *ctx);
-static t_exit_status	process_one_token(t_pipeline *pl, t_parser_context *ctx);
-static t_exit_status	finalize_last_command(t_pipeline *pl, t_parser_context *ctx);
-int	append_cmd(t_pipeline *pl, t_command cmd);
+							t_parser_context *ctx);
+static t_exit_status	process_one_token(t_pipeline *pl,
+							t_parser_context *ctx);
+static t_exit_status	finalize_last_command(t_pipeline *pl,
+							t_parser_context *ctx);
+int						append_cmd(t_pipeline *pl, t_command cmd);
 
 t_exit_status	build_pipeline_from_tokens(t_shell *shell)
 {
@@ -85,7 +87,8 @@ static t_exit_status	process_one_token(t_pipeline *pl, t_parser_context *ctx)
 	return (ES_SUCCESS);
 }
 
-static t_exit_status	finalize_last_command(t_pipeline *pl, t_parser_context *ctx)
+static t_exit_status	finalize_last_command(t_pipeline *pl,
+		t_parser_context *ctx)
 {
 	int	has_argv;
 	int	has_redirs;

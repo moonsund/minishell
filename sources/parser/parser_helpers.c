@@ -1,22 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parser_tokens_helpers.c                            :+:      :+:    :+:   */
+/*   parser_helpers.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:20 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 20:05:26 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 21:45:25 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int				token_has_any_quotes(t_token *token);
-int				redir_push_back(t_redir **lst, t_redir *node);
+int		token_has_any_quotes(t_token *token);
+int		redir_push_back(t_redir **lst, t_redir *node);
 size_t	count_argv(char **argv);
 char	**alloc_argv_with_copy(char **old_argv, size_t argc);
-int	append_dup_arg(char **new_argv, size_t argc, char *arg);
+int		append_dup_arg(char **new_argv, size_t argc, char *arg);
 
 int	token_has_any_quotes(t_token *token)
 {

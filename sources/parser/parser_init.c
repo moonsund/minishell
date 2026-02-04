@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser_init.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:15 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 20:30:42 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 21:43:50 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,9 @@
 t_pipeline	*init_pipeline(void);
 void		init_parser_context(t_parser_context *ctx);
 void		init_command(t_command *cmd);
-t_redir	*init_redirect(t_parser_context *ctx);
-static void	apply_redir(t_redir *redir, t_token_type token_type, t_parser_context *ctx);
+t_redir		*init_redirect(t_parser_context *ctx);
+static void	apply_redir(t_redir *redir, t_token_type token_type,
+				t_parser_context *ctx);
 
 t_pipeline	*init_pipeline(void)
 {
@@ -52,7 +53,7 @@ t_redir	*init_redirect(t_parser_context *ctx)
 {
 	t_redir			*redir;
 	t_token_type	token_type;
-	
+
 	if (!ctx || !ctx->current || !ctx->next || !ctx->next->raw_str)
 		return (NULL);
 	token_type = ctx->current->type;
@@ -72,7 +73,8 @@ t_redir	*init_redirect(t_parser_context *ctx)
 	return (redir);
 }
 
-static void	apply_redir(t_redir *redir, t_token_type token_type, t_parser_context *ctx)
+static void	apply_redir(t_redir *redir, t_token_type token_type,
+		t_parser_context *ctx)
 {
 	if (token_type == TOK_REDIR_IN)
 	{
