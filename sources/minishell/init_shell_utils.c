@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   init_shell_utils.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:14:52 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 16:07:22 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 16:27:02 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 void	init_env_list_empty(t_env_var_list *list);
 char	*find_env_sep(char *env_line);
 t_var	*create_var_from_env_line(char *env_line, char *sep_ptr);
-int	append_var_or_cleanup(t_env_var_list *list, t_var *var);
+int		append_var_or_cleanup(t_env_var_list *list, t_var *var);
 
 void	init_env_list_empty(t_env_var_list *list)
 {
