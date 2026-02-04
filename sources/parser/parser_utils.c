@@ -3,29 +3,29 @@
 /*                                                        :::      ::::::::   */
 /*   parser_utils.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:23 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 10:15:24 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 13:11:27 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void free_cmd(t_command *cmd);
+void		free_cmd(t_command *cmd);
 
-static bool is_heredoc_file(const char *filename)
+static bool	is_heredoc_file(const char *filename)
 {
 	if (!filename)
 		return (false);
 	return (ft_strncmp(filename, ".heredoc_", 9) == 0);
 }
 
-void free_cmd(t_command *cmd)
+void	free_cmd(t_command *cmd)
 {
-	size_t argc;
-	t_redir *redir;
-	t_redir *next_redir;
+	size_t	argc;
+	t_redir	*redir;
+	t_redir	*next_redir;
 
 	if (cmd->argv)
 	{
@@ -37,7 +37,6 @@ void free_cmd(t_command *cmd)
 		}
 	}
 	free(cmd->argv);
-	
 	redir = cmd->redirs;
 	while (redir)
 	{
@@ -51,6 +50,5 @@ void free_cmd(t_command *cmd)
 		free(redir);
 		redir = next_redir;
 	}
-	
 	init_command(cmd);
 }
