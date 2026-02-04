@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   expand_utils.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 13:41:51 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 15:53:19 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 16:25:08 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,7 @@ t_exit_status	exp_loop(t_expctx *c);
 t_exit_status	exp_append_char(t_expctx *c, char ch);
 t_exit_status	exp_dollar(t_expctx *c, size_t *i);
 t_exit_status	exp_append_status(t_expctx *c, size_t *i);
-int	append_str(t_buf *buf, char *str, t_qmark quote_mark);
-
+int				append_str(t_buf *buf, char *str, t_qmark quote_mark);
 
 t_exit_status	exp_loop(t_expctx *c)
 {

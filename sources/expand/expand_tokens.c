@@ -3,20 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   expand_tokens.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 15:54:59 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 15:55:00 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 16:24:00 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-t_exit_status	expand_tokens(t_token_list *tokens, t_env_var_list *env_vars,
-		t_exit_status exit_status);		
+t_exit_status			expand_tokens(t_token_list *tokens,
+							t_env_var_list *env_vars,
+							t_exit_status exit_status);
 static t_exit_status	expand_word_token(t_token *token,
 							t_env_var_list *env_vars,
-							t_exit_status exit_status);						
+							t_exit_status exit_status);
 static bool				token_needs_expansion(t_token *token);
 static t_exit_status	exp_commit(t_expctx *c);
 static t_exit_status	exp_fail(t_expctx *c);
@@ -92,7 +93,6 @@ static t_exit_status	exp_fail(t_expctx *c)
 	return (ES_GENERAL);
 }
 
-
 static t_exit_status	exp_commit(t_expctx *c)
 {
 	free(c->tok->raw_str);
@@ -102,5 +102,3 @@ static t_exit_status	exp_commit(t_expctx *c)
 	c->tok->length = c->buf.used_length - 1;
 	return (ES_SUCCESS);
 }
-
-
