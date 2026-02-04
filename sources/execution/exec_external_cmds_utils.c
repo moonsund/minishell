@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:18:42 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/03 22:58:34 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 14:18:30 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,8 @@
 #include "minishell.h"
 
 bool	is_input_exec_ok(char *cmd, char **updated_path, bool *path_alloc);
-bool	is_cmd_binary_found(char **updated_path, t_shell *minishell, char *cmd, bool *path_alloc);
-char	*fetch_and_check_bin_path(t_shell *minishell, char *cmd);
+bool	is_cmd_binary_found(char **updated_path, t_shell *shell, char *cmd, bool *path_alloc);
+char	*fetch_and_check_bin_path(t_shell *shell, char *cmd);
 char	*build_path_to_check(char *dir, char *cmd);
 void	execve_fail(bool path_alloc, char **updated_path, char ***conv_envp);
 
@@ -34,9 +34,9 @@ bool	is_input_exec_ok(char *cmd, char **updated_path, bool *path_alloc)
 	}
 }
 
-bool	is_cmd_binary_found(char **updated_path, t_shell *minishell, char *cmd, bool *path_alloc)
+bool	is_cmd_binary_found(char **updated_path, t_shell *shell, char *cmd, bool *path_alloc)
 {
-	*updated_path = fetch_and_check_bin_path(minishell, cmd);
+	*updated_path = fetch_and_check_bin_path(shell, cmd);
 	if (!updated_path)
 	{
 		perror("command not found");
@@ -46,7 +46,7 @@ bool	is_cmd_binary_found(char **updated_path, t_shell *minishell, char *cmd, boo
 	return (true);
 }
 
-char	*fetch_and_check_bin_path(t_shell *minishell, char *cmd)
+char	*fetch_and_check_bin_path(t_shell *shell, char *cmd)
 {
 	t_var	*path_var_in_env;
 	char	**path_var_dirs;
@@ -54,7 +54,7 @@ char	*fetch_and_check_bin_path(t_shell *minishell, char *cmd)
 	int		i;
 
 	i = 0;
-	path_var_in_env = find_var(&minishell->env_vars, "PATH");
+	path_var_in_env = find_var(&shell->env_vars, "PATH");
 	if (!path_var_in_env || !path_var_in_env->value)
 		return (NULL);
 	path_var_dirs = ft_split(path_var_in_env->value, ':');

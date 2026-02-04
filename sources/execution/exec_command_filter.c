@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:18:53 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/03 18:54:18 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 14:18:15 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ int	is_builtin(const char *cmd);
 int	is_parent_builtin(const char *cmd);
 int	exec_builtin_in_parent(t_shell *shell, t_command *cmd);
 int	run_any_builtin_in_child(t_shell *shell, t_command *cmd);
-int	execute_built_in_commands(t_shell *minishell, t_command *cmd);
+int	execute_built_in_commands(t_shell *shell, t_command *cmd);
 
 int	is_builtin(const char *cmd)
 {
@@ -97,7 +97,7 @@ int	run_any_builtin_in_child(t_shell *shell, t_command *cmd)
 // We're in a child process.
 // If there are pipes, commands without output have been ignored,
 // the others will execute normally with the correct FDs (if applicable)
-int	execute_built_in_commands(t_shell *minishell, t_command *cmd)
+int	execute_built_in_commands(t_shell *shell, t_command *cmd)
 {
 	int		exit_status;
 	char	*current_working_directory;
@@ -111,15 +111,15 @@ int	execute_built_in_commands(t_shell *minishell, t_command *cmd)
 	else if (ft_strcmp(cmd->argv[0], "pwd") == 0)
 		exit_status = execute_pwd(current_working_directory);
 	else if (ft_strcmp(cmd->argv[0], "export") == 0)
-		exit_status = execute_export(minishell);
+		exit_status = execute_export(shell);
 	else if (ft_strcmp(cmd->argv[0], "unset") == 0)
-		exit_status = execute_unset(minishell);
+		exit_status = execute_unset(shell);
 	else if (ft_strcmp(cmd->argv[0], "env") == 0)
-		exit_status = execute_env(minishell);
+		exit_status = execute_env(shell);
 	else if (ft_strcmp(cmd->argv[0], "exit") == 0)
 	{
 		free(current_working_directory);
-		exit_status = execute_exit(minishell, cmd);
+		exit_status = execute_exit(shell, cmd);
 		exit(exit_status);
 	}
 	free(current_working_directory);

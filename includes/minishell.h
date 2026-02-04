@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/04 12:59:15 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 14:19:06 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -303,7 +303,7 @@ int								exec_builtin_in_parent(t_shell *shell,
 									t_command *cmd);
 int								run_any_builtin_in_child(t_shell *shell,
 									t_command *cmd);
-int								execute_built_in_commands(t_shell *minishell,
+int								execute_built_in_commands(t_shell *shell,
 									t_command *cmd);
 
 // exec_builtin_commands.c
@@ -320,30 +320,30 @@ int								parse_exit_code(const char *str,
 									int *exit_code);
 
 // exec_builtin_env_commands.c
-int								execute_export(t_shell *minishell);
-int								execute_unset(t_shell *minishell);
-int								execute_env(t_shell *minishell);
+int								execute_export(t_shell *shell);
+int								execute_unset(t_shell *shell);
+int								execute_env(t_shell *shell);
 
 // exec_builtin_env_cmds_utils.c
-void							print_export(t_shell *minishell);
+void							print_export(t_shell *shell);
 void							sort_envp_alpha(char **envp);
 void							str_swap(char **s1, char **s2);
-int								check_env_var_data(char ***env_var_data,
+int								check_var_data(char ***var_data,
 									char *argv, char **key, char **value);
 int								key_value_check_init(char **key,
-									char ***env_var_data, char **value);
+									char ***var_data, char **value);
 
 // exec_external_commands.c
-int								execute_external_commands(t_shell *minishell,
+int								execute_external_commands(t_shell *shell,
 									t_command *cmd);
 
 // exec_external_cmds_utils.c
 bool							is_input_exec_ok(char *cmd, char **updated_path,
 									bool *path_alloc);
 bool							is_cmd_binary_found(char **updated_path,
-									t_shell *minishell, char *cmd,
+									t_shell *shell, char *cmd,
 									bool *path_alloc);
-char							*fetch_and_check_bin_path(t_shell *minishell,
+char							*fetch_and_check_bin_path(t_shell *shell,
 									char *cmd);
 char							*build_path_to_check(char *dir, char *cmd);
 void							execve_fail(bool path_alloc,
