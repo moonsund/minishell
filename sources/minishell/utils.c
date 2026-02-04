@@ -3,44 +3,43 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:09 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 10:15:10 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 13:06:14 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void reset_iteration(t_shell *shell);
-void shell_destroy(t_shell *shell);
-void free_tokens(t_token_list *list);
-void free_pipeline(t_pipeline *pl);
-void free_env_var_list(t_env_var_list *vars);
-void err_print(t_exit_status type, const char *ctx);
+void	reset_iteration(t_shell *shell);
+void	shell_destroy(t_shell *shell);
+void	free_tokens(t_token_list *list);
+void	free_pipeline(t_pipeline *pl);
+void	free_env_var_list(t_env_var_list *vars);
+void	err_print(t_exit_status type, const char *ctx);
 
-void reset_iteration(t_shell *shell)
+void	reset_iteration(t_shell *shell)
 {
 	free_tokens(&shell->tokens);
 	free_pipeline(shell->pipeline);
 	shell->pipeline = NULL;
 }
 
-void shell_destroy(t_shell *shell)
+void	shell_destroy(t_shell *shell)
 {
 	reset_iteration(shell);
 	free_env_var_list(&shell->env_vars);
 	rl_clear_history();
 }
 
-void free_tokens(t_token_list *list)
+void	free_tokens(t_token_list *list)
 {
-	t_token *cur;
-	t_token *next;
+	t_token	*cur;
+	t_token	*next;
 
 	if (!list)
 		return ;
-
 	cur = list->head;
 	while (cur != NULL)
 	{
@@ -55,13 +54,12 @@ void free_tokens(t_token_list *list)
 	list->count = 0;
 }
 
-void free_pipeline(t_pipeline *pl)
+void	free_pipeline(t_pipeline *pl)
 {
-	size_t i;
+	size_t	i;
 
 	if (!pl)
-		return;
-
+		return ;
 	i = 0;
 	while (i < pl->count)
 	{
@@ -72,14 +70,13 @@ void free_pipeline(t_pipeline *pl)
 	free(pl);
 }
 
-void free_env_var_list(t_env_var_list *vars)
+void	free_env_var_list(t_env_var_list *vars)
 {
-	t_var *cur;
-	t_var *next;
+	t_var	*cur;
+	t_var	*next;
 
 	if (!vars)
 		return ;
-
 	cur = vars->head;
 	while (cur != NULL)
 	{
@@ -96,35 +93,30 @@ void free_env_var_list(t_env_var_list *vars)
 
 // Edited to print on stderr rather than stdout
 // TBC : typo on the printf("minishell: %s: \n", where); ?
-void err_print(t_exit_status type, const char *where)
+void	err_print(t_exit_status type, const char *where)
 {
 	if (type == ES_GENERAL)
 	{
-		// printf("minishell: %s\n", where);
 		write(2, "minishell: ", 11);
 		write(2, where, ft_strlen(where));
 		write(2, "\n", 1);
 	}
 	else if (type == ES_INVALID_USAGE)
 	{
-		// printf("minishell: syntax_error: %s\n", where);
 		write(2, "minishell: syntax_error: ", 25);
 		write(2, where, ft_strlen(where));
 		write(2, "\n", 1);
 	}
 	else
 	{
-		// printf( "minishell: %s\n", where);
 		write(2, "minishell: ", 11);
 		write(2, where, ft_strlen(where));
 		write(2, "\n", 1);
 	}
 }
 
-// Edited to print on stderr rather than stdout
-void err_malloc_print(const char *where)
+void	err_malloc_print(const char *where)
 {
-	// printf("minishell: %s: cannot allocate memory\n", where);
 	write(2, "minishell: ", 11);
 	write(2, where, ft_strlen(where));
 	write(2, ": cannot allocate memory\n", 26);
