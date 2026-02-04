@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:31 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 12:44:15 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 13:46:15 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,8 @@ int	execute_pipeline(t_shell *shell)
 	if (pl->count == 0 || !pl->cmds)
 		return (ES_GENERAL);
 	cmd = &pl->cmds[0];
-	if (pl->count == 1 && cmd->argv && cmd->argv[0] && is_parent_builtin(cmd->argv[0]))
+	if (pl->count == 1 && cmd->argv && cmd->argv[0]
+		&& is_parent_builtin(cmd->argv[0]))
 		return (exec_builtin_in_parent(shell, cmd));
 	if ((shell->pipeline->count == 1) && (!shell->pipeline->cmds->argv)
 		&& shell->pipeline->cmds->redirs
@@ -40,7 +41,8 @@ int	execute_pipeline(t_shell *shell)
 	return (exec_pipeline_forking(shell, pl));
 }
 
-// only redirections, builtins and external commands both with and w/o redirections
+// only redirections, builtins and external commands
+// both with and w/o redirections
 int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 {
 	size_t	i;
@@ -61,7 +63,7 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 	{
 		pipefds[0] = -1;
 		pipefds[1] = -1;
-		if (i + 1 < pl->count)	// checks if we need a pipe for the current command
+		if (i + 1 < pl->count)
 		{
 			if (pipe(pipefds) < 0)
 			{
@@ -82,7 +84,7 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 		}
 		if (pid == 0)
 		{
-			if (prev_read != -1) // if not the 1st pipe
+			if (prev_read != -1)
 			{
 				if (dup2(prev_read, STDIN_FILENO) < 0)
 				{
@@ -90,7 +92,7 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 					exit(1);
 				}
 			}
-			if (pipefds[1] != -1) // if not the last command
+			if (pipefds[1] != -1)
 			{
 				if (dup2(pipefds[1], STDOUT_FILENO) < 0)
 				{
@@ -113,10 +115,10 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 			{
 				if (execute_external_commands(shell, &pl->cmds[i]) > 0)
 				{
-					if (errno == ENOENT) // No such file or directory
+					if (errno == ENOENT)
 						exit(127);
 					else
-						exit(126); // EACCES, EISDIR, ENOEXEC, etc.
+						exit(126);
 				}
 			}
 		}
