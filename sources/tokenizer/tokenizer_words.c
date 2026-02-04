@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tokenizer_words.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:42 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 17:58:58 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 18:23:25 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,8 +40,8 @@ t_token	*make_word_token(t_buf *buf)
 	token->raw_str = malloc(sizeof(char) * (buf->used_length + 1));
 	token->quotes_map = malloc(sizeof(t_qmark) * buf->used_length);
 	if (!token->raw_str || !token->quotes_map)
-		return (free(token->raw_str), free(token->quotes_map), 
-				free(token), NULL);
+		return (free(token->raw_str), free(token->quotes_map),
+			free(token), NULL);
 	if (buf->capacity)
 	{
 		ft_memcpy(token->raw_str, buf->characters, buf->used_length);

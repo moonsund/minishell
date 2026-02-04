@@ -3,27 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   tokenizer_chars.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:32 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 17:40:27 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 18:22:55 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	append_char(char c, t_buf *buf, t_qmark quote_mark);
-int	boost_buf(t_buf *buf, size_t needed_length);
-static void	replace_buffers(t_buf *buf,
-								char *new_chars,
-								t_qmark *new_qmap,
-								size_t new_capacity);
-static int	alloc_new_buffers(size_t capacity,
-								char **new_chars,
-								t_qmark **new_qmap);
+int				append_char(char c, t_buf *buf, t_qmark quote_mark);
+int				boost_buf(t_buf *buf, size_t needed_length);
+static void		replace_buffers(t_buf *buf, char *new_chars, t_qmark *new_qmap,
+					size_t new_capacity);
+static int		alloc_new_buffers(size_t capacity, char **new_chars,
+					t_qmark **new_qmap);
 static size_t	calc_new_capacity(size_t current, size_t needed);
-
-
 
 int	append_char(char c, t_buf *buf, t_qmark quote_mark)
 {
@@ -53,16 +48,14 @@ int	boost_buf(t_buf *buf, size_t needed_length)
 	return (1);
 }
 
-static void	replace_buffers(t_buf *buf,
-								char *new_chars,
-								t_qmark *new_qmap,
-								size_t new_capacity)
+static void	replace_buffers(t_buf *buf, char *new_chars, t_qmark *new_qmap,
+		size_t new_capacity)
 {
 	if (buf->characters)
 		ft_memcpy(new_chars, buf->characters, buf->used_length);
 	if (buf->quotes_map)
-		ft_memcpy(new_qmap, buf->quotes_map,
-			buf->used_length * sizeof(*new_qmap));
+		ft_memcpy(new_qmap, buf->quotes_map, buf->used_length
+			* sizeof(*new_qmap));
 	free(buf->characters);
 	free(buf->quotes_map);
 	buf->characters = new_chars;
@@ -70,9 +63,8 @@ static void	replace_buffers(t_buf *buf,
 	buf->capacity = new_capacity;
 }
 
-static int	alloc_new_buffers(size_t capacity,
-								char **new_chars,
-								t_qmark **new_qmap)
+static int	alloc_new_buffers(size_t capacity, char **new_chars,
+		t_qmark **new_qmap)
 {
 	*new_chars = malloc(capacity * sizeof(**new_chars));
 	*new_qmap = malloc(capacity * sizeof(**new_qmap));

@@ -3,22 +3,24 @@
 /*                                                        :::      ::::::::   */
 /*   tokenizer.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:46 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 17:31:05 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 18:20:19 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-t_exit_status	tokenize_with_qmap(const char *str, t_token_list *tokens);
-int				process_quotes(const char *str, t_lexer_context *ctx);
-int				process_spaces_outside_quotes(const char *str,
-					t_token_list *tokens, t_lexer_context *ctx);
+t_exit_status			tokenize_with_qmap(const char *str,
+							t_token_list *tokens);
+int						process_quotes(const char *str, t_lexer_context *ctx);
+int						process_spaces_outside_quotes(const char *str,
+							t_token_list *tokens, t_lexer_context *ctx);
 static t_exit_status	lex_process_step(const char *str, t_token_list *tokens,
-						t_lexer_context *ctx);
-static t_exit_status	lex_finalize(t_token_list *tokens, t_lexer_context *ctx);
+							t_lexer_context *ctx);
+static t_exit_status	lex_finalize(t_token_list *tokens,
+							t_lexer_context *ctx);
 
 t_exit_status	tokenize_with_qmap(const char *str, t_token_list *tokens)
 {
@@ -36,7 +38,7 @@ t_exit_status	tokenize_with_qmap(const char *str, t_token_list *tokens)
 }
 
 static t_exit_status	lex_process_step(const char *str, t_token_list *tokens,
-						t_lexer_context *ctx)
+		t_lexer_context *ctx)
 {
 	int	res;
 

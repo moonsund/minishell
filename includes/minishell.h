@@ -6,7 +6,7 @@
 /*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/04 20:27:43 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 20:38:20 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,10 +87,10 @@ typedef enum e_redir_type
 
 typedef struct s_buf
 {
-	char	*characters;
-	t_qmark	*quotes_map;
-	size_t	capacity;
-	size_t	used_length;
+	char						*characters;
+	t_qmark						*quotes_map;
+	size_t						capacity;
+	size_t						used_length;
 }								t_buf;
 
 typedef struct s_lexer_context
@@ -104,11 +104,11 @@ typedef struct s_lexer_context
 
 typedef struct s_token
 {
-	char			*raw_str;
-	t_token_type	type;
-	t_qmark			*quotes_map;
-	size_t			length;
-	struct s_token	*next;
+	char						*raw_str;
+	t_token_type				type;
+	t_qmark						*quotes_map;
+	size_t						length;
+	struct s_token				*next;
 }								t_token;
 
 typedef struct s_token_list
@@ -148,25 +148,25 @@ typedef struct s_env_var_list
 
 typedef struct s_redir
 {
-	t_redir_type	type;
-	int				fd;
-	char			*target;
-	int				expand;
-	struct s_redir	*next;
+	t_redir_type				type;
+	int							fd;
+	char						*target;
+	int							expand;
+	struct s_redir				*next;
 }								t_redir;
 
 typedef struct s_expctx
 {
-	t_token			*tok;
-	t_env_var_list	*env;
-	t_exit_status	last;
-	t_buf			buf;
-}	t_expctx;
+	t_token						*tok;
+	t_env_var_list				*env;
+	t_exit_status				last;
+	t_buf						buf;
+}								t_expctx;
 
 typedef struct s_command
 {
-	char	**argv;
-	t_redir	*redirs;
+	char						**argv;
+	t_redir						*redirs;
 }								t_command;
 
 typedef struct s_pipeline
@@ -206,8 +206,10 @@ int								execute_prepared(t_shell *shell);
 int								init_shell(t_shell *shell, char **envp);
 void							init_env_list_empty(t_env_var_list *list);
 char							*find_env_sep(char *env_line);
-t_var							*create_var_from_env_line(char *env_line, char *sep_ptr);
-int								append_var_or_cleanup(t_env_var_list *list, t_var *var);
+t_var							*create_var_from_env_line(char *env_line,
+									char *sep_ptr);
+int								append_var_or_cleanup(t_env_var_list *list,
+									t_var *var);
 void							reset_iteration(t_shell *shell);
 void							shell_destroy(t_shell *shell);
 void							free_tokens(t_token_list *list);
@@ -275,11 +277,13 @@ int	append_dup_arg(char **new_argv, size_t argc, char *arg);
 void							free_cmd(t_command *cmd);
 
 // tokenizer.c
-t_exit_status	tokenize_with_qmap(const char *str, t_token_list *tokens);
-int				process_quotes(const char *str, t_lexer_context *ctx);
-int				process_spaces_outside_quotes(const char *str,
-					t_token_list *tokens, t_lexer_context *ctx);
-void			init_lexer_context(t_lexer_context *context);
+t_exit_status					tokenize_with_qmap(const char *str,
+									t_token_list *tokens);
+int								process_quotes(const char *str,
+									t_lexer_context *ctx);
+int								process_spaces_outside_quotes(const char *str,
+									t_token_list *tokens, t_lexer_context *ctx);
+void							init_lexer_context(t_lexer_context *context);
 t_token							*make_word_token(t_buf *buf);
 
 // tokenizer_words.c
@@ -290,13 +294,15 @@ int								process_word(t_token_list *tokens,
 int								check_operators(const char *str,
 									t_token_list *tokens,
 									t_lexer_context *context);
-int	process_operator_token(t_token_type type, const char *literal,
-		t_token_list *tokens, t_lexer_context *context);
-int	should_handle_operator(const char *str, const t_lexer_context *ctx);
-int	flush_word_buf_as_token(t_token_list *tokens, t_lexer_context *ctx);
-int	dispatch_operator_token(const char *str,
-									t_token_list *tokens,
+int								process_operator_token(t_token_type type,
+									const char *literal, t_token_list *tokens,
+									t_lexer_context *context);
+int								should_handle_operator(const char *str,
+									const t_lexer_context *ctx);
+int								flush_word_buf_as_token(t_token_list *tokens,
 									t_lexer_context *ctx);
+int								dispatch_operator_token(const char *str,
+									t_token_list *tokens, t_lexer_context *ctx);
 
 // tokenizer_chars.c
 int								append_char(char c, t_buf *buf,
@@ -346,7 +352,7 @@ int								exec_builtin_in_parent(t_shell *shell,
 int								run_any_builtin_in_child(t_shell *shell,
 									t_command *cmd);
 int								execute_built_in_commands(t_shell *shell,
-									t_command *cmd);
+									t_command *cmd, char **cwd);
 
 // exec_builtin_commands.c
 int								execute_echo(t_command *cmds);
@@ -370,8 +376,8 @@ int								execute_env(t_shell *shell);
 void							print_export(t_shell *shell);
 void							sort_envp_alpha(char **envp);
 void							str_swap(char **s1, char **s2);
-int								check_var_data(char ***var_data,
-									char *argv, char **key, char **value);
+int								check_var_data(char ***var_data, char *argv,
+									char **key, char **value);
 int								key_value_check_init(char **key,
 									char ***var_data, char **value);
 
@@ -388,8 +394,8 @@ bool							is_binary_found(char **updt_path,
 char							*fetch_and_check_bin_path(t_shell *shell,
 									char *cmd);
 char							*build_path_to_check(char *dir, char *cmd);
-void							execve_fail(bool path_alloc,
-									char **updt_path, char ***conv_envp);
+void							execve_fail(bool path_alloc, char **updt_path,
+									char ***conv_envp);
 
 // exec_utils_fd.c
 int								open_fd(const char *path, bool append,
