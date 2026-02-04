@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   build_envp.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:16:04 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 14:54:14 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 16:21:30 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-char	**build_envp(t_env_var_list *list);
+char		**build_envp(t_env_var_list *list);
 static int	fill_envp_from_list(char **envp, t_env_var_list *list);
 static char	*make_envp_entry(const t_var *var);
 

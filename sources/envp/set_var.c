@@ -3,19 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   set_var.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:16:04 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 14:49:37 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 16:19:21 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int		set_var(t_env_var_list *list, const char *name, const char *value);
-static void	append_var_to_list(t_env_var_list *list, t_var *var);
+int				set_var(t_env_var_list *list, const char *name,
+					const char *value);
+static void		append_var_to_list(t_env_var_list *list, t_var *var);
 static t_var	*create_new_var(const char *name, const char *value);
-static int	update_existing_var(t_var *variable, const char *value);
+static int		update_existing_var(t_var *variable, const char *value);
 
 int	set_var(t_env_var_list *list, const char *name, const char *value)
 {

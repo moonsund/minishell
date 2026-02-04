@@ -1,21 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   unset_var.c.c                                      :+:      :+:    :+:   */
+/*   unset_var.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:16:04 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 14:48:47 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 16:19:26 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int		unset_var(t_env_var_list *list, const char *name);
-static void	detach_var_from_list(t_env_var_list *list, t_var *prev, t_var *cur);
-static void	free_var(t_var *var);
-static t_var	*find_var_with_prev(t_env_var_list *list, const char *name, t_var **out_prev);
+int				unset_var(t_env_var_list *list, const char *name);
+static void		detach_var_from_list(t_env_var_list *list, t_var *prev,
+					t_var *cur);
+static void		free_var(t_var *var);
+static t_var	*find_var_with_prev(t_env_var_list *list, const char *name,
+					t_var **out_prev);
 
 int	unset_var(t_env_var_list *list, const char *name)
 {
@@ -52,7 +54,8 @@ static void	free_var(t_var *var)
 	free(var);
 }
 
-static t_var	*find_var_with_prev(t_env_var_list *list, const char *name, t_var **out_prev)
+static t_var	*find_var_with_prev(t_env_var_list *list, const char *name,
+		t_var **out_prev)
 {
 	t_var	*prev;
 	t_var	*cur;
