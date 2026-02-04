@@ -6,24 +6,15 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:00 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/03 20:33:15 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 22:53:15 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 #include "minishell.h"
 
-void	close_if_valid(int fd);
 void	free_envp(t_env_var_list *list);
 void	free_strings_array(char **array);
-
-// Ok to pass the fd rather than a pointer to it ? TBC
-// Would it be smart to set to -1  after closing ? TBD
-void	close_if_valid(int fd)
-{
-	if (fd >= 0)
-		close(fd);
-}
 
 void	free_envp(t_env_var_list *list)
 {

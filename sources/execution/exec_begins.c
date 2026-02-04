@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:31 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 21:23:11 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 23:03:14 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,24 +61,24 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 	prev_read = -1;
 	while (pl->count > i)
 	{
-		pipefds[0] = -1;
-		pipefds[1] = -1;
-		if (i + 1 < pl->count)
-		{
-			if (pipe(pipefds) < 0)
-			{
-				perror("pipe");
-				free(pids);
-				return (1);
-			}
-		}
+		if (pipe_setup(pipefds, &i, pl, pids) == 1)
+			return (1);
+		// pipefds[0] = -1;
+		// pipefds[1] = -1;
+		// if (i + 1 < pl->count)
+		// {
+		// 	if (pipe(pipefds) < 0)
+		// 	{
+		// 		perror("pipe");
+		// 		free(pids);
+		// 		return (1);
+		// 	}
+		// }
 		pid = fork();
 		if (pid < 0)
 		{
 			perror("fork");
-			close_if_valid(pipefds[0]);
-			close_if_valid(pipefds[1]);
-			close_if_valid(prev_read);
+			close_all_if_valid(&prev_read, pipefds, false);
 			free(pids);
 			return (1);
 		}
@@ -100,9 +100,7 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 					exit(1);
 				}
 			}
-			close_if_valid(prev_read);
-			close_if_valid(pipefds[0]);
-			close_if_valid(pipefds[1]);
+			close_all_if_valid(&prev_read, pipefds, false);
 			apply_redirs_or_die(&pl->cmds[i]);
 			if (!pl->cmds[i].argv || !pl->cmds[i].argv[0])
 				exit(0);
@@ -115,8 +113,7 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 				exit (execute_external_commands(shell, &pl->cmds[i]));
 		}
 		pids[i] = pid;
-		close_if_valid(prev_read);
-		close_if_valid(pipefds[1]);
+		close_all_if_valid(&prev_read, pipefds, true);
 		prev_read = pipefds[0];
 		i++;
 	}

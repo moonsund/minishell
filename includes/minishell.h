@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/04 20:38:20 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 23:01:44 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -401,9 +401,11 @@ void							execve_fail(bool path_alloc, char **updt_path,
 int								open_fd(const char *path, bool append,
 									bool truncate);
 void							open_and_close_fd(t_command *cmd);
+int								pipe_setup(int *pipefds, int *i, t_pipeline *pl, pid_t	*pids);
+void							close_if_valid(int fd);
+void							close_all_if_valid(int *fd, int *pipe_fd, bool exclude_read_pipe);
 
 // exec_close_and_free.c
-void							close_if_valid(int fd);
 void							free_envp(t_env_var_list *list);
 void							free_strings_array(char **array);
 
