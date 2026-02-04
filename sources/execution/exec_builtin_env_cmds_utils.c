@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:14 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/03 22:56:34 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 12:33:50 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 void	print_export(t_shell *minishell);
 void	sort_envp_alpha(char **envp);
 void	str_swap(char **s1, char **s2);
-int		fetch_and_check_env_var_data(char ***env_var_data, char *argv, char **key, char **value);
+int		check_env_var_data(char ***env_var_data, char *argv, char **key, char **value);
 int		key_value_check_init(char **key, char ***env_var_data, char **value);
 
 void	print_export(t_shell *minishell)
@@ -69,7 +69,7 @@ void	str_swap(char **s1, char **s2)
 	*s2 = tmp;
 }
 
-int	fetch_and_check_env_var_data(char ***env_var_data, char *argv, char **key, char **value)
+int	check_env_var_data(char ***env_var_data, char *argv, char **key, char **value)
 {
 	if (argv[0] == '=')
 	{

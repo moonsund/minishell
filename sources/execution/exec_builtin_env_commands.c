@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:14 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/03 22:57:30 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 12:33:50 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ int	execute_export(t_shell *minishell)
 		print_export(minishell);
 		return (0);
 	}
-	if (!fetch_and_check_env_var_data(&env_var_data, minishell->pipeline->cmds->argv[1], &key, &value))
+	if (!check_env_var_data(&env_var_data, minishell->pipeline->cmds->argv[1], &key, &value))
 		return (1);
 	if (!set_var(&minishell->env_vars, key, value))
 	{

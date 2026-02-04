@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:31 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/03 22:52:01 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 12:24:42 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,20 +22,22 @@ static int	wait_all_and_get_last(pid_t *pids, size_t count);
 Auto check Valgrind VSCode : Ctrl Shift p > run task > Valgrind
 Redirections - Test commands :
 wc -l < w
-sort < infile
+sort < z
 grep ok << end
-pwd > outfile
-ls >> outfile
+pwd > y
+ls >> y
 export FRUIT=apple > new_outfile
 cat w y z > new
 
 Pipes - Test commands :
 ls | grep sources | wc
 ls -la | grep git | wc -l
-cat z | sort | head -5
+cat Makefile | sort | tail -5
 ls | exit | wc
 pwd | grep z | wc -m
 echo London | cat -e > y
+
+$Z
 
 */
 

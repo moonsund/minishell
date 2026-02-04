@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/04 10:11:58 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 12:33:50 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 # define MINISHELL_H
 
 # define _POSIX_C_SOURCE 200809L
-# include <stdio.h>     // perror
 # include "libft.h"
 # include <dirent.h> // opendir
 # include <errno.h>  // errno
@@ -52,13 +51,13 @@ void							setup_signals(void);
 
 typedef enum e_exit_status
 {
-	ES_SUCCESS = 0,				// success
-	ES_GENERAL = 1,				// any “generic” error (including malloc failures, open/dup2 errors in redirections, etc.)
-	ES_INVALID_USAGE = 2,		// syntax error and incorrect usage of a builtin
-	ES_NOT_EXECUTABLE = 126,	// command or file found, but cannot be executed (EACCES, is a directory, not executable)
-	ES_NOT_FOUND = 127,			// command not found (PATH lookup failed / file does not exist)
-	ES_SIGINT = 130,			// 128 + SIGINT (2)
-	ES_SIGQUIT = 131,			// 128 + SIGQUIT (3)
+	ES_SUCCESS = 0,
+	ES_GENERAL = 1,
+	ES_INVALID_USAGE = 2,
+	ES_NOT_EXECUTABLE = 126,
+	ES_NOT_FOUND = 127,
+	ES_SIGINT = 130,
+	ES_SIGQUIT = 131,
 }								t_exit_status;
 
 typedef enum e_token_type
@@ -73,9 +72,9 @@ typedef enum e_token_type
 
 typedef enum e_qmark
 {
-	Q_NONE,	// outside quotes
-	Q_SQ,	// inside single quotes '...'
-	Q_DQ,	// inside double quotes "..."
+	Q_NONE,
+	Q_SQ,
+	Q_DQ,
 }								t_qmark;
 
 typedef enum e_redir_type
@@ -88,10 +87,10 @@ typedef enum e_redir_type
 
 typedef struct s_buf
 {
-	char	*characters;	// array of accumulated characters
-	t_qmark	*quotes_map;	// array of qmarks for everysingle character in the characters array
-	size_t	capacity;		// actual array length
-	size_t	used_length;	// array length in use
+	char	*characters;
+	t_qmark	*quotes_map;
+	size_t	capacity;
+	size_t	used_length;
 }								t_buf;
 
 typedef struct s_lexer_context
@@ -105,10 +104,10 @@ typedef struct s_lexer_context
 
 typedef struct s_token
 {
-	char			*raw_str;		// '0\'-terminated string
-	t_token_type	type;			// WORD, PIPE, REDIR_IN, etc.
-	t_qmark			*quotes_map;	// array of qmarks for everysingle character in the raw_str
-	size_t			length;			// *raw_str length
+	char			*raw_str;
+	t_token_type	type;
+	t_qmark			*quotes_map;
+	size_t			length;
 	struct s_token	*next;
 }								t_token;
 
@@ -149,18 +148,17 @@ typedef struct s_env_var_list
 
 typedef struct s_redir
 {
-	t_redir_type	type;		// R_IN / R_OUT / R_APPEND / R_HEREDOC
-	int				fd;			// 0 or 1
-	char			*target;	// filename or limiter
-	int				expand;		// only for heredoc: 0 or 1
+	t_redir_type	type;
+	int				fd;
+	char			*target;
+	int				expand;
 	struct s_redir	*next;
 }								t_redir;
 
 typedef struct s_command
 {
-	char **argv; // null-terminated array of arguments
-	// int	argc;
-	t_redir						*redirs;
+	char	**argv;
+	t_redir	*redirs;
 }								t_command;
 
 typedef struct s_pipeline
@@ -183,10 +181,9 @@ typedef struct s_shell
 	int							exit_status;
 	int							should_exit;
 	char						*input;
-	t_env_var_list				env_vars; // envp vars saved in linked list
+	t_env_var_list				env_vars;
 	t_token_list				tokens;
-	t_pipeline					*pipeline; // Only base to consider for exec
-	// t_ast ast;
+	t_pipeline					*pipeline;
 }								t_shell;
 
 // main.c
@@ -204,22 +201,29 @@ void							shell_destroy(t_shell *shell);
 void							free_tokens(t_token_list *list);
 void							free_pipeline(t_pipeline *pl);
 void							free_env_var_list(t_env_var_list *vars);
-void							err_print(t_exit_status exit_status, const char *ctx);
+void							err_print(t_exit_status exit_status,
+									const char *ctx);
 void							err_malloc_print(const char *where);
 void							setup_signals(void);
 
 // envp.c
-t_var							*find_var(t_env_var_list *list, const char *name);
-int								set_var(t_env_var_list *list, const char *name, const char *value);
-int								unset_var(t_env_var_list *list, const char *name);
-char							*get_var_value(t_env_var_list *var_list, const char *var);
+t_var							*find_var(t_env_var_list *list,
+									const char *name);
+int								set_var(t_env_var_list *list, const char *name,
+									const char *value);
+int								unset_var(t_env_var_list *list,
+									const char *name);
+char							*get_var_value(t_env_var_list *var_list,
+									const char *var);
 char							**build_envp(t_env_var_list *list);
 
 // envp_utils.c
 void							free_envp_partial(char **envp, size_t used);
 
 // expand.c
-t_exit_status					expand_tokens(t_token_list *tokens, t_env_var_list *env_vars, t_exit_status exit_status);
+t_exit_status					expand_tokens(t_token_list *tokens,
+									t_env_var_list *env_vars,
+									t_exit_status exit_status);
 char							*get_last_status_string(t_exit_status exit_status);
 
 // parcer_init.c
@@ -228,7 +232,8 @@ void							init_parser_context(t_parser_context *ctx);
 void							init_command(t_command *cmd);
 
 // parcer_tokens.c
-t_exit_status					process_tokens(t_pipeline *pl, t_token_list *list, t_parser_context *ctx);
+t_exit_status					process_tokens(t_pipeline *pl,
+									t_token_list *list, t_parser_context *ctx);
 
 // parcer_utils.c
 void							free_cmd(t_command *cmd);
@@ -238,52 +243,68 @@ t_exit_status					build_pipeline_from_tokens(t_shell *shell);
 int								append_cmd(t_pipeline *pl, t_command cmd);
 
 // tokenizer.c
-t_exit_status					tokenize_with_qmap(const char *str, t_token_list *tokens);
+t_exit_status					tokenize_with_qmap(const char *str,
+									t_token_list *tokens);
 t_token							*make_word_token(t_buf *buf);
 
 // tokenizer_words.c
-int								process_word(t_token_list *tokens, t_lexer_context *ctx);
+int								process_word(t_token_list *tokens,
+									t_lexer_context *ctx);
 
 // tokenizer_operators.c
-int								check_operators(const char *str, t_token_list *tokens, t_lexer_context *context);
+int								check_operators(const char *str,
+									t_token_list *tokens,
+									t_lexer_context *context);
 
 // tokenizer_chars.c
-int								append_char(char c, t_buf *buf, t_qmark quote_mark);
+int								append_char(char c, t_buf *buf,
+									t_qmark quote_mark);
 int								boost_buf(t_buf *buf, size_t needed_length);
 
 // tokenizer_utils.c
 bool							is_empty(const char *str);
 bool							is_space(unsigned char c);
 bool							is_operator(unsigned char c);
-void							append_token(t_token_list *list, t_token *token);
+void							append_token(t_token_list *list,
+									t_token *token);
 void							reset_buf(t_buf *buf);
 void							free_buf(t_buf *buf);
 void							init_buffer(t_buf *buf);
 
 // heredoc
-t_exit_status					process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars, t_exit_status exit_status);
-t_exit_status					expand_heredoc(char **line, t_env_var_list *env_vars, t_exit_status exit_status);
+t_exit_status					process_heredoc(t_pipeline *pipeline,
+									t_env_var_list *env_vars,
+									t_exit_status exit_status);
+t_exit_status					expand_heredoc(char **line,
+									t_env_var_list *env_vars,
+									t_exit_status exit_status);
 t_exit_status					strbuf_init(t_strbuf *strbuf);
 void							strbuf_free(t_strbuf *strbuf);
 t_exit_status					strbuf_reserve(t_strbuf *strbuf, size_t extra);
 t_exit_status					strbuf_append_char(t_strbuf *strbuf, char c);
-t_exit_status					strbuf_append_str(t_strbuf *strbuf, const char *s);
-t_exit_status					heredoc_cleanup_return(int fd, char *filename, t_exit_status st);
-void							redir_replace_with_infile(t_redir *r, char *filename);
+t_exit_status					strbuf_append_str(t_strbuf *strbuf,
+									const char *s);
+t_exit_status					heredoc_cleanup_return(int fd, char *filename,
+									t_exit_status st);
+void							redir_replace_with_infile(t_redir *r,
+									char *filename);
 char							*generate_heredoc_filename(size_t heredoc_index);
 t_exit_status					write_line_in_fd(int fd, const char *line);
 
 // execution.c
 int								execute_pipeline(t_shell *shell);
-int								exec_pipeline_forking(t_shell *shell, const t_pipeline *pl);
+int								exec_pipeline_forking(t_shell *shell,
+									const t_pipeline *pl);
 
 // exec_command_filter.c
 int								is_builtin(const char *cmd);
 int								is_parent_builtin(const char *cmd);
-int								exec_builtin_in_parent(t_shell *shell, t_command *cmd);
-int								run_builtin_without_output_in_parent(t_shell *shell, t_command *cmd);
-int								run_any_builtin_in_child(t_shell *shell, t_command *cmd);
-int								execute_built_in_commands(t_shell *minishell, t_command *cmd);
+int								exec_builtin_in_parent(t_shell *shell,
+									t_command *cmd);
+int								run_any_builtin_in_child(t_shell *shell,
+									t_command *cmd);
+int								execute_built_in_commands(t_shell *minishell,
+									t_command *cmd);
 
 // exec_builtin_commands.c
 int								execute_echo(t_command *cmds);
@@ -295,7 +316,8 @@ int								execute_exit(t_shell *shell, t_command *cmd);
 char							*fetch_current_working_directory(void);
 bool							is_line_return(char **cmd, int *i);
 bool							is_numeric_string(const char *str);
-int								parse_exit_code(const char *str, int *exit_code);
+int								parse_exit_code(const char *str,
+									int *exit_code);
 
 // exec_builtin_env_commands.c
 int								execute_export(t_shell *minishell);
@@ -304,23 +326,32 @@ int								execute_env(t_shell *minishell);
 
 // exec_builtin_env_cmds_utils.c
 void							print_export(t_shell *minishell);
-void							sort_envp_alpha(char **envp); // export no args
+void							sort_envp_alpha(char **envp);
 void							str_swap(char **s1, char **s2);
-int								fetch_and_check_env_var_data(char ***env_var_data, char *argv, char **key, char **value);
-int								key_value_check_init(char **key, char ***env_var_data, char **value);
+int								check_env_var_data(char ***env_var_data,
+									char *argv, char **key, char **value);
+int								key_value_check_init(char **key,
+									char ***env_var_data, char **value);
 
 // exec_external_commands.c
-int								execute_external_commands(t_shell *minishell, t_command *cmd);
+int								execute_external_commands(t_shell *minishell,
+									t_command *cmd);
 
 // exec_external_cmds_utils.c
-bool							is_input_exec_ok(char *cmd, char **updated_path, bool *path_alloc);
-bool							is_cmd_binary_found(char **updated_path, t_shell *minishell, char *cmd, bool *path_alloc);
-char							*fetch_and_check_bin_path(t_shell *minishell, char *cmd);
+bool							is_input_exec_ok(char *cmd, char **updated_path,
+									bool *path_alloc);
+bool							is_cmd_binary_found(char **updated_path,
+									t_shell *minishell, char *cmd,
+									bool *path_alloc);
+char							*fetch_and_check_bin_path(t_shell *minishell,
+									char *cmd);
 char							*build_path_to_check(char *dir, char *cmd);
-void							execve_fail(bool path_alloc, char **updated_path, char ***conv_envp);
+void							execve_fail(bool path_alloc,
+									char **updated_path, char ***conv_envp);
 
 // exec_utils_fd.c
-int								open_fd(const char *path, bool append, bool truncate);
+int								open_fd(const char *path, bool append,
+									bool truncate);
 void							open_and_close_fd(t_command *cmd);
 
 // exec_close_and_free.c
