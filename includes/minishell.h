@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/04 23:22:18 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 23:53:08 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -351,6 +351,7 @@ t_exit_status	hd_abort(int fd, char *filename, t_exit_status st);
 int								execute_pipeline(t_shell *shell);
 int								exec_pipeline_forking(t_shell *shell,
 									const t_pipeline *pl);
+int								wait_all_and_get_last(pid_t *pids, size_t count);
 
 // exec_command_filter.c
 int								is_builtin(const char *cmd);
@@ -409,7 +410,7 @@ void							execve_fail(bool path_alloc, char **updt_path,
 int								open_fd(const char *path, bool append,
 									bool truncate);
 void							open_and_close_fd(t_command *cmd);
-int								pipe_setup(int *pipefds, int *i, t_pipeline *pl, pid_t	*pids);
+int								pipe_setup(int *pipefds, size_t *i, size_t pl_count, pid_t	*pids);
 void							close_if_valid(int fd);
 void							close_all_if_valid(int *fd, int *pipe_fd, bool exclude_read_pipe);
 
