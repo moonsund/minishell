@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:18:53 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/04 14:18:15 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 16:16:02 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,6 +119,7 @@ int	execute_built_in_commands(t_shell *shell, t_command *cmd)
 	else if (ft_strcmp(cmd->argv[0], "exit") == 0)
 	{
 		free(current_working_directory);
+		printf("exit\n");
 		exit_status = execute_exit(shell, cmd);
 		exit(exit_status);
 	}
