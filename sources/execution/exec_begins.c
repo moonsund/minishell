@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:31 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 13:46:15 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 20:57:55 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,15 +112,7 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 				exit(last_status);
 			}
 			else
-			{
-				if (execute_external_commands(shell, &pl->cmds[i]) > 0)
-				{
-					if (errno == ENOENT)
-						exit(127);
-					else
-						exit(126);
-				}
-			}
+				exit (execute_external_commands(shell, &pl->cmds[i]));
 		}
 		pids[i] = pid;
 		close_if_valid(prev_read);
