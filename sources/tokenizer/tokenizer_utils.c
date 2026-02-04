@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tokenizer_utils.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:39 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 18:02:40 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 18:20:38 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 void	free_tokens(t_token_list *list);
 void	reset_buf(t_buf *buf);
 void	free_buf(t_buf *buf);
-void			init_lexer_context(t_lexer_context *context);
+void	init_lexer_context(t_lexer_context *context);
 
 void	reset_buf(t_buf *buf)
 {

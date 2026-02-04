@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   tokenizer copy.c                                   :+:      :+:    :+:   */
+/*   tokenizer_operators_utils.c                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:46 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 17:50:18 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 18:20:34 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,8 @@
 
 int	should_handle_operator(const char *str, const t_lexer_context *ctx);
 int	flush_word_buf_as_token(t_token_list *tokens, t_lexer_context *ctx);
-int	dispatch_operator_token(const char *str,
-									t_token_list *tokens,
-									t_lexer_context *ctx);
+int	dispatch_operator_token(const char *str, t_token_list *tokens,
+		t_lexer_context *ctx);
 
 int	should_handle_operator(const char *str, const t_lexer_context *ctx)
 {
@@ -43,9 +42,8 @@ int	flush_word_buf_as_token(t_token_list *tokens, t_lexer_context *ctx)
 	return (0);
 }
 
-int	dispatch_operator_token(const char *str,
-									t_token_list *tokens,
-									t_lexer_context *ctx)
+int	dispatch_operator_token(const char *str, t_token_list *tokens,
+		t_lexer_context *ctx)
 {
 	if (str[ctx->i] == '|')
 		return (process_operator_token(TOK_PIPE, "|", tokens, ctx));
