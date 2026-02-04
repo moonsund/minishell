@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec_builtin_cmds_utils.c                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:08 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/03 23:15:29 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 14:37:42 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 char		*fetch_current_working_directory(void);
 bool		is_line_return(char **cmd, int *i);
-bool	is_numeric_string(const char *str);
+bool		is_numeric_string(const char *str);
 int			parse_exit_code(const char *str, int *exit_code);
 static int	parse_digits(const char *str, int i, long long *result);
 

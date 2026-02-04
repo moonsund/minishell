@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/04 14:19:06 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 14:35:35 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -338,16 +338,16 @@ int								execute_external_commands(t_shell *shell,
 									t_command *cmd);
 
 // exec_external_cmds_utils.c
-bool							is_input_exec_ok(char *cmd, char **updated_path,
+bool							is_input_exec_ok(char *cmd, char **updt_path,
 									bool *path_alloc);
-bool							is_cmd_binary_found(char **updated_path,
+bool							is_binary_found(char **updt_path,
 									t_shell *shell, char *cmd,
 									bool *path_alloc);
 char							*fetch_and_check_bin_path(t_shell *shell,
 									char *cmd);
 char							*build_path_to_check(char *dir, char *cmd);
 void							execve_fail(bool path_alloc,
-									char **updated_path, char ***conv_envp);
+									char **updt_path, char ***conv_envp);
 
 // exec_utils_fd.c
 int								open_fd(const char *path, bool append,

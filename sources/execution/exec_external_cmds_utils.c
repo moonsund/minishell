@@ -6,24 +6,25 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:18:42 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/04 14:18:30 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 14:37:12 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 #include "minishell.h"
 
-bool	is_input_exec_ok(char *cmd, char **updated_path, bool *path_alloc);
-bool	is_cmd_binary_found(char **updated_path, t_shell *shell, char *cmd, bool *path_alloc);
+bool	is_input_exec_ok(char *cmd, char **updt_path, bool *path_alloc);
+bool	is_binary_found(char **updt_path, t_shell *shell,
+			char *cmd, bool *path_alloc);
 char	*fetch_and_check_bin_path(t_shell *shell, char *cmd);
 char	*build_path_to_check(char *dir, char *cmd);
-void	execve_fail(bool path_alloc, char **updated_path, char ***conv_envp);
+void	execve_fail(bool path_alloc, char **updt_path, char ***conv_envp);
 
-bool	is_input_exec_ok(char *cmd, char **updated_path, bool *path_alloc)
+bool	is_input_exec_ok(char *cmd, char **updt_path, bool *path_alloc)
 {
 	if (access(cmd, X_OK) == 0)
 	{
-		*updated_path = cmd;
+		*updt_path = cmd;
 		*path_alloc = false;
 		return (true);
 	}
@@ -34,10 +35,11 @@ bool	is_input_exec_ok(char *cmd, char **updated_path, bool *path_alloc)
 	}
 }
 
-bool	is_cmd_binary_found(char **updated_path, t_shell *shell, char *cmd, bool *path_alloc)
+bool	is_binary_found(char **updt_path, t_shell *shell,
+			char *cmd, bool *path_alloc)
 {
-	*updated_path = fetch_and_check_bin_path(shell, cmd);
-	if (!updated_path)
+	*updt_path = fetch_and_check_bin_path(shell, cmd);
+	if (!updt_path)
 	{
 		perror("command not found");
 		return (false);
@@ -88,10 +90,10 @@ char	*build_path_to_check(char *dir, char *cmd)
 	return (path_to_check);
 }
 
-void	execve_fail(bool path_alloc, char **updated_path, char ***conv_envp)
+void	execve_fail(bool path_alloc, char **updt_path, char ***conv_envp)
 {
 	perror("command not found");
 	if (path_alloc)
-		free(*updated_path);
+		free(*updt_path);
 	free_strings_array(*conv_envp);
 }
