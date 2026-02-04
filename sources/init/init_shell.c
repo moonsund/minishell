@@ -3,44 +3,41 @@
 /*                                                        :::      ::::::::   */
 /*   init_shell.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:14:52 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 10:14:53 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 12:56:29 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int init_shell(t_shell *shell, char **envp);
-int init_env_var_list(t_env_var_list *list, char **envp);
+int	init_shell(t_shell *shell, char **envp);
+int	init_env_var_list(t_env_var_list *list, char **envp);
 
-int init_shell(t_shell *shell, char **envp)
+int	init_shell(t_shell *shell, char **envp)
 {
 	shell->exit_status = 0;
 	shell->pipeline = NULL;
 	shell->tokens.count = 0;
 	shell->tokens.head = NULL;
 	shell->tokens.tail = NULL;
-
 	if (!init_env_var_list(&shell->env_vars, envp))
 		return (0);
 	return (1);
 }
 
-int init_env_var_list(t_env_var_list *list, char **envp)
+int	init_env_var_list(t_env_var_list *list, char **envp)
 {
-	t_var *var;
-	size_t i;
-	char *sep_ptr;
+	t_var	*var;
+	size_t	i;
+	char	*sep_ptr;
 
 	list->count = 0;
 	list->head = NULL;
 	list->tail = NULL;
-
 	if (!envp)
 		return (1);
-
 	i = 0;
 	while (envp[i])
 	{
@@ -48,16 +45,14 @@ int init_env_var_list(t_env_var_list *list, char **envp)
 		if (!sep_ptr)
 		{
 			i++;
-			continue;
+			continue ;
 		}
-
 		var = malloc(sizeof(*var));
 		if (!var)
 		{
 			free_env_var_list(list);
 			return (0);
 		}
-
 		var->name = ft_substr(envp[i], 0, sep_ptr - envp[i]);
 		var->value = ft_strdup(sep_ptr + 1);
 		if (!var->name || !var->value)
@@ -68,15 +63,12 @@ int init_env_var_list(t_env_var_list *list, char **envp)
 			free_env_var_list(list);
 			return (0);
 		}
-
 		var->next = NULL;
-
 		if (list->head == NULL)
 			list->head = var;
 		else
 			list->tail->next = var;
 		list->tail = var;
-
 		list->count++;
 		i++;
 	}

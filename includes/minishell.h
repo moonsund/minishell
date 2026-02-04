@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/04 12:33:50 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 12:59:15 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,22 +14,22 @@
 # define MINISHELL_H
 
 # define _POSIX_C_SOURCE 200809L
-# include "libft.h"
-# include <dirent.h> // opendir
-# include <errno.h>  // errno
-# include <fcntl.h>  // open
-# include <limits.h> // INT_MAX
-# include <readline/history.h>
+# include <stdio.h>		// perror
 # include <readline/readline.h>
+# include <readline/history.h>
+# include "libft.h"
+# include <dirent.h>	// opendir
+# include <errno.h>		// errno
+# include <fcntl.h>		// open
+# include <limits.h>	// INT_MAX
 # include <signal.h>
 # include <stdbool.h>
-# include <stdio.h>     // perror
-# include <stdlib.h>    // EXIT_FAILURE, EXIT_SUCCESS
-# include <sys/stat.h>  // open
-# include <sys/time.h>  // time
-# include <sys/types.h> // opendir
-# include <sys/wait.h>  // waitpid
-# include <unistd.h>    // close, pipe, fork, read, write, getcwd, chdir
+# include <stdlib.h>	// EXIT_FAILURE, EXIT_SUCCESS
+# include <sys/stat.h>	// open
+# include <sys/time.h>	// time
+# include <sys/types.h>	// opendir
+# include <sys/wait.h>	// waitpid
+# include <unistd.h>	// close, pipe, fork, read, write, getcwd, chdir
 
 // Easier Debug
 # define NC "\e[0m"
