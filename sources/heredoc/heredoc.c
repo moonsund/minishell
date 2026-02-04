@@ -3,115 +3,122 @@
 /*                                                        :::      ::::::::   */
 /*   heredoc.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:14:37 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 21:20:30 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 23:23:13 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-t_exit_status			process_heredoc(t_pipeline *pipeline,
-							t_env_var_list *env_vars,
-							t_exit_status exit_status);
-static t_exit_status	get_heredoc(t_redir *redir, t_env_var_list *env_vars,
-							t_exit_status exit_status, size_t *heredoc_index);
-static t_exit_status	heredoc_loop(t_redir *redir, t_env_var_list *env_vars,
-							t_exit_status exit_status, int fd, char *filename);
+t_exit_status	process_heredoc(t_pipeline *pipeline,
+					t_env_var_list *env_vars, t_exit_status last_status);
+static t_exit_status	process_cmd_heredoc(t_command *cmd, t_hd_ctx *ctx);
+static t_exit_status	get_heredoc(t_redir *redir, t_hd_ctx *ctx);
+static t_exit_status	hd_write_loop(int fd, t_redir *r, t_hd_ctx *ctx);
+static char *generate_heredoc_filename(size_t heredoc_index);
 
-t_exit_status	process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars,
-		t_exit_status last_status)
+t_exit_status	process_heredoc(t_pipeline *pipeline,
+					t_env_var_list *env_vars, t_exit_status last_status)
 {
+	t_hd_ctx		ctx;
 	size_t			i;
-	t_redir			*redir;
-	size_t			heredoc_index;
-	t_exit_status	status;
+	t_exit_status	st;
 
 	if (!pipeline || !env_vars)
-		return (0);
-	heredoc_index = 0;
+		return (ES_GENERAL);
+	ctx.env = env_vars;
+	ctx.last_status = last_status;
+	ctx.index = 0;
 	i = 0;
 	while (i < pipeline->count)
 	{
-		redir = pipeline->cmds[i].redirs;
-		while (redir)
-		{
-			if (redir->type == R_HEREDOC)
-			{
-				status = get_heredoc(redir, env_vars, last_status,
-						&heredoc_index);
-				if (status != ES_SUCCESS)
-					return (status);
-			}
-			redir = redir->next;
-		}
+		st = process_cmd_heredoc(&pipeline->cmds[i], &ctx);
+		if (st != ES_SUCCESS)
+			return (st);
 		i++;
 	}
 	return (ES_SUCCESS);
 }
 
-static t_exit_status	get_heredoc(t_redir *redir, t_env_var_list *env_vars,
-		t_exit_status exit_status, size_t *heredoc_index)
+static t_exit_status	process_cmd_heredoc(t_command *cmd, t_hd_ctx *ctx)
 {
-	char			*heredoc_filename;
-	int				fd;
+	t_redir			*r;
 	t_exit_status	st;
 
-	heredoc_filename = generate_heredoc_filename((*heredoc_index)++);
-	if (!heredoc_filename)
+	if (!cmd || !ctx)
 		return (ES_GENERAL);
-	fd = open(heredoc_filename, O_WRONLY | O_CREAT | O_TRUNC, 0600);
-	if (fd < 0)
+	r = cmd->redirs;
+	while (r)
 	{
-		free(heredoc_filename);
-		return (ES_GENERAL);
+		if (r->type == R_HEREDOC)
+		{
+			st = get_heredoc(r, ctx);
+			if (st != ES_SUCCESS)
+				return (st);
+		}
+		r = r->next;
 	}
-	st = heredoc_loop(redir, env_vars, exit_status, fd, heredoc_filename);
-	if (st != ES_SUCCESS)
-		return (st);
-	close(fd);
-	redir_replace_with_infile(redir, heredoc_filename);
 	return (ES_SUCCESS);
 }
 
-static t_exit_status	heredoc_loop(t_redir *redir, t_env_var_list *env_vars,
-		t_exit_status exit_status, int fd, char *filename)
+static t_exit_status	get_heredoc(t_redir *redir, t_hd_ctx *ctx)
 {
-	char			*line;
-	t_exit_status	status;
+	char			*name;
+	int				fd;
+	t_exit_status	st;
+
+	name = generate_heredoc_filename(ctx->index++);
+	if (!name)
+		return (ES_GENERAL);
+	fd = open(name, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+	if (fd < 0)
+		return (hd_abort(-1, name, ES_GENERAL));
+
+	setup_signals_heredoc();
+	st = hd_write_loop(fd, redir, ctx);
+	if (st != ES_SUCCESS)
+		return (hd_abort(fd, name, st));
+
+	close(fd);
+	setup_signals();
+	redir_replace_with_infile(redir, name);
+	return (ES_SUCCESS);
+}
+
+static t_exit_status	hd_write_loop(int fd, t_redir *r, t_hd_ctx *ctx)
+{
+	char	*line;
 
 	while (true)
 	{
 		line = readline("heredoc> ");
 		if (g_sigint)
-		{
-			g_sigint = 0;
-			return (heredoc_cleanup_return(fd, filename, ES_SIGINT));
-		}
-		if (!line)
-			break ;
-		if (redir->target && ft_strcmp(line, redir->target) == 0)
-		{
-			free(line);
-			break ;
-		}
-		if (redir->expand)
-		{
-			status = expand_heredoc(&line, env_vars, exit_status);
-			if (status != ES_SUCCESS)
-			{
-				free(line);
-				return (heredoc_cleanup_return(fd, filename, status));
-			}
-		}
-		status = write_line_in_fd(fd, line);
-		if (status != ES_SUCCESS)
-		{
-			free(line);
-			return (heredoc_cleanup_return(fd, filename, status));
-		}
+			return (free(line), ES_SIGINT);
+		if (!line) /* Ctrl+D */
+			return (ES_SUCCESS);
+		if (r->target && ft_strcmp(line, r->target) == 0)
+			return (free(line), ES_SUCCESS);
+		if (!is_empty(line))
+			add_history(line);
+		if (r->expand && !expand_heredoc(&line, ctx->env, ctx->last_status))
+			return (free(line), ES_GENERAL);
+		if (!write_line_in_fd(fd, line))
+			return (free(line), ES_GENERAL);
 		free(line);
 	}
-	return (ES_SUCCESS);
+}
+
+static char *generate_heredoc_filename(size_t heredoc_index)
+{
+    char    *idx;
+    char    *name;
+
+    idx = ft_itoa((int)heredoc_index);
+    if (!idx)
+        return (NULL);
+    name = ft_strjoin(".heredoc_", idx);
+    free(idx);
+    return (name);
 }

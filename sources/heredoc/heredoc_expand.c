@@ -3,124 +3,89 @@
 /*                                                        :::      ::::::::   */
 /*   heredoc_expand.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:14:01 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 12:49:44 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 22:59:38 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-t_exit_status			expand_heredoc(char **line, t_env_var_list *env_vars,
-							t_exit_status exit_status);
-static t_exit_status	expand_dollar(t_strbuf *strbuf, const char *src,
-							size_t *i, t_env_var_list *env_vars,
-							t_exit_status exit_status);
-static size_t			var_name_end(const char *str, size_t start);
-static t_exit_status	append_env_value(t_strbuf *strbuf,
-							t_env_var_list *env_vars, const char *s,
-							size_t start, size_t end);
+int	expand_heredoc(char **line, t_env_var_list *env_vars,
+				t_exit_status last_status);
+int	hd_exp_dollar(char **dst, const char *src, size_t *i, t_exp_ctx *ctx);
+char	*exp_varname(const char *src, size_t start, size_t len);
 
-t_exit_status	expand_heredoc(char **line, t_env_var_list *env_vars,
-		t_exit_status exit_status)
+int	expand_heredoc(char **line, t_env_var_list *env_vars,
+				t_exit_status last_status)
 {
-	t_strbuf		strbuf;
-	const char		*src;
-	size_t			i;
-	t_exit_status	status;
+	t_exp_ctx	ctx;
+	char		*dst;
+	size_t		i;
 
-	if (!line || !*line || !env_vars)
-		return (ES_GENERAL);
-	status = strbuf_init(&strbuf);
-	if (status != ES_SUCCESS)
-		return (status);
-	src = *line;
+	if (!line || !*line)
+		return (1);
+	ctx.env = env_vars;
+	ctx.last_status = last_status;
+	dst = ft_strdup("");
+	if (!dst)
+		return (0);
 	i = 0;
-	while (src[i])
+	while ((*line)[i])
 	{
-		if (src[i] == '$')
-			status = expand_dollar(&strbuf, src, &i, env_vars, exit_status);
-		else
+		if ((*line)[i] == '$')
 		{
-			status = strbuf_append_char(&strbuf, src[i]);
-			i++;
+			if (!hd_exp_dollar(&dst, *line, &i, &ctx))
+				return (free(dst), 0);
+			continue;
 		}
-		if (status != ES_SUCCESS)
-		{
-			strbuf_free(&strbuf);
-			return (status);
-		}
+		if (!append_charter(&dst, (*line)[i]))
+			return (free(dst), 0);
+		i++;
 	}
 	free(*line);
-	*line = strbuf.buf;
-	return (ES_SUCCESS);
+	*line = dst;
+	return (1);
 }
 
-static t_exit_status	expand_dollar(t_strbuf *strbuf, const char *src,
-		size_t *i, t_env_var_list *env_vars, t_exit_status exit_status)
+int	hd_exp_dollar(char **dst, const char *src, size_t *i, t_exp_ctx *ctx)
 {
-	size_t			start;
-	size_t			end;
-	t_exit_status	status;
-
-	if (!src[*i + 1])
-	{
-		status = strbuf_append_char(strbuf, '$');
-		if (status != ES_SUCCESS)
-			return (status);
-		*i += 1;
-		return (ES_SUCCESS);
-	}
-	if (src[*i + 1] == '?')
-	{
-		status = strbuf_append_str(strbuf, get_last_status_string(exit_status));
-		if (status != ES_SUCCESS)
-			return (status);
-		*i += 2;
-		return (ES_SUCCESS);
-	}
-	start = *i + 1;
-	end = var_name_end(src, start);
-	if (end == start)
-	{
-		status = strbuf_append_char(strbuf, '$');
-		if (status != ES_SUCCESS)
-			return (status);
-		*i += 1;
-		return (ES_SUCCESS);
-	}
-	status = append_env_value(strbuf, env_vars, src, start, end);
-	if (status != ES_SUCCESS)
-		return (status);
-	*i = end;
-	return (ES_SUCCESS);
-}
-
-static size_t	var_name_end(const char *str, size_t start)
-{
+	size_t	start;
 	size_t	j;
-
-	j = start;
-	while (str[j] && (ft_isalnum((unsigned char)str[j]) || str[j] == '_'))
-		j++;
-	return (j);
-}
-
-static t_exit_status	append_env_value(t_strbuf *strbuf,
-		t_env_var_list *env_vars, const char *s, size_t start, size_t end)
-{
 	char	*name;
 	char	*val;
 
-	name = (char *)malloc((end - start) + 1);
+	if (!src[*i + 1])
+		return (append_charter(dst, src[(*i)++]));
+	if (src[*i + 1] == '?')
+		return ((*i += 2), append_string(dst,
+				get_last_status_string(ctx->last_status)));
+	start = *i + 1;
+	j = start;
+	while (src[j] && (ft_isalnum((unsigned char)src[j]) || src[j] == '_'))
+		j++;
+	if (j == start)
+		return (append_charter(dst, src[(*i)++]));
+	name = exp_varname(src, start, j - start);
 	if (!name)
-		return (ES_GENERAL);
-	ft_memcpy(name, s + start, end - start);
-	name[end - start] = '\0';
-	val = get_var_value(env_vars, name);
+		return (0);
+	val = get_var_value(ctx->env, name);
 	free(name);
 	if (val && val[0] != '\0')
-		return (strbuf_append_str(strbuf, val));
-	return (ES_SUCCESS);
+		return (*i = j, append_string(dst, val));
+	*i = j;
+	return (1);
+}
+
+char	*exp_varname(const char *src, size_t start, size_t len)
+{
+	char	*name;
+
+	name = malloc(len + 1);
+	if (!name)
+		return (NULL);
+	ft_memcpy(name, src + start, len);
+	name[len] = '\0';
+	return (name);
 }

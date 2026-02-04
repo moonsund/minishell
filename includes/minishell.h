@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/04 23:01:44 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 23:22:18 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,6 +146,19 @@ typedef struct s_env_var_list
 	size_t						count;
 }								t_env_var_list;
 
+typedef struct s_exp_ctx
+{
+	t_env_var_list	*env;
+	t_exit_status	last_status;
+}	t_exp_ctx;
+
+typedef struct s_hd_ctx
+{
+	t_env_var_list	*env;
+	t_exit_status	last_status;
+	size_t			index;
+}	t_hd_ctx;
+
 typedef struct s_redir
 {
 	t_redir_type				type;
@@ -218,7 +231,8 @@ void							free_env_var_list(t_env_var_list *vars);
 void							err_print(t_exit_status exit_status,
 									const char *ctx);
 void							err_malloc_print(const char *where);
-void							setup_signals(void);
+void	setup_signals_prompt(void);
+void	setup_signals_heredoc(void);
 
 // envp.c
 t_var							*find_var(t_env_var_list *list,
@@ -320,24 +334,18 @@ void							free_buf(t_buf *buf);
 void							init_buffer(t_buf *buf);
 
 // heredoc
-t_exit_status					process_heredoc(t_pipeline *pipeline,
-									t_env_var_list *env_vars,
-									t_exit_status exit_status);
-t_exit_status					expand_heredoc(char **line,
-									t_env_var_list *env_vars,
-									t_exit_status exit_status);
-t_exit_status					strbuf_init(t_strbuf *strbuf);
-void							strbuf_free(t_strbuf *strbuf);
-t_exit_status					strbuf_reserve(t_strbuf *strbuf, size_t extra);
-t_exit_status					strbuf_append_char(t_strbuf *strbuf, char c);
-t_exit_status					strbuf_append_str(t_strbuf *strbuf,
-									const char *s);
-t_exit_status					heredoc_cleanup_return(int fd, char *filename,
-									t_exit_status st);
-void							redir_replace_with_infile(t_redir *r,
-									char *filename);
-char							*generate_heredoc_filename(size_t heredoc_index);
-t_exit_status					write_line_in_fd(int fd, const char *line);
+t_exit_status	process_heredoc(t_pipeline *pipeline,
+					t_env_var_list *env_vars, t_exit_status last_status);
+int	expand_heredoc(char **line, t_env_var_list *env_vars,
+				t_exit_status last_status);
+int	hd_exp_dollar(char **dst, const char *src, size_t *i, t_exp_ctx *ctx);
+char	*exp_varname(const char *src, size_t start, size_t len);
+void	redir_replace_with_infile(t_redir *r, char *filename);
+int	write_line_in_fd(int fd, char *line);
+int	append_charter(char **line, char c);
+int	append_string(char **line, const char *str);
+t_exit_status	hd_abort(int fd, char *filename, t_exit_status st);
+
 
 // execution.c
 int								execute_pipeline(t_shell *shell);
