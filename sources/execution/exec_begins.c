@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:31 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 12:24:42 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 12:44:15 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,29 +18,6 @@ static void	apply_redirs_or_die(const t_command *cmd);
 static int	open_redir_file(const t_redir *redir);
 static int	wait_all_and_get_last(pid_t *pids, size_t count);
 
-/*
-Auto check Valgrind VSCode : Ctrl Shift p > run task > Valgrind
-Redirections - Test commands :
-wc -l < w
-sort < z
-grep ok << end
-pwd > y
-ls >> y
-export FRUIT=apple > new_outfile
-cat w y z > new
-
-Pipes - Test commands :
-ls | grep sources | wc
-ls -la | grep git | wc -l
-cat Makefile | sort | tail -5
-ls | exit | wc
-pwd | grep z | wc -m
-echo London | cat -e > y
-
-$Z
-
-*/
-
 int	execute_pipeline(t_shell *shell)
 {
 	t_pipeline	*pl;
@@ -50,10 +27,8 @@ int	execute_pipeline(t_shell *shell)
 	if (pl->count == 0 || !pl->cmds)
 		return (ES_GENERAL);
 	cmd = &pl->cmds[0];
-	// cd/export/unset/exit with and w/o redirections = all commands that don't print anything but modify the shell
 	if (pl->count == 1 && cmd->argv && cmd->argv[0] && is_parent_builtin(cmd->argv[0]))
 		return (exec_builtin_in_parent(shell, cmd));
-	// Command line starting with a redirection, but no pipe, no cmd and no other redirection, e.g. '> outfile'
 	if ((shell->pipeline->count == 1) && (!shell->pipeline->cmds->argv)
 		&& shell->pipeline->cmds->redirs
 		&& (shell->pipeline->cmds->redirs->type == R_OUT
