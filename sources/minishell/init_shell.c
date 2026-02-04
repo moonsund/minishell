@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   init_shell.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:00 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 13:00:23 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 16:07:26 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,47 +30,27 @@ int	init_shell(t_shell *shell, char **envp)
 
 static int	init_env_var_list(t_env_var_list *list, char **envp)
 {
-	t_var	*var;
 	size_t	i;
 	char	*sep_ptr;
+	t_var	*var;
 
-	list->count = 0;
-	list->head = NULL;
-	list->tail = NULL;
+	init_env_list_empty(list);
 	if (!envp)
 		return (1);
 	i = 0;
 	while (envp[i])
 	{
-		sep_ptr = ft_strchr(envp[i], '=');
+		sep_ptr = find_env_sep(envp[i]);
 		if (!sep_ptr)
 		{
 			i++;
 			continue ;
 		}
-		var = malloc(sizeof(*var));
+		var = create_var_from_env_line(envp[i], sep_ptr);
 		if (!var)
-		{
-			free_env_var_list(list);
 			return (0);
-		}
-		var->name = ft_substr(envp[i], 0, sep_ptr - envp[i]);
-		var->value = ft_strdup(sep_ptr + 1);
-		if (!var->name || !var->value)
-		{
-			free(var->name);
-			free(var->value);
-			free(var);
-			free_env_var_list(list);
+		if (!append_var_or_cleanup(list, var))
 			return (0);
-		}
-		var->next = NULL;
-		if (list->head == NULL)
-			list->head = var;
-		else
-			list->tail->next = var;
-		list->tail = var;
-		list->count++;
 		i++;
 	}
 	return (1);

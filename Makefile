@@ -27,6 +27,7 @@ SRC_FILES = \
 	main.c \
 	minishell/minishell.c \
 	minishell/init_shell.c \
+	minishell/init_shell_utils.c \
 	minishell/signals.c \
 	minishell/free_utils.c \
 	minishell/print_utils.c \

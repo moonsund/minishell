@@ -6,7 +6,7 @@
 /*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/04 15:54:38 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 16:07:18 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -204,6 +204,10 @@ void							process_input(char *input, t_shell *shell);
 int								parse_and_prepare(t_shell *shell, char *input);
 int								execute_prepared(t_shell *shell);
 int								init_shell(t_shell *shell, char **envp);
+void							init_env_list_empty(t_env_var_list *list);
+char							*find_env_sep(char *env_line);
+t_var							*create_var_from_env_line(char *env_line, char *sep_ptr);
+int								append_var_or_cleanup(t_env_var_list *list, t_var *var);
 void							reset_iteration(t_shell *shell);
 void							shell_destroy(t_shell *shell);
 void							free_tokens(t_token_list *list);
