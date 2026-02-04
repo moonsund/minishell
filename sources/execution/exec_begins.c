@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:31 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 23:03:14 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 23:46:14 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@ int			execute_pipeline(t_shell *shell);
 int			exec_pipeline_forking(t_shell *shell, const t_pipeline *pl);
 static void	apply_redirs_or_die(const t_command *cmd);
 static int	open_redir_file(const t_redir *redir);
-static int	wait_all_and_get_last(pid_t *pids, size_t count);
 
 int	execute_pipeline(t_shell *shell)
 {
@@ -61,19 +60,8 @@ int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
 	prev_read = -1;
 	while (pl->count > i)
 	{
-		if (pipe_setup(pipefds, &i, pl, pids) == 1)
+		if (pipe_setup(pipefds, &i, pl->count, pids) == 1)
 			return (1);
-		// pipefds[0] = -1;
-		// pipefds[1] = -1;
-		// if (i + 1 < pl->count)
-		// {
-		// 	if (pipe(pipefds) < 0)
-		// 	{
-		// 		perror("pipe");
-		// 		free(pids);
-		// 		return (1);
-		// 	}
-		// }
 		pid = fork();
 		if (pid < 0)
 		{
@@ -164,31 +152,3 @@ static int	open_redir_file(const t_redir *redir)
 	return (fd);
 }
 
-static int	wait_all_and_get_last(pid_t *pids, size_t count)
-{
-	size_t	i;
-	int		status;
-	int		last_status;
-	pid_t	last_pid;
-
-	last_status = 0;
-	last_pid = pids[count - 1];
-	i = 0;
-	while (i < count)
-	{
-		if (waitpid(pids[i], &status, 0) > 0)
-		{
-			if (pids[i] == last_pid)
-			{
-				if (WIFEXITED(status))
-					last_status = WEXITSTATUS(status);
-				else if (WIFSIGNALED(status))
-					last_status = 128 + WTERMSIG(status);
-				else
-					last_status = 1;
-			}
-		}
-		i++;
-	}
-	return (last_status);
-}

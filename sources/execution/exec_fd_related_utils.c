@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:18:36 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/04 23:12:32 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 23:20:28 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 int		open_fd(const char *path, bool append, bool truncate);
 void	open_and_close_fd(t_command *cmd);
-int		pipe_setup(int *pipefds, int *i, t_pipeline *pl, pid_t	*pids);
+int		pipe_setup(int *pipefds, size_t *i, size_t pl_count, pid_t	*pids);
 void	close_if_valid(int fd);
 void	close_all_if_valid(int *fd, int *pipe_fd, bool exclude_read_pipe);
 
@@ -58,11 +58,11 @@ void	open_and_close_fd(t_command *cmd)
 	}
 }
 
-int		pipe_setup(int *pipefds, int *i, t_pipeline *pl, pid_t *pids)
+int		pipe_setup(int *pipefds, size_t *i, size_t pl_count, pid_t *pids)
 {
 	pipefds[0] = -1;
 	pipefds[1] = -1;
-	if (i + 1 < pl->count)
+	if (*i + 1 < pl_count)
 	{
 		if (pipe(pipefds) < 0)
 		{
