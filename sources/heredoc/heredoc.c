@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:14:37 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 12:52:41 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 21:20:30 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ t_exit_status	process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars,
 	t_exit_status	status;
 
 	if (!pipeline || !env_vars)
-		return (ES_GENERAL);
+		return (0);
 	heredoc_index = 0;
 	i = 0;
 	while (i < pipeline->count)

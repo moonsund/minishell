@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:31 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 20:57:55 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 21:23:11 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,8 @@ int	execute_pipeline(t_shell *shell)
 	t_command	*cmd;
 
 	pl = shell->pipeline;
-	if (pl->count == 0 || !pl->cmds)
-		return (ES_GENERAL);
+	if (!pl || pl->count == 0 || !pl->cmds)
+		return (0);
 	cmd = &pl->cmds[0];
 	if (pl->count == 1 && cmd->argv && cmd->argv[0]
 		&& is_parent_builtin(cmd->argv[0]))
