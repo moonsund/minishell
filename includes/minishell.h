@@ -6,7 +6,7 @@
 /*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/04 17:53:20 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/04 20:27:43 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -248,27 +248,31 @@ t_exit_status	exp_append_status(t_expctx *c, size_t *i);
 int	append_str(t_buf *buf, char *str, t_qmark quote_mark);
 
 
-
-
-
-
-
-
-// parcer_init.c
-t_pipeline						*init_pipeline(void);
-void							init_parser_context(t_parser_context *ctx);
-void							init_command(t_command *cmd);
-
-// parcer_tokens.c
-t_exit_status					process_tokens(t_pipeline *pl,
-									t_token_list *list, t_parser_context *ctx);
-
-// parcer_utils.c
-void							free_cmd(t_command *cmd);
-
 // parser.c
 t_exit_status					build_pipeline_from_tokens(t_shell *shell);
 int								append_cmd(t_pipeline *pl, t_command cmd);
+
+// parcer_tokens.c
+int						process_word_token(t_parser_context *ctx);
+t_exit_status			process_pipe_token(t_pipeline *pl, t_parser_context *ctx);
+t_exit_status			process_redir_tokens(t_parser_context *ctx);
+int	append_arg(t_command *cmd, char *arg);
+
+// parcer_init.c
+t_pipeline	*init_pipeline(void);
+void		init_parser_context(t_parser_context *ctx);
+void		init_command(t_command *cmd);
+t_redir	*init_redirect(t_parser_context *ctx);
+
+// parcer_helpers.c
+int				token_has_any_quotes(t_token *token);
+int				redir_push_back(t_redir **lst, t_redir *node);
+size_t	count_argv(char **argv);
+char	**alloc_argv_with_copy(char **old_argv, size_t argc);
+int	append_dup_arg(char **new_argv, size_t argc, char *arg);
+
+// parcer_utils.c
+void							free_cmd(t_command *cmd);
 
 // tokenizer.c
 t_exit_status	tokenize_with_qmap(const char *str, t_token_list *tokens);

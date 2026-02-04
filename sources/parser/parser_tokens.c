@@ -3,68 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   parser_tokens.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:20 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 13:14:36 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 20:27:31 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 int						process_word_token(t_parser_context *ctx);
-int						append_arg(t_command *cmd, char *arg);
-static t_exit_status	process_pipe_token(t_pipeline *pl,
-							t_parser_context *ctx);
-static t_exit_status	process_redir_tokens(t_parser_context *ctx);
-int						token_has_any_quotes(t_token *token);
-int						redir_push_back(t_redir **lst, t_redir *node);
-static t_redir			*init_redirect(t_parser_context *ctx);
-
-t_exit_status	process_tokens(t_pipeline *pl, t_token_list *list,
-		t_parser_context *ctx)
-{
-	t_exit_status	exit_status;
-	int				has_argv;
-	int				has_redirs;
-
-	ctx->current = list->head;
-	while (ctx->current)
-	{
-		ctx->next = ctx->current->next;
-		if (ctx->current->type == TOK_WORD)
-		{
-			if (!process_word_token(ctx))
-				return (ES_GENERAL);
-		}
-		else if (ctx->current->type == TOK_PIPE)
-		{
-			exit_status = process_pipe_token(pl, ctx);
-			if (exit_status != ES_SUCCESS)
-				return (exit_status);
-		}
-		else
-		{
-			exit_status = process_redir_tokens(ctx);
-			if (exit_status != ES_SUCCESS)
-				return (exit_status);
-		}
-		ctx->current = ctx->current->next;
-	}
-	if (ctx->cmd_started)
-	{
-		has_argv = (ctx->current_cmd.argv && ctx->current_cmd.argv[0]);
-		has_redirs = (ctx->current_cmd.redirs != NULL);
-		if (!has_argv && !has_redirs)
-		{
-			err_print(ES_INVALID_USAGE, "near 'newline'");
-			return (ES_INVALID_USAGE);
-		}
-		if (!append_cmd(pl, ctx->current_cmd))
-			return (ES_GENERAL);
-	}
-	return (ES_SUCCESS);
-}
+t_exit_status			process_pipe_token(t_pipeline *pl, t_parser_context *ctx);
+t_exit_status			process_redir_tokens(t_parser_context *ctx);
+int	append_arg(t_command *cmd, char *arg);
 
 int	process_word_token(t_parser_context *ctx)
 {
@@ -81,47 +32,7 @@ int	process_word_token(t_parser_context *ctx)
 	return (1);
 }
 
-int	append_arg(t_command *cmd, char *arg)
-{
-	char	**new_argv;
-	char	*dup;
-	size_t	argc;
-	size_t	i;
-
-	if (!cmd)
-		return (0);
-	if (!arg)
-		return (1);
-	argc = 0;
-	if (cmd->argv)
-	{
-		while (cmd->argv[argc])
-			argc++;
-	}
-	new_argv = (char **)malloc(sizeof(*new_argv) * (argc + 2));
-	if (!new_argv)
-		return (0);
-	i = 0;
-	while (i < argc)
-	{
-		new_argv[i] = cmd->argv[i];
-		i++;
-	}
-	dup = ft_strdup(arg);
-	if (!dup)
-	{
-		free(new_argv);
-		return (0);
-	}
-	new_argv[argc] = dup;
-	new_argv[argc + 1] = NULL;
-	free(cmd->argv);
-	cmd->argv = new_argv;
-	return (1);
-}
-
-static t_exit_status	process_pipe_token(t_pipeline *pl,
-		t_parser_context *ctx)
+t_exit_status	process_pipe_token(t_pipeline *pl, t_parser_context *ctx)
 {
 	if (!ctx->cmd_started || !ctx->next || ctx->current_cmd.argv == NULL
 		|| ctx->current_cmd.argv[0] == NULL)
@@ -136,7 +47,7 @@ static t_exit_status	process_pipe_token(t_pipeline *pl,
 	return (ES_SUCCESS);
 }
 
-static t_exit_status	process_redir_tokens(t_parser_context *ctx)
+t_exit_status	process_redir_tokens(t_parser_context *ctx)
 {
 	t_redir	*redir_node;
 
@@ -166,78 +77,25 @@ static t_exit_status	process_redir_tokens(t_parser_context *ctx)
 	return (ES_SUCCESS);
 }
 
-static t_redir	*init_redirect(t_parser_context *ctx)
+int	append_arg(t_command *cmd, char *arg)
 {
-	t_redir			*redir;
-	t_token_type	token_type;
+	char	**new_argv;
+	size_t	argc;
 
-	token_type = ctx->current->type;
-	redir = malloc(sizeof(*redir));
-	if (!redir)
-		return (NULL);
-	redir->fd = 0;
-	redir->expand = 0;
-	redir->next = NULL;
-	if (token_type == TOK_REDIR_IN)
-	{
-		redir->type = R_IN;
-		redir->fd = 0;
-	}
-	else if (token_type == TOK_HEREDOC)
-	{
-		redir->type = R_HEREDOC;
-		if (!token_has_any_quotes(ctx->next))
-			redir->expand = 1;
-	}
-	else if (token_type == TOK_REDIR_OUT)
-	{
-		redir->type = R_OUT;
-		redir->fd = 1;
-	}
-	else
-	{
-		redir->type = R_APPEND;
-		redir->fd = 1;
-	}
-	redir->target = ft_strdup(ctx->next->raw_str);
-	if (!redir->target)
-	{
-		free(redir);
-		return (NULL);
-	}
-	return (redir);
-}
-
-int	token_has_any_quotes(t_token *token)
-{
-	size_t	i;
-
-	i = 0;
-	if (!token || !token->quotes_map)
+	if (!cmd)
 		return (0);
-	while (i < token->length)
-	{
-		if (token->quotes_map[i] == Q_SQ || token->quotes_map[i] == Q_DQ)
-			return (1);
-		i++;
-	}
-	return (0);
-}
-
-int	redir_push_back(t_redir **lst, t_redir *node)
-{
-	t_redir	*cur;
-
-	if (!node)
-		return (0);
-	if (!*lst)
-	{
-		*lst = node;
+	if (!arg)
 		return (1);
+	argc = count_argv(cmd->argv);
+	new_argv = alloc_argv_with_copy(cmd->argv, argc);
+	if (!new_argv)
+		return (0);
+	if (!append_dup_arg(new_argv, argc, arg))
+	{
+		free(new_argv);
+		return (0);
 	}
-	cur = *lst;
-	while (cur->next)
-		cur = cur->next;
-	cur->next = node;
+	free(cmd->argv);
+	cmd->argv = new_argv;
 	return (1);
 }
