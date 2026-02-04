@@ -28,7 +28,8 @@ SRC_FILES = \
 	minishell/minishell.c \
 	minishell/init_shell.c \
 	minishell/signals.c \
-	minishell/utils.c \
+	minishell/free_utils.c \
+	minishell/print_utils.c \
 	tokenizer/tokenizer.c \
 	tokenizer/tokenizer_words.c \
 	tokenizer/tokenizer_operators.c \

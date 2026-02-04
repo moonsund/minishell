@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:09 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 13:06:14 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 13:49:37 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,6 @@ void	shell_destroy(t_shell *shell);
 void	free_tokens(t_token_list *list);
 void	free_pipeline(t_pipeline *pl);
 void	free_env_var_list(t_env_var_list *vars);
-void	err_print(t_exit_status type, const char *ctx);
 
 void	reset_iteration(t_shell *shell)
 {
@@ -89,35 +88,4 @@ void	free_env_var_list(t_env_var_list *vars)
 	vars->head = NULL;
 	vars->tail = NULL;
 	vars->count = 0;
-}
-
-// Edited to print on stderr rather than stdout
-// TBC : typo on the printf("minishell: %s: \n", where); ?
-void	err_print(t_exit_status type, const char *where)
-{
-	if (type == ES_GENERAL)
-	{
-		write(2, "minishell: ", 11);
-		write(2, where, ft_strlen(where));
-		write(2, "\n", 1);
-	}
-	else if (type == ES_INVALID_USAGE)
-	{
-		write(2, "minishell: syntax_error: ", 25);
-		write(2, where, ft_strlen(where));
-		write(2, "\n", 1);
-	}
-	else
-	{
-		write(2, "minishell: ", 11);
-		write(2, where, ft_strlen(where));
-		write(2, "\n", 1);
-	}
-}
-
-void	err_malloc_print(const char *where)
-{
-	write(2, "minishell: ", 11);
-	write(2, where, ft_strlen(where));
-	write(2, ": cannot allocate memory\n", 26);
 }
