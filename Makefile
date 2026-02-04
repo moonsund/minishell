@@ -39,7 +39,9 @@ SRC_FILES = \
 	parser/parser_tokens.c \
 	parser/parser_utils.c \
 	parser/parser.c \
-	expand/expand.c \
+	expand/expand_tokens.c \
+	expand/expand_tokens_utils.c \
+	expand/expand_utils.c \
 	heredoc/heredoc.c \
 	heredoc/heredoc_expand.c \
 	heredoc/heredoc_expand_utils.c \

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/04 14:35:35 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/04 15:54:38 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,6 +155,14 @@ typedef struct s_redir
 	struct s_redir	*next;
 }								t_redir;
 
+typedef struct s_expctx
+{
+	t_token			*tok;
+	t_env_var_list	*env;
+	t_exit_status	last;
+	t_buf			buf;
+}	t_expctx;
+
 typedef struct s_command
 {
 	char	**argv;
@@ -224,7 +232,23 @@ void							free_envp_partial(char **envp, size_t used);
 t_exit_status					expand_tokens(t_token_list *tokens,
 									t_env_var_list *env_vars,
 									t_exit_status exit_status);
-char							*get_last_status_string(t_exit_status exit_status);
+char	*get_last_status_string(t_exit_status exit_status);
+t_exit_status	exp_append_var(t_expctx *c, size_t start, size_t end,
+							size_t *i);
+size_t			var_end(const char *s, size_t len, size_t start);
+char				*dup_var_name(const char *s, size_t start, size_t end);
+t_exit_status	exp_loop(t_expctx *c);
+t_exit_status	exp_append_char(t_expctx *c, char ch);
+t_exit_status	exp_dollar(t_expctx *c, size_t *i);
+t_exit_status	exp_append_status(t_expctx *c, size_t *i);
+int	append_str(t_buf *buf, char *str, t_qmark quote_mark);
+
+
+
+
+
+
+
 
 // parcer_init.c
 t_pipeline						*init_pipeline(void);
