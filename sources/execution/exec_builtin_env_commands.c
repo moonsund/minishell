@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:14 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/05 01:08:07 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/05 13:00:13 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 int	execute_export(t_shell *shell);
 int	execute_unset(t_shell *shell);
 int	execute_env(t_shell *shell);
+int	key_check(char **key, char *argv);
 
 // Subject : "export with no options"
 int	execute_export(t_shell *shell)
@@ -32,16 +33,16 @@ int	execute_export(t_shell *shell)
 		return (0);
 	}
 	argv_1 = shell->pipeline->cmds->argv[1];
-	if (!ft_strchr(argv_1, '='))
+	if (!ft_strchr(argv_1, '='))		// pas de = trouvé
 	{
-		// verif en 1er s'il y a seulement des chars alpha num (pas de num seuls ou num au debut) ou '_'
-				// ok > go further
-				// else > error message
-		// puis verifier s'il y un '=' (si oui, variable exportee, meme si key est vide / si non, ignorer et status 0)
+		return (key_check(&key, argv_1));
+	}
+	else								// = trouvé
+	{
+		// s'il y a un '=' (si oui, variable exportee, meme si key est vide / si non, ignorer et status 0)
 		// puis verifier s'il y a une key
 		if (!check_var_data(&var_data, argv_1, &key, &value))
 			return (1);
-		return (0);
 	}
 
 	if (!set_var(&shell->env_vars, key, value))
@@ -52,6 +53,33 @@ int	execute_export(t_shell *shell)
 	}
 	free_strings_array(var_data);
 	return (0);
+}
+
+int	key_check(char **key, char *argv)
+{
+	int	i;
+
+	i = 0;
+	if (!argv || !argv[0])
+		return (0);
+	*key = argv;
+	// if ((*argv)[0] && (*argv)[1])
+	// 	*value = (*argv)[1];
+	if (!ft_isdigit((*key)[0]))
+	{
+		err_print(1, "not a valid identifier");
+		return (0);
+	}
+	while ((*key)[i])
+	{
+		if (!ft_isalnum((*key)[i]) && (!ft_strchr(*key, '_')))
+		{
+			err_print(1, "not a valid identifier");
+			return (0);
+		}
+		i++;
+	}
+	return (1);
 }
 
 // Subject : "unset with no options"
