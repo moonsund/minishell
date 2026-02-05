@@ -3,18 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   execution_forking.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:31 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/05 10:54:12 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/05 12:03:19 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 int			exec_pipeline_forking(t_shell *shell, const t_pipeline *pl);
-static int	fork_one_segment(t_shell *sh, const t_pipeline *pl, t_fork_ctx *ctx);
-static void	child_exec_segment(t_shell *sh, const t_command *cmd, t_fork_ctx *ctx);
+static int	fork_one_segment(t_shell *sh, const t_pipeline *pl,
+				t_fork_ctx *ctx);
+static void	child_exec_segment(t_shell *sh, const t_command *cmd,
+				t_fork_ctx *ctx);
 static void	child_dup_or_die(int from, int to, const char *perr);
 static int	wait_all_and_get_last(pid_t *pids, size_t count);
 
@@ -65,7 +67,8 @@ static int	fork_one_segment(t_shell *sh, const t_pipeline *pl, t_fork_ctx *ctx)
 	return (0);
 }
 
-static void	child_exec_segment(t_shell *sh, const t_command *cmd, t_fork_ctx *ctx)
+static void	child_exec_segment(t_shell *sh, const t_command *cmd,
+		t_fork_ctx *ctx)
 {
 	int	status;
 
