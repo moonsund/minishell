@@ -6,7 +6,7 @@
 /*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:04 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/05 13:42:03 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/05 14:57:11 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,7 @@ int	parse_and_prepare(t_shell *shell, char *input)
 	status = build_pipeline_from_tokens(shell);
 	if (status != ES_SUCCESS)
 		return (status);
-	status = process_heredoc(shell->pipeline, &shell->env_vars,
+	status = process_heredoc(shell->pl, &shell->env_vars,
 			shell->exit_status);
 	if (status != ES_SUCCESS)
 		return (status);

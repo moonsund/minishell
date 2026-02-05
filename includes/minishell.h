@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/05 10:53:16 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/05 13:49:53 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -212,7 +212,7 @@ typedef struct s_shell
 	char						*input;
 	t_env_var_list				env_vars;
 	t_token_list				tokens;
-	t_pipeline					*pipeline;
+	t_pipeline					*pl;
 }								t_shell;
 
 // main.c
@@ -342,7 +342,7 @@ void							free_buf(t_buf *buf);
 void							init_buffer(t_buf *buf);
 
 // heredoc
-t_exit_status	process_heredoc(t_pipeline *pipeline,
+t_exit_status	process_heredoc(t_pipeline *pl,
 					t_env_var_list *env_vars, t_exit_status last_status);
 int	expand_heredoc(char **line, t_env_var_list *env_vars,
 				t_exit_status last_status);
@@ -376,12 +376,12 @@ int								exec_builtin_in_parent(t_shell *shell,
 int								run_any_builtin_in_child(t_shell *shell,
 									t_command *cmd);
 int								execute_built_in_commands(t_shell *shell,
-									t_command *cmd, char **cwd);
+									t_command *cmd);
 
 // exec_builtin_commands.c
 int								execute_echo(t_command *cmds);
 int								execute_cd(t_command *cmds);
-int								execute_pwd(char *current_working_directory);
+int								execute_pwd();
 int								execute_exit(t_shell *shell, t_command *cmd);
 
 // exec_builtin_cmds_utils.c
@@ -400,7 +400,8 @@ int								execute_env(t_shell *shell);
 void							print_export(t_shell *shell);
 void							sort_envp_alpha(char **envp);
 void							str_swap(char **s1, char **s2);
-int								check_var_data(char ***var_data, char *argv,
+int								key_check(char **key, char *argv);
+int								check_data(char ***var_data, char *argv,
 									char **key, char **value);
 int								key_value_check_init(char **key,
 									char ***var_data, char **value);

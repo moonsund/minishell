@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:00 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 16:26:53 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/05 13:29:31 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ int	init_shell(t_shell *shell, char **envp)
 {
 	shell->exit_status = ES_SUCCESS;
 	shell->should_exit = false;
-	shell->pipeline = NULL;
+	shell->pl = NULL;
 	shell->tokens.count = 0;
 	shell->tokens.head = NULL;
 	shell->tokens.tail = NULL;

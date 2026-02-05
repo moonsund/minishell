@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:18:53 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/04 18:35:37 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/05 13:53:13 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ int	is_builtin(const char *cmd);
 int	is_parent_builtin(const char *cmd);
 int	exec_builtin_in_parent(t_shell *shell, t_command *cmd);
 int	run_any_builtin_in_child(t_shell *shell, t_command *cmd);
-int	execute_built_in_commands(t_shell *shell, t_command *cmd, char **cwd);
+int	execute_built_in_commands(t_shell *shell, t_command *cmd);
 
 int	is_builtin(const char *cmd)
 {
@@ -79,28 +79,25 @@ int	exec_builtin_in_parent(t_shell *shell, t_command *cmd)
 // exit should always execute, even in pipeline
 int	run_any_builtin_in_child(t_shell *shell, t_command *cmd)
 {
-	char	*curr_directory;
-
-	curr_directory = fetch_current_working_directory();
 	if (is_parent_builtin(cmd->argv[0]))
 	{
 		if (ft_strcmp(cmd->argv[0], "exit") == 0)
-			return (execute_built_in_commands(shell, cmd, &curr_directory));
-		if (shell->pipeline->count > 1)
+			return (execute_built_in_commands(shell, cmd));
+		if (shell->pl->count > 1)
 			return (0);
 		else
-			return (execute_built_in_commands(shell, cmd, &curr_directory));
+			return (execute_built_in_commands(shell, cmd));
 	}
 	else
 	{
-		return (execute_built_in_commands(shell, cmd, &curr_directory));
+		return (execute_built_in_commands(shell, cmd));
 	}
 }
 
 // We're in a child process.
 // If there are pipes, commands without output have been ignored,
 // the others will execute normally with the correct FDs (if applicable)
-int	execute_built_in_commands(t_shell *shell, t_command *cmd, char **cwd)
+int	execute_built_in_commands(t_shell *shell, t_command *cmd)
 {
 	int		exit_status;
 
@@ -110,7 +107,7 @@ int	execute_built_in_commands(t_shell *shell, t_command *cmd, char **cwd)
 	else if (ft_strcmp(cmd->argv[0], "cd") == 0)
 		exit_status = execute_cd(cmd);
 	else if (ft_strcmp(cmd->argv[0], "pwd") == 0)
-		exit_status = execute_pwd(*cwd);
+		exit_status = execute_pwd();
 	else if (ft_strcmp(cmd->argv[0], "export") == 0)
 		exit_status = execute_export(shell);
 	else if (ft_strcmp(cmd->argv[0], "unset") == 0)
@@ -119,11 +116,9 @@ int	execute_built_in_commands(t_shell *shell, t_command *cmd, char **cwd)
 		exit_status = execute_env(shell);
 	else if (ft_strcmp(cmd->argv[0], "exit") == 0)
 	{
-		free(*cwd);
 		printf("exit\n");
 		exit_status = execute_exit(shell, cmd);
 		exit(exit_status);
 	}
-	free(*cwd);
 	return (exit_status);
 }
