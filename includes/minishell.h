@@ -6,7 +6,7 @@
 /*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/05 10:22:19 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/05 10:53:16 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -356,10 +356,17 @@ t_exit_status	hd_abort(int fd, char *filename, t_exit_status st);
 
 
 // execution.c
-int								execute_pipeline(t_shell *shell);
-int								exec_pipeline_forking(t_shell *shell,
-									const t_pipeline *pl);
-int								wait_all_and_get_last(pid_t *pids, size_t count);
+int	execute_pipeline(t_shell *shell);
+
+// execution_forking.c
+int			exec_pipeline_forking(t_shell *shell, const t_pipeline *pl);
+
+// execution_forking_helpers.c
+void	ctx_init(t_fork_ctx *ctx, pid_t *pids);
+int	open_pipe_if_needed(t_fork_ctx *c, const t_pipeline *pl);
+void	free_on_error(pid_t *pids, t_fork_ctx *c);
+int	open_redir_file(const t_redir *redir);
+void	apply_redirs_or_die(const t_command *cmd);
 
 // exec_command_filter.c
 int								is_builtin(const char *cmd);

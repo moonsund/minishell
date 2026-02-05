@@ -54,7 +54,9 @@ SRC_FILES = \
 	envp/unset_var.c \
 	envp/set_var.c \
 	envp/build_envp.c \
-	execution/exec_begins.c \
+	execution/execution.c \
+	execution/execution_forking.c \
+	execution/execution_forking_helpers.c \
 	execution/exec_fork_actions.c \
 	execution/exec_command_filter.c \
 	execution/exec_builtin_commands.c \
