@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser_tokens.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:20 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 21:44:48 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/05 00:10:58 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,11 +68,7 @@ t_exit_status	process_redir_tokens(t_parser_context *ctx)
 		return (ES_GENERAL);
 	}
 	if (!redir_push_back(&ctx->current_cmd.redirs, redir_node))
-	{
-		free(redir_node->target);
-		free(redir_node);
-		return (ES_GENERAL);
-	}
+		return (free(redir_node->target), free(redir_node), ES_GENERAL);
 	ctx->current = ctx->next;
 	return (ES_SUCCESS);
 }
