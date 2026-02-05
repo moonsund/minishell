@@ -1,4 +1,4 @@
-_This project has been created as part of the 42 curriculum by [schappuy](https://profile.intra.42.fr/users/schappuy) and [lorlov](https://profile.intra.42.fr/users/lorlov)._
+_This project has been created as part of the 42 curriculum by [lorlov](https://profile.intra.42.fr/users/lorlov) and [schappuy](https://profile.intra.42.fr/users/schappuy)._
 
 # Description
 Welcome to our Minishell !
@@ -23,16 +23,29 @@ That was an amazing team work experience that we divided in two strategical sect
 * **Parsing** (handled by Leon)
 * **Execution** (mostly handled by Sophie - Leon came to the rescue when it got time-critical though)
 
+_Required official description, just in case :_
+Minishell is a 42 project where you build your own simplified version of bash from scratch in C.
+The goal: Understand how a shell actually works under the hood - parsing commands, handling processes, managing file descriptors, dealing with signals, and all that low-level stuff.
+
 # Instructions
 If you're here, you already know the drill : git clone, make, enjoy ! And ... That's pretty much it !
 If you're an evaluator : Please have mercy on us - We're both on pace 24 and I'm a few hours away from the Black Hole
 
 [![puss_in_boots_please](https://cdn3.emoji.gg/emojis/3106-puss-in-boots-please.png)](https://emoji.gg/emoji/3106-puss-in-boots-please)
 
+_Required official intructions, just in case :_
+### Compilation
+Run `make` to compile the project.
+
+### Execution
+./minishell
+
 # Resources
-For this project, we did extensive research on ...
-* Google, obviously
-* Youtube
+For this project, we used ...
+* Google / Youtube / AI and all that jazz, obviously
+* Bash as a reference, and all the manuals for authorized functions
+* VSCode & GDB to code & debug
+* Valgrind & Fsanitize for mem leaks
 * Wait, should we actually list all the tools we used during 3 months of research here ?
 
 Was AI used ? Of course bro, all along the project, but in a smart way.
@@ -42,7 +55,7 @@ Here's an idea of the prompts we used :
 * Don't provide any answers
 * What can I do with the 3 eggs, 2 apples, corn flour and butter I have at home ? - WHOOPS, wrong copy-paste.
 
-However guess what ?! We didn't use AI for this README * Insert here a sunglasses emoji *
+However guess what ?! We _(almost)_ didn't use AI for this README * Insert here a sunglasses emoji *
 
 # Additional sections
 Do we need an additional section ?
