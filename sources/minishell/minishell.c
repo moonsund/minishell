@@ -6,7 +6,7 @@
 /*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:04 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/05 14:57:11 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/05 15:15:23 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,12 @@ void	process_input(char *input, t_shell *shell)
 int	parse_and_prepare(t_shell *shell, char *input)
 {
 	int	status;
-
+	
+	if (is_empty(input))
+	{
+		status = ES_SUCCESS;
+		return (status);
+	}
 	status = tokenize_with_qmap(input, &shell->tokens);
 	if (status != ES_SUCCESS)
 		return (status);
