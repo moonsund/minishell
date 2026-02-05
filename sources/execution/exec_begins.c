@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec_begins.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:31 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 23:46:14 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/05 10:17:31 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,72 +40,118 @@ int	execute_pipeline(t_shell *shell)
 	return (exec_pipeline_forking(shell, pl));
 }
 
-// only redirections, builtins and external commands
-// both with and w/o redirections
-int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
+typedef struct s_fork_ctx
 {
 	size_t	i;
 	int		prev_read;
 	int		pipefds[2];
 	pid_t	*pids;
+}	t_fork_ctx;
+
+static void	ctx_init(t_fork_ctx *c, pid_t *pids)
+{
+	c->i = 0;
+	c->prev_read = -1;
+	c->pipefds[0] = -1;
+	c->pipefds[1] = -1;
+	c->pids = pids;
+}
+
+static void	child_dup_or_die(int from, int to, const char *perr)
+{
+	if (from == -1)
+		return ;
+	if (dup2(from, to) < 0)
+	{
+		perror(perr);
+		exit(1);
+	}
+}
+
+static void	child_exec_segment(t_shell *sh, const t_command *cmd, t_fork_ctx *c)
+{
+	int	st;
+
+	child_dup_or_die(c->prev_read, STDIN_FILENO, "dup2 stdin");
+	child_dup_or_die(c->pipefds[1], STDOUT_FILENO, "dup2 stdout");
+	close_if_valid(c->prev_read);
+	close_if_valid(c->pipefds[0]);
+	close_if_valid(c->pipefds[1]);
+	apply_redirs_or_die(cmd);
+	if (!cmd->argv || !cmd->argv[0])
+		exit(0);
+	if (is_builtin(cmd->argv[0]))
+	{
+		st = run_any_builtin_in_child(sh, (t_command *)cmd);
+		exit(st);
+	}
+	if (execute_external_commands(sh, (t_command *)cmd) > 0)
+		exit((errno == ENOENT) ? 127 : 126);
+	exit(0);
+}
+
+static int	open_pipe_if_needed(t_fork_ctx *c, const t_pipeline *pl)
+{
+	c->pipefds[0] = -1;
+	c->pipefds[1] = -1;
+	if (c->i + 1 >= pl->count)
+		return (0);
+	if (pipe(c->pipefds) < 0)
+	{
+		perror("pipe");
+		return (1);
+	}
+	return (0);
+}
+
+static int	fork_one_segment(t_shell *sh, const t_pipeline *pl, t_fork_ctx *c)
+{
 	pid_t	pid;
-	int		last_status;
+
+	if (open_pipe_if_needed(c, pl))
+		return (1);
+	pid = fork();
+	if (pid < 0)
+	{
+		perror("fork");
+		close_if_valid(c->pipefds[0]);
+		close_if_valid(c->pipefds[1]);
+		return (1);
+	}
+	if (pid == 0)
+		child_exec_segment(sh, &pl->cmds[c->i], c);
+	c->pids[c->i] = pid;
+	close_if_valid(c->prev_read);
+	close_if_valid(c->pipefds[1]);
+	c->prev_read = c->pipefds[0];
+	c->i++;
+	return (0);
+}
+
+static void	free_on_error(pid_t *pids, t_fork_ctx *c)
+{
+	close_if_valid(c->prev_read);
+	free(pids);
+}
+
+int	exec_pipeline_forking(t_shell *shell, const t_pipeline *pl)
+{
+	pid_t		*pids;
+	t_fork_ctx	c;
+	int			last_status;
 
 	if (!pl || pl->count == 0)
 		return (0);
-	pids = (pid_t *)malloc(sizeof(pid_t) * pl->count);
+	pids = (pid_t *)malloc(sizeof(*pids) * pl->count);
 	if (!pids)
 		return (1);
-	i = 0;
-	prev_read = -1;
-	while (pl->count > i)
+	ctx_init(&c, pids);
+	while (c.i < pl->count)
 	{
-		if (pipe_setup(pipefds, &i, pl->count, pids) == 1)
-			return (1);
-		pid = fork();
-		if (pid < 0)
-		{
-			perror("fork");
-			close_all_if_valid(&prev_read, pipefds, false);
-			free(pids);
-			return (1);
-		}
-		if (pid == 0)
-		{
-			if (prev_read != -1)
-			{
-				if (dup2(prev_read, STDIN_FILENO) < 0)
-				{
-					perror("dup2 stdin");
-					exit(1);
-				}
-			}
-			if (pipefds[1] != -1)
-			{
-				if (dup2(pipefds[1], STDOUT_FILENO) < 0)
-				{
-					perror("dup2 stdout");
-					exit(1);
-				}
-			}
-			close_all_if_valid(&prev_read, pipefds, false);
-			apply_redirs_or_die(&pl->cmds[i]);
-			if (!pl->cmds[i].argv || !pl->cmds[i].argv[0])
-				exit(0);
-			if (is_builtin(pl->cmds[i].argv[0]))
-			{
-				last_status = run_any_builtin_in_child(shell, &pl->cmds[i]);
-				exit(last_status);
-			}
-			else
-				exit (execute_external_commands(shell, &pl->cmds[i]));
-		}
-		pids[i] = pid;
-		close_all_if_valid(&prev_read, pipefds, true);
-		prev_read = pipefds[0];
-		i++;
+		if (fork_one_segment(shell, pl, &c))
+			return (free_on_error(pids, &c), 1);
 	}
-	close_if_valid(prev_read);
+	close_if_valid(c.prev_read);
 	last_status = wait_all_and_get_last(pids, pl->count);
 	free(pids);
 	return (last_status);
@@ -151,4 +197,3 @@ static int	open_redir_file(const t_redir *redir)
 		fd = open(redir->target, O_RDONLY);
 	return (fd);
 }
-
