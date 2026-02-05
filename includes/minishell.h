@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/05 00:35:51 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/05 10:22:19 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,6 +175,14 @@ typedef struct s_expctx
 	t_exit_status				last;
 	t_buf						buf;
 }								t_expctx;
+
+typedef struct s_fork_ctx
+{
+	size_t	i;
+	int		prev_read;
+	int		pipefds[2];
+	pid_t	*pids;
+}	t_fork_ctx;
 
 typedef struct s_command
 {

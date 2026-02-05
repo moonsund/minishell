@@ -6,7 +6,7 @@
 /*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:31 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/05 10:17:31 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/05 10:22:25 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,14 +39,6 @@ int	execute_pipeline(t_shell *shell)
 	}
 	return (exec_pipeline_forking(shell, pl));
 }
-
-typedef struct s_fork_ctx
-{
-	size_t	i;
-	int		prev_read;
-	int		pipefds[2];
-	pid_t	*pids;
-}	t_fork_ctx;
 
 static void	ctx_init(t_fork_ctx *c, pid_t *pids)
 {
