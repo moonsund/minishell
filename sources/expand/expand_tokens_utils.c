@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 15:46:52 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 16:24:53 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/05 15:46:48 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,9 @@ t_exit_status	exp_append_var(t_expctx *c, size_t start, size_t end,
 size_t			var_end(const char *s, size_t len, size_t start);
 char			*dup_var_name(const char *s, size_t start, size_t end);
 
-char	*get_last_status_string(t_exit_status exit_status)
+char	*get_last_status_string(t_exit_status exit_st)
 {
-	return (ft_itoa(exit_status));
+	return (ft_itoa(exit_st));
 }
 
 size_t	var_end(const char *s, size_t len, size_t start)

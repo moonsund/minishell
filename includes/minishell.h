@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/05 13:49:53 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/05 15:46:54 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,15 +30,6 @@
 # include <sys/types.h>	// opendir
 # include <sys/wait.h>	// waitpid
 # include <unistd.h>	// close, pipe, fork, read, write, getcwd, chdir
-
-// Easier Debug
-# define NC "\e[0m"
-# define BLUE "\e[34m"
-# define MAGENTA "\e[35m"
-# define YELLOW "\e[33m"
-# define RED "\e[31m"
-# define GREEN "\e[32m"
-# define CYAN "\e[36m"
 
 # ifndef SIGNALS_H
 #  define SIGNALS_H
@@ -148,16 +139,16 @@ typedef struct s_env_var_list
 
 typedef struct s_exp_ctx
 {
-	t_env_var_list	*env;
-	t_exit_status	last_status;
-}	t_exp_ctx;
+	t_env_var_list				*env;
+	t_exit_status				last_status;
+}								t_exp_ctx;
 
 typedef struct s_hd_ctx
 {
-	t_env_var_list	*env;
-	t_exit_status	last_status;
-	size_t			index;
-}	t_hd_ctx;
+	t_env_var_list				*env;
+	t_exit_status				last_status;
+	size_t						index;
+}								t_hd_ctx;
 
 typedef struct s_redir
 {
@@ -178,11 +169,11 @@ typedef struct s_expctx
 
 typedef struct s_fork_ctx
 {
-	size_t	i;
-	int		prev_read;
-	int		pipefds[2];
-	pid_t	*pids;
-}	t_fork_ctx;
+	size_t						i;
+	int							prev_read;
+	int							pipefds[2];
+	pid_t						*pids;
+}								t_fork_ctx;
 
 typedef struct s_command
 {
@@ -239,8 +230,8 @@ void							free_env_var_list(t_env_var_list *vars);
 void							err_print(t_exit_status exit_status,
 									const char *ctx);
 void							err_malloc_print(const char *where);
-void	setup_signals_prompt(void);
-void	setup_signals_heredoc(void);
+void							setup_signals_prompt(void);
+void							setup_signals_heredoc(void);
 
 // envp.c
 t_var							*find_var(t_env_var_list *list,
@@ -260,40 +251,45 @@ void							free_envp_partial(char **envp, size_t used);
 t_exit_status					expand_tokens(t_token_list *tokens,
 									t_env_var_list *env_vars,
 									t_exit_status exit_status);
-char	*get_last_status_string(t_exit_status exit_status);
-t_exit_status	exp_append_var(t_expctx *c, size_t start, size_t end,
-							size_t *i);
-size_t			var_end(const char *s, size_t len, size_t start);
-char				*dup_var_name(const char *s, size_t start, size_t end);
-t_exit_status	exp_loop(t_expctx *c);
-t_exit_status	exp_append_char(t_expctx *c, char ch);
-t_exit_status	exp_dollar(t_expctx *c, size_t *i);
-t_exit_status	exp_append_status(t_expctx *c, size_t *i);
-int	append_str(t_buf *buf, char *str, t_qmark quote_mark);
-
+char							*get_last_status_string(t_exit_status exit_st);
+t_exit_status					exp_append_var(t_expctx *c, size_t start,
+									size_t end, size_t *i);
+size_t							var_end(const char *s, size_t len,
+									size_t start);
+char							*dup_var_name(const char *s, size_t start,
+									size_t end);
+t_exit_status					exp_loop(t_expctx *c);
+t_exit_status					exp_append_char(t_expctx *c, char ch);
+t_exit_status					exp_dollar(t_expctx *c, size_t *i);
+t_exit_status					exp_append_status(t_expctx *c, size_t *i);
+int								append_str(t_buf *buf, char *str,
+									t_qmark quote_mark);
 
 // parser.c
 t_exit_status					build_pipeline_from_tokens(t_shell *shell);
 int								append_cmd(t_pipeline *pl, t_command cmd);
 
 // parcer_tokens.c
-int						process_word_token(t_parser_context *ctx);
-t_exit_status			process_pipe_token(t_pipeline *pl, t_parser_context *ctx);
-t_exit_status			process_redir_tokens(t_parser_context *ctx);
-int	append_arg(t_command *cmd, char *arg);
+int								process_word_token(t_parser_context *ctx);
+t_exit_status					process_pipe_token(t_pipeline *pl,
+									t_parser_context *ctx);
+t_exit_status					process_redir_tokens(t_parser_context *ctx);
+int								append_arg(t_command *cmd, char *arg);
 
 // parcer_init.c
-t_pipeline	*init_pipeline(void);
-void		init_parser_context(t_parser_context *ctx);
-void		init_command(t_command *cmd);
-t_redir	*init_redirect(t_parser_context *ctx);
+t_pipeline						*init_pipeline(void);
+void							init_parser_context(t_parser_context *ctx);
+void							init_command(t_command *cmd);
+t_redir							*init_redirect(t_parser_context *ctx);
 
 // parcer_helpers.c
-int				token_has_any_quotes(t_token *token);
-int				redir_push_back(t_redir **lst, t_redir *node);
-size_t	count_argv(char **argv);
-char	**alloc_argv_with_copy(char **old_argv, size_t argc);
-int	append_dup_arg(char **new_argv, size_t argc, char *arg);
+int								token_has_any_quotes(t_token *token);
+int								redir_push_back(t_redir **lst, t_redir *node);
+size_t							count_argv(char **argv);
+char							**alloc_argv_with_copy(char **old_argv,
+									size_t argc);
+int								append_dup_arg(char **new_argv, size_t argc,
+									char *arg);
 
 // parcer_utils.c
 void							free_cmd(t_command *cmd);
@@ -342,31 +338,38 @@ void							free_buf(t_buf *buf);
 void							init_buffer(t_buf *buf);
 
 // heredoc
-t_exit_status	process_heredoc(t_pipeline *pl,
-					t_env_var_list *env_vars, t_exit_status last_status);
-int	expand_heredoc(char **line, t_env_var_list *env_vars,
-				t_exit_status last_status);
-int	hd_exp_dollar(char **dst, const char *src, size_t *i, t_exp_ctx *ctx);
-char	*exp_varname(const char *src, size_t start, size_t len);
-void	redir_replace_with_infile(t_redir *r, char *filename);
-int	write_line_in_fd(int fd, char *line);
-int	append_charter(char **line, char c);
-int	append_string(char **line, const char *str);
-t_exit_status	hd_abort(int fd, char *filename, t_exit_status st);
-
+t_exit_status					process_heredoc(t_pipeline *pl,
+									t_env_var_list *env_vars,
+									t_exit_status last_status);
+int								expand_heredoc(char **line,
+									t_env_var_list *env_vars,
+									t_exit_status last_status);
+int								hd_exp_dollar(char **dst, const char *src,
+									size_t *i, t_exp_ctx *ctx);
+char							*exp_varname(const char *src, size_t start,
+									size_t len);
+void							redir_replace_with_infile(t_redir *r,
+									char *filename);
+int								write_line_in_fd(int fd, char *line);
+int								append_charter(char **line, char c);
+int								append_string(char **line, const char *str);
+t_exit_status					hd_abort(int fd, char *filename,
+									t_exit_status st);
 
 // execution.c
-int	execute_pipeline(t_shell *shell);
+int								execute_pipeline(t_shell *shell);
 
 // execution_forking.c
-int			exec_pipeline_forking(t_shell *shell, const t_pipeline *pl);
+int								exec_pipeline_forking(t_shell *shell,
+									const t_pipeline *pl);
 
 // execution_forking_helpers.c
-void	ctx_init(t_fork_ctx *ctx, pid_t *pids);
-int	open_pipe_if_needed(t_fork_ctx *c, const t_pipeline *pl);
-void	free_on_error(pid_t *pids, t_fork_ctx *c);
-int	open_redir_file(const t_redir *redir);
-void	apply_redirs_or_die(const t_command *cmd);
+void							ctx_init(t_fork_ctx *ctx, pid_t *pids);
+int								open_pipe_if_needed(t_fork_ctx *c,
+									const t_pipeline *pl);
+void							free_on_error(pid_t *pids, t_fork_ctx *c);
+int								open_redir_file(const t_redir *redir);
+void							apply_redirs_or_die(const t_command *cmd);
 
 // exec_command_filter.c
 int								is_builtin(const char *cmd);
@@ -381,7 +384,7 @@ int								execute_built_in_commands(t_shell *shell,
 // exec_builtin_commands.c
 int								execute_echo(t_command *cmds);
 int								execute_cd(t_command *cmds);
-int								execute_pwd();
+int								execute_pwd(void);
 int								execute_exit(t_shell *shell, t_command *cmd);
 
 // exec_builtin_cmds_utils.c
@@ -426,9 +429,11 @@ void							execve_fail(bool path_alloc, char **updt_path,
 int								open_fd(const char *path, bool append,
 									bool truncate);
 void							open_and_close_fd(t_command *cmd);
-int								pipe_setup(int *pipefds, size_t *i, size_t pl_count, pid_t	*pids);
+int								pipe_setup(int *pipefds, size_t *i,
+									size_t pl_count, pid_t *pids);
 void							close_if_valid(int fd);
-void							close_all_if_valid(int *fd, int *pipe_fd, bool exclude_read_pipe);
+void							close_all_if_valid(int *fd, int *pipe_fd,
+									bool exclude_read_pipe);
 
 // exec_close_and_free.c
 void							free_envp(t_env_var_list *list);
