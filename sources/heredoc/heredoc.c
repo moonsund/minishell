@@ -6,13 +6,13 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:14:37 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/05 12:10:58 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/05 13:31:54 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-t_exit_status			process_heredoc(t_pipeline *pipeline,
+t_exit_status			process_heredoc(t_pipeline *pl,
 							t_env_var_list *env_vars,
 							t_exit_status last_status);
 static t_exit_status	process_cmd_heredoc(t_command *cmd, t_hd_ctx *ctx);
@@ -20,22 +20,22 @@ static t_exit_status	get_heredoc(t_redir *redir, t_hd_ctx *ctx);
 static t_exit_status	hd_write_loop(int fd, t_redir *r, t_hd_ctx *ctx);
 static char				*generate_heredoc_filename(size_t heredoc_index);
 
-t_exit_status	process_heredoc(t_pipeline *pipeline, t_env_var_list *env_vars,
+t_exit_status	process_heredoc(t_pipeline *pl, t_env_var_list *env_vars,
 		t_exit_status last_status)
 {
 	t_hd_ctx		ctx;
 	size_t			i;
 	t_exit_status	st;
 
-	if (!pipeline || !env_vars)
+	if (!pl || !env_vars)
 		return (ES_GENERAL);
 	ctx.env = env_vars;
 	ctx.last_status = last_status;
 	ctx.index = 0;
 	i = 0;
-	while (i < pipeline->count)
+	while (i < pl->count)
 	{
-		st = process_cmd_heredoc(&pipeline->cmds[i], &ctx);
+		st = process_cmd_heredoc(&pl->cmds[i], &ctx);
 		if (st != ES_SUCCESS)
 			return (st);
 		i++;

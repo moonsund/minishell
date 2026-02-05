@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:18:53 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/04 18:35:37 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/05 13:29:11 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@ int	run_any_builtin_in_child(t_shell *shell, t_command *cmd)
 	{
 		if (ft_strcmp(cmd->argv[0], "exit") == 0)
 			return (execute_built_in_commands(shell, cmd, &curr_directory));
-		if (shell->pipeline->count > 1)
+		if (shell->pl->count > 1)
 			return (0);
 		else
 			return (execute_built_in_commands(shell, cmd, &curr_directory));

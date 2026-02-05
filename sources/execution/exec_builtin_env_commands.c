@@ -6,46 +6,38 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:14 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/05 13:00:13 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/05 13:29:11 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 #include "minishell.h"
 
-int	execute_export(t_shell *shell);
-int	execute_unset(t_shell *shell);
-int	execute_env(t_shell *shell);
-int	key_check(char **key, char *argv);
+int		execute_export(t_shell *shell);
+void	print_export(t_shell *shell);
+int		execute_unset(t_shell *shell);
+int		execute_env(t_shell *shell);
 
-// Subject : "export with no options"
 int	execute_export(t_shell *shell)
 {
-	char	*argv_1;
 	char	**var_data;
 	char	*key;
-	char	*value;
+	char	*val;
 
 	var_data = NULL;
-	if (!shell->pipeline->cmds->argv[1] || shell->pipeline->cmds->argv[1][0] == '\0')
+	if (!shell->pl->cmds->argv[1] || shell->pl->cmds->argv[1][0] == '\0')
 	{
 		print_export(shell);
 		return (0);
 	}
-	argv_1 = shell->pipeline->cmds->argv[1];
-	if (!ft_strchr(argv_1, '='))		// pas de = trouvé
+	if (!ft_strchr(shell->pl->cmds->argv[1], '='))
+		return (key_check(&key, shell->pl->cmds->argv[1]));
+	else
 	{
-		return (key_check(&key, argv_1));
-	}
-	else								// = trouvé
-	{
-		// s'il y a un '=' (si oui, variable exportee, meme si key est vide / si non, ignorer et status 0)
-		// puis verifier s'il y a une key
-		if (!check_var_data(&var_data, argv_1, &key, &value))
+		if (!check_data(&var_data, shell->pl->cmds->argv[1], &key, &val))
 			return (1);
 	}
-
-	if (!set_var(&shell->env_vars, key, value))
+	if (!set_var(&shell->env_vars, key, val))
 	{
 		free_strings_array(var_data);
 		err_print(1, "failed to create environment variable");
@@ -55,41 +47,31 @@ int	execute_export(t_shell *shell)
 	return (0);
 }
 
-int	key_check(char **key, char *argv)
+void	print_export(t_shell *shell)
 {
-	int	i;
+	char	**envp_to_sort;
+	int		i;
 
+	envp_to_sort = build_envp(&shell->env_vars);
+	if (!envp_to_sort)
+		return ;
+	sort_envp_alpha(envp_to_sort);
 	i = 0;
-	if (!argv || !argv[0])
-		return (0);
-	*key = argv;
-	// if ((*argv)[0] && (*argv)[1])
-	// 	*value = (*argv)[1];
-	if (!ft_isdigit((*key)[0]))
+	while (envp_to_sort[i])
 	{
-		err_print(1, "not a valid identifier");
-		return (0);
-	}
-	while ((*key)[i])
-	{
-		if (!ft_isalnum((*key)[i]) && (!ft_strchr(*key, '_')))
-		{
-			err_print(1, "not a valid identifier");
-			return (0);
-		}
+		printf("declare -x ");
+		printf("%s\n", envp_to_sort[i]);
 		i++;
 	}
-	return (1);
+	free_strings_array(envp_to_sort);
 }
 
-// Subject : "unset with no options"
 int	execute_unset(t_shell *shell)
 {
-	unset_var(&shell->env_vars, shell->pipeline->cmds->argv[1]);
+	unset_var(&shell->env_vars, shell->pl->cmds->argv[1]);
 	return (0);
 }
 
-// Subject : "env with no options or arguments"
 int	execute_env(t_shell *shell)
 {
 	char	**env_to_print;

@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:26 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 21:45:07 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/05 13:29:31 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ t_exit_status	build_pipeline_from_tokens(t_shell *shell)
 		shell->exit_status = 2;
 		return (0);
 	}
-	shell->pipeline = pl;
+	shell->pl = pl;
 	return (ES_SUCCESS);
 }
 

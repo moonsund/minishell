@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.c                                            :+:      :+:    :+:   */
+/*   free_utils.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:09 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 13:49:37 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/05 13:29:31 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,8 @@ void	free_env_var_list(t_env_var_list *vars);
 void	reset_iteration(t_shell *shell)
 {
 	free_tokens(&shell->tokens);
-	free_pipeline(shell->pipeline);
-	shell->pipeline = NULL;
+	free_pipeline(shell->pl);
+	shell->pl = NULL;
 }
 
 void	shell_destroy(t_shell *shell)
