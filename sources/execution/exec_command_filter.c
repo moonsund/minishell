@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:18:53 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/05 13:50:38 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/05 13:53:13 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,9 +79,6 @@ int	exec_builtin_in_parent(t_shell *shell, t_command *cmd)
 // exit should always execute, even in pipeline
 int	run_any_builtin_in_child(t_shell *shell, t_command *cmd)
 {
-	// char	*curr_directory;
-
-	// curr_directory = fetch_current_working_directory();
 	if (is_parent_builtin(cmd->argv[0]))
 	{
 		if (ft_strcmp(cmd->argv[0], "exit") == 0)
