@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:08 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/04 20:56:57 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/05 13:50:54 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 int	execute_echo(t_command *cmds);
 int	execute_cd(t_command *cmds);
-int	execute_pwd(char *current_working_directory);
+int	execute_pwd(void);
 int	execute_exit(t_shell *shell, t_command *cmd);
 
 int	execute_echo(t_command *cmds)
@@ -56,9 +56,13 @@ int	execute_cd(t_command *cmds)
 	return (0);
 }
 
-int	execute_pwd(char *current_working_directory)
+int	execute_pwd(void)
 {
-	printf("%s\n", current_working_directory);
+	char	*curr_directory;
+
+	curr_directory = fetch_current_working_directory();
+	printf("%s\n", curr_directory);
+	free(curr_directory);
 	return (0);
 }
 

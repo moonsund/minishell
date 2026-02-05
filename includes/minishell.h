@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/05 13:30:43 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/05 13:49:53 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -376,12 +376,12 @@ int								exec_builtin_in_parent(t_shell *shell,
 int								run_any_builtin_in_child(t_shell *shell,
 									t_command *cmd);
 int								execute_built_in_commands(t_shell *shell,
-									t_command *cmd, char **cwd);
+									t_command *cmd);
 
 // exec_builtin_commands.c
 int								execute_echo(t_command *cmds);
 int								execute_cd(t_command *cmds);
-int								execute_pwd(char *current_working_directory);
+int								execute_pwd();
 int								execute_exit(t_shell *shell, t_command *cmd);
 
 // exec_builtin_cmds_utils.c
