@@ -3,19 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   execution_forking_helpers.c                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:31 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/05 11:03:54 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/05 12:05:05 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 void	ctx_init(t_fork_ctx *ctx, pid_t *pids);
-int	open_pipe_if_needed(t_fork_ctx *c, const t_pipeline *pl);
+int		open_pipe_if_needed(t_fork_ctx *c, const t_pipeline *pl);
 void	free_on_error(pid_t *pids, t_fork_ctx *c);
-int	open_redir_file(const t_redir *redir);
+int		open_redir_file(const t_redir *redir);
 void	apply_redirs_or_die(const t_command *cmd);
 
 void	ctx_init(t_fork_ctx *ctx, pid_t *pids)

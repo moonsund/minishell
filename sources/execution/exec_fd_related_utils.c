@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:18:36 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/04 23:20:28 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/05 12:06:01 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ void	open_and_close_fd(t_command *cmd)
 	}
 }
 
-int		pipe_setup(int *pipefds, size_t *i, size_t pl_count, pid_t *pids)
+int	pipe_setup(int *pipefds, size_t *i, size_t pl_count, pid_t *pids)
 {
 	pipefds[0] = -1;
 	pipefds[1] = -1;

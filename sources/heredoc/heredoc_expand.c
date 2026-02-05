@@ -6,26 +6,24 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:14:01 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/05 00:10:10 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/05 12:11:14 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	expand_heredoc(char **line, t_env_var_list *env_vars,
-				t_exit_status last_status);
-int	hd_exp_dollar(char **dst, const char *src, size_t *i, t_exp_ctx *ctx);
+int		expand_heredoc(char **line, t_env_var_list *env_vars,
+			t_exit_status last_status);
+int		hd_exp_dollar(char **dst, const char *src, size_t *i, t_exp_ctx *ctx);
 char	*exp_varname(const char *src, size_t start, size_t len);
 
 int	expand_heredoc(char **line, t_env_var_list *env_vars,
-				t_exit_status last_status)
+		t_exit_status last_status)
 {
 	t_exp_ctx	ctx;
 	char		*dst;
 	size_t		i;
 
-	// if (!line || !*line)
-	// 	return (1);
 	ctx.env = env_vars;
 	ctx.last_status = last_status;
 	dst = ft_strdup("");
@@ -38,7 +36,7 @@ int	expand_heredoc(char **line, t_env_var_list *env_vars,
 		{
 			if (!hd_exp_dollar(&dst, *line, &i, &ctx))
 				return (free(dst), 0);
-			continue;
+			continue ;
 		}
 		if (!append_charter(&dst, (*line)[i]))
 			return (free(dst), 0);

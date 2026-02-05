@@ -6,16 +6,16 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:14:09 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/05 00:10:50 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/05 12:11:22 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	redir_replace_with_infile(t_redir *r, char *filename);
-int	write_line_in_fd(int fd, char *line);
-int	append_charter(char **line, char c);
-int	append_string(char **line, const char *str);
+void			redir_replace_with_infile(t_redir *r, char *filename);
+int				write_line_in_fd(int fd, char *line);
+int				append_charter(char **line, char c);
+int				append_string(char **line, const char *str);
 t_exit_status	hd_abort(int fd, char *filename, t_exit_status st);
 
 void	redir_replace_with_infile(t_redir *r, char *filename)
@@ -78,8 +78,6 @@ int	append_string(char **line, const char *str)
 	size_t	l2;
 	char	*new_line;
 
-	// if (!line || !str)
-	// 	return (0);
 	l2 = ft_strlen(str);
 	if (!*line)
 	{
