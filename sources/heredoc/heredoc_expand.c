@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   heredoc_expand.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:14:01 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 22:59:38 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/05 00:10:10 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,8 @@ int	expand_heredoc(char **line, t_env_var_list *env_vars,
 	char		*dst;
 	size_t		i;
 
-	if (!line || !*line)
-		return (1);
+	// if (!line || !*line)
+	// 	return (1);
 	ctx.env = env_vars;
 	ctx.last_status = last_status;
 	dst = ft_strdup("");

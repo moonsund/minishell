@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   heredoc_helpers.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:14:09 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 23:02:33 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/05 00:10:50 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,8 +78,8 @@ int	append_string(char **line, const char *str)
 	size_t	l2;
 	char	*new_line;
 
-	if (!line || !str)
-		return (0);
+	// if (!line || !str)
+	// 	return (0);
 	l2 = ft_strlen(str);
 	if (!*line)
 	{

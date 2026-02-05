@@ -6,7 +6,7 @@
 /*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:19:14 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/04 14:17:03 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/05 00:36:12 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,6 +92,8 @@ int	key_value_check_init(char **key, char ***var_data, char **value)
 	int	i;
 
 	i = 0;
+	if (!(*var_data)[0] || !(*var_data)[1])
+		return (0);
 	*key = (*var_data)[0];
 	if ((*var_data)[0] && (*var_data)[1])
 		*value = (*var_data)[1];
