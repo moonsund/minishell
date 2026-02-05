@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:04 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 13:01:31 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/05 12:46:41 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ void	minishell_loop(t_shell *shell)
 		input = handle_input();
 		if (!input)
 		{
+			printf("exit\n");
 			shell->should_exit = true;
 			break ;
 		}
