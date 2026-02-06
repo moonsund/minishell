@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/05 15:46:54 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/05 23:50:44 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -229,8 +229,11 @@ void							free_pipeline(t_pipeline *pl);
 void							free_env_var_list(t_env_var_list *vars);
 void							err_print(t_exit_status exit_status,
 									const char *ctx);
+void							print_cmd_not_found(const char *cmd);
 void							err_malloc_print(const char *where);
-void							setup_signals_prompt(void);
+void							ctrl_c_handler(int signum);
+void							setup_signals(void);
+void							ctrl_c_heredoc_handler(int signum);
 void							setup_signals_heredoc(void);
 
 // envp.c
@@ -422,8 +425,7 @@ bool							is_binary_found(char **updt_path,
 char							*fetch_and_check_bin_path(t_shell *shell,
 									char *cmd);
 char							*build_path_to_check(char *dir, char *cmd);
-void							execve_fail(bool path_alloc, char **updt_path,
-									char ***conv_envp);
+int	execve_fail(bool path_alloc, char **path, char ***envp, const char *name);
 
 // exec_utils_fd.c
 int								open_fd(const char *path, bool append,

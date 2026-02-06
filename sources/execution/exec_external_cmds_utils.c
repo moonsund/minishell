@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec_external_cmds_utils.c                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:18:42 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/04 14:37:12 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/05 23:36:24 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,32 +18,26 @@ bool	is_binary_found(char **updt_path, t_shell *shell,
 			char *cmd, bool *path_alloc);
 char	*fetch_and_check_bin_path(t_shell *shell, char *cmd);
 char	*build_path_to_check(char *dir, char *cmd);
-void	execve_fail(bool path_alloc, char **updt_path, char ***conv_envp);
+int	execve_fail(bool path_alloc, char **path, char ***envp, const char *name);
 
-bool	is_input_exec_ok(char *cmd, char **updt_path, bool *path_alloc)
+bool	is_input_exec_ok(char *cmd, char **path, bool *path_alloc)
 {
-	if (access(cmd, X_OK) == 0)
-	{
-		*updt_path = cmd;
-		*path_alloc = false;
-		return (true);
-	}
-	else
-	{
-		perror("error");
-		return (false);
-	}
+	if (access(cmd, F_OK) != 0)
+		return (false); /* errno=ENOENT -> 127 */
+	if (access(cmd, X_OK) != 0)
+		return (false); /* errno=EACCES -> 126 */
+
+	*path = cmd;
+	*path_alloc = false;
+	return (true);
 }
 
 bool	is_binary_found(char **updt_path, t_shell *shell,
 			char *cmd, bool *path_alloc)
 {
 	*updt_path = fetch_and_check_bin_path(shell, cmd);
-	if (!updt_path)
-	{
-		perror("command not found");
+	if (!*updt_path)
 		return (false);
-	}
 	*path_alloc = true;
 	return (true);
 }
@@ -90,10 +84,21 @@ char	*build_path_to_check(char *dir, char *cmd)
 	return (path_to_check);
 }
 
-void	execve_fail(bool path_alloc, char **updt_path, char ***conv_envp)
+int	execve_fail(bool path_alloc, char **path, char ***envp, const char *name)
 {
-	perror("command not found");
+	int	code;
+
+	code = 126;
+	if (errno == ENOENT)
+		code = 127;
+	if (name)
+		perror(name);
+	else
+		perror("execve");
 	if (path_alloc)
-		free(*updt_path);
-	free_strings_array(*conv_envp);
+		free(*path);
+	if (envp && *envp)
+		free_strings_array(*envp);
+	return (code);
 }
+

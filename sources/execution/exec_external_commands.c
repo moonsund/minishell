@@ -3,43 +3,82 @@
 /*                                                        :::      ::::::::   */
 /*   exec_external_commands.c                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:18:42 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/04 18:39:46 by schappuy         ###   ########.fr       */
+/*   Updated: 2026/02/06 00:03:49 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 #include "minishell.h"
 
-int	execute_external_commands(t_shell *shell, t_command *cmd);
+static int	resolve_path_or_report(t_shell *shell, t_command *cmd,
+				char **resolved_path, bool *path_alloc);
+static int	exec_with_envp_or_cleanup(t_shell *shell, t_command *cmd,
+				char *resolved_path, bool path_alloc);
+static int	status_from_errno_for_exec(void);
 
 int	execute_external_commands(t_shell *shell, t_command *cmd)
 {
-	char	**conv_envp;
-	char	*updt_path;
+	char	*resolved_path;
 	bool	path_alloc;
+	int		status;
 
-	path_alloc = false;
-	if (cmd->argv)
-	{
-		if (cmd->argv[0][0] == '\0')
-			return (0);
-		else if (ft_strchr(cmd->argv[0], '/'))
-		{
-			if (!is_input_exec_ok(cmd->argv[0], &updt_path, &path_alloc))
-				return (1);
-		}
-		else if (!is_binary_found(&updt_path, shell, cmd->argv[0], &path_alloc))
-			return (127);
-	}
-	else
+	if (!shell || !cmd || !cmd->argv || !cmd->argv[0])
 		return (1);
+	resolved_path = NULL;
+	path_alloc = false;
+	status = resolve_path_or_report(shell, cmd, &resolved_path, &path_alloc);
+	if (status == -1)
+		return (0);
+	if (status != 0)
+		return (status);
+	return (exec_with_envp_or_cleanup(shell, cmd, resolved_path, path_alloc));
+}
+
+static int	resolve_path_or_report(t_shell *shell, t_command *cmd,
+				char **resolved_path, bool *path_alloc)
+{
+	if (cmd->argv[0][0] == '\0')
+		return (-1);
+
+	if (ft_strchr(cmd->argv[0], '/'))
+	{
+		if (!is_input_exec_ok(cmd->argv[0], resolved_path, path_alloc))
+		{
+			perror(cmd->argv[0]);
+			return (status_from_errno_for_exec());
+		}
+		return (0);
+	}
+	if (!is_binary_found(resolved_path, shell, cmd->argv[0], path_alloc))
+	{
+		print_cmd_not_found(cmd->argv[0]);
+		return (127);
+	}
+	return (0);
+}
+
+static int	exec_with_envp_or_cleanup(t_shell *shell, t_command *cmd,
+				char *resolved_path, bool path_alloc)
+{
+	char	**conv_envp;
+
 	conv_envp = build_envp(&shell->env_vars);
 	if (!conv_envp)
+	{
+		if (path_alloc)
+			free(resolved_path);
 		return (1);
-	execve(updt_path, cmd->argv, conv_envp);
-	execve_fail(path_alloc, &updt_path, &conv_envp);
+	}
+	execve(resolved_path, cmd->argv, conv_envp);
+	return (execve_fail(path_alloc, &resolved_path, &conv_envp, resolved_path));
+}
+
+static int	status_from_errno_for_exec(void)
+{
+	if (errno == ENOENT)
+		return (127);
 	return (126);
 }

@@ -6,7 +6,7 @@
 /*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/04 10:15:09 by lorlov            #+#    #+#             */
-/*   Updated: 2026/02/04 13:49:23 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/05 23:50:19 by lorlov           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 void	err_print(t_exit_status type, const char *ctx);
 void	err_malloc_print(const char *where);
+void	print_cmd_not_found(const char *cmd);
 
 void	err_print(t_exit_status type, const char *where)
 {
@@ -42,4 +43,11 @@ void	err_malloc_print(const char *where)
 	write(2, "minishell: ", 11);
 	write(2, where, ft_strlen(where));
 	write(2, ": cannot allocate memory\n", 26);
+}
+
+void	print_cmd_not_found(const char *cmd)
+{
+	ft_putstr_fd("minishell: ", STDERR_FILENO);
+	ft_putstr_fd((char *)cmd, STDERR_FILENO);
+	ft_putstr_fd(": command not found\n", STDERR_FILENO);
 }
