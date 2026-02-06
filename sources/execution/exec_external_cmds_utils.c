@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec_external_cmds_utils.c                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:18:42 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/05 23:36:24 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/06 13:04:11 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,15 +18,15 @@ bool	is_binary_found(char **updt_path, t_shell *shell,
 			char *cmd, bool *path_alloc);
 char	*fetch_and_check_bin_path(t_shell *shell, char *cmd);
 char	*build_path_to_check(char *dir, char *cmd);
-int	execve_fail(bool path_alloc, char **path, char ***envp, const char *name);
+int		execve_fail(bool path_alloc, char **path,
+			char ***envp, const char *name);
 
 bool	is_input_exec_ok(char *cmd, char **path, bool *path_alloc)
 {
 	if (access(cmd, F_OK) != 0)
-		return (false); /* errno=ENOENT -> 127 */
+		return (false);
 	if (access(cmd, X_OK) != 0)
-		return (false); /* errno=EACCES -> 126 */
-
+		return (false);
 	*path = cmd;
 	*path_alloc = false;
 	return (true);
@@ -101,4 +101,3 @@ int	execve_fail(bool path_alloc, char **path, char ***envp, const char *name)
 		free_strings_array(*envp);
 	return (code);
 }
-

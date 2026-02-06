@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:17:58 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/05 23:50:44 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/06 13:04:39 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -425,7 +425,8 @@ bool							is_binary_found(char **updt_path,
 char							*fetch_and_check_bin_path(t_shell *shell,
 									char *cmd);
 char							*build_path_to_check(char *dir, char *cmd);
-int	execve_fail(bool path_alloc, char **path, char ***envp, const char *name);
+int								execve_fail(bool path_alloc, char **path,
+									char ***envp, const char *name);
 
 // exec_utils_fd.c
 int								open_fd(const char *path, bool append,

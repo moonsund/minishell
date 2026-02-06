@@ -90,7 +90,7 @@ SRC_FILES = \
 	$(SRC_HEREDOC) \
 	$(SRC_ENVP) \
 	$(SRC_EXECUTION)
-	
+
 SRCS = $(addprefix $(SRC_DIR) $(SRC_FILES))
 OBJS = $(addprefix $(OBJ_DIR),$(SRC_FILES:.c=.o))
 DEPS = $(OBJS:.o=.d)

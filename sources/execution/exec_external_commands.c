@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec_external_commands.c                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lorlov <lorlov@student.42berlin.de>        +#+  +:+       +#+        */
+/*   By: schappuy <schappuy@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/02 20:18:42 by schappuy          #+#    #+#             */
-/*   Updated: 2026/02/06 00:03:49 by lorlov           ###   ########.fr       */
+/*   Updated: 2026/02/06 13:03:16 by schappuy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,6 @@ static int	resolve_path_or_report(t_shell *shell, t_command *cmd,
 {
 	if (cmd->argv[0][0] == '\0')
 		return (-1);
-
 	if (ft_strchr(cmd->argv[0], '/'))
 	{
 		if (!is_input_exec_ok(cmd->argv[0], resolved_path, path_alloc))
